@@ -7,8 +7,8 @@ import 'package:universal_pos_system_v1/data/local/dao/units/units_dao.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/category_colors_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/stocks_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/transfers_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/transfers/transfers_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/units/units_repository.dart';
 import 'sidebar/app_sidebar.dart' as admin_sidebar;
 

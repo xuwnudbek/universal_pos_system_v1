@@ -298,18 +298,6 @@ class _ItemsPageState extends State<ItemsPage> {
                                       fixedWidth: 100,
                                     ),
                                     DataColumn2(
-                                      headingRowAlignment: MainAxisAlignment.start,
-                                      label: Text(
-                                        'Qoldiq',
-                                        style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      size: ColumnSize.M,
-                                      numeric: true,
-                                      fixedWidth: 80,
-                                    ),
-                                    DataColumn2(
                                       headingRowAlignment: MainAxisAlignment.center,
                                       label: Text(
                                         'Amallar',
@@ -431,16 +419,6 @@ class ItemsDataSource extends DataTableSource {
             alignment: Alignment.center,
             child: Text(
               item.unit.shortName,
-            ),
-          ),
-        ),
-        // Stock cell
-        DataCell(
-          Text(
-            item.stock.toString(),
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: item.stock > 0 ? Colors.green : Colors.red,
             ),
           ),
         ),

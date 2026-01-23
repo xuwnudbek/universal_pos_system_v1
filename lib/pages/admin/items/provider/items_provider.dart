@@ -121,7 +121,6 @@ class ItemsProvider extends ChangeNotifier {
       name: result.name,
       barcode: result.barcode,
       price: result.price,
-      stock: result.stock,
       categoryId: result.categoryId,
       unitId: result.unitId,
     );
@@ -135,7 +134,6 @@ class ItemsProvider extends ChangeNotifier {
       name: result.name,
       barcode: result.barcode,
       price: result.price,
-      stock: result.stock,
       categoryId: result.categoryId,
       unitId: result.unitId,
     );

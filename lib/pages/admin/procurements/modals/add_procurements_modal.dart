@@ -172,7 +172,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
 
                       // Location dropdown
                       DropdownButtonFormField<LocationsEnum>(
-                        value: _selectedLocation,
+                        initialValue: _selectedLocation,
                         decoration: InputDecoration(
                           labelText: 'Qayerga keladi',
                         ),
@@ -257,7 +257,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
                                   ),
                                   SizedBox(height: AppSpacing.sm),
                                   DropdownButtonFormField<ItemFull>(
-                                    value: item.selectedItem,
+                                    initialValue: item.selectedItem,
                                     decoration: InputDecoration(
                                       labelText: 'Maxsulot',
                                       isDense: true,
@@ -326,7 +326,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
                     ],
                   ),
                 ),

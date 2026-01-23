@@ -72,7 +72,6 @@ class _AddItemModalState extends State<AddItemModal> {
       name: _nameCtrl.text.trim(),
       barcode: _barcodeCtrl.text.trim(),
       price: double.parse(_priceCtrl.text),
-      stock: 0,
       categoryId: _selectedCategory!.id,
       unitId: _selectedUnit!.id,
     );

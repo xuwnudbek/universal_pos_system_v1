@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/stocks_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 
 class WarehouseItem {

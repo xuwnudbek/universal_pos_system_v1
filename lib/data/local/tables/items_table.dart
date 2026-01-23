@@ -9,8 +9,6 @@ class Items extends Table {
   RealColumn get price => real()();
   IntColumn get unitId => integer().references(Units, #id)();
 
-  RealColumn get stock => real()();
-
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
   IntColumn get categoryId => integer().nullable()();

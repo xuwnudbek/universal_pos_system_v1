@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/stocks_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
 import 'package:universal_pos_system_v1/pages/admin/warehouse/providers/warehouse_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/functions/string_to_hex.dart';
