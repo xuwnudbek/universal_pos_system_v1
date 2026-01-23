@@ -11,6 +11,8 @@ import 'tables/carts_table.dart';
 import 'tables/item_categories_table.dart';
 import 'tables/items_table.dart';
 import 'tables/category_colors_table.dart';
+import 'tables/procurement_items_table.dart';
+import 'tables/procurements_table.dart';
 import 'tables/sale_histories_table.dart';
 import 'tables/stocks_table.dart';
 import 'tables/transfers_table.dart';
@@ -29,6 +31,8 @@ part 'app_database.g.dart';
     Units,
     Stocks,
     Transfers,
+    Procurements,
+    ProcurementItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
