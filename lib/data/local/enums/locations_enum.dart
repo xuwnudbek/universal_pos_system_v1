@@ -1,0 +1,4 @@
+enum LocationsEnum {
+  warehouse,
+  store,
+}

@@ -1,0 +1,61 @@
+import 'package:drift/drift.dart';
+import 'package:universal_pos_system_v1/data/local/tables/category_colors_table.dart';
+import 'package:universal_pos_system_v1/data/local/tables/item_categories_table.dart';
+import '../../app_database.dart';
+import '../../tables/items_table.dart';
+
+part 'items_dao.g.dart';
+
+@DriftAccessor(tables: [Items, ItemCategories, CategoryColors])
+class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
+  ItemsDao(super.db);
+
+  Future<List<Item>> getAll() => select(items).get();
+
+  Future<int> insertItem(
+    String name,
+    double price,
+    String barcode,
+    int unitId,
+    double stock,
+    int? categoryId,
+  ) {
+    return into(items).insert(
+      ItemsCompanion.insert(
+        name: name,
+        price: price,
+        barcode: barcode,
+        unitId: unitId,
+        stock: stock,
+        categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
+      ),
+    );
+  }
+
+  Future<int> updateItem(
+    int id,
+    String name,
+    double price,
+    String barcode,
+    int unitId,
+    double stock,
+    int? categoryId,
+  ) {
+    final query = update(items)..where((c) => c.id.equals(id));
+
+    return query.write(
+      ItemsCompanion(
+        name: Value(name),
+        price: Value(price),
+        barcode: Value(barcode),
+        unitId: Value(unitId),
+        stock: Value(stock),
+        categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
+      ),
+    );
+  }
+
+  Future deleteItem(int id) {
+    return (delete(items)..where((c) => c.id.equals(id))).go();
+  }
+}
