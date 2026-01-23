@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
-import 'package:universal_pos_system_v1/data/repositories/procurements_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/procurement_items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/procurements/procurement_items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/procurements/procurements_repository.dart';
 
 class ProcurementWithItems {
   final Procurement procurement;

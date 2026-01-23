@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
-import 'package:universal_pos_system_v1/data/repositories/item_categories_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/items_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/units_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/units/units_repository.dart';
 import 'package:universal_pos_system_v1/models/item_form_result.dart';
 
 class ItemsProvider extends ChangeNotifier {

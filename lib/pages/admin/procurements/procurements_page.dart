@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_pos_system_v1/data/repositories/items_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/procurements_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/procurement_items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/procurements/procurement_items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/procurements/procurements_repository.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/modals/add_procurements_modal.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/providers/procurements_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';

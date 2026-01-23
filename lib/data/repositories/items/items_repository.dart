@@ -1,10 +1,9 @@
-import 'package:universal_pos_system_v1/data/local/dao/units/units_dao.dart';
-import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
-
-import '../local/dao/items/items_dao.dart';
-import '../local/dao/item_categories/item_categories_dao.dart';
-import '../local/dao/colors/category_colors_dao.dart';
-import '../models/items_full.dart';
+import '../../local/dao/colors/category_colors_dao.dart';
+import '../../local/dao/item_categories/item_categories_dao.dart';
+import '../../local/dao/items/items_dao.dart';
+import '../../local/dao/units/units_dao.dart';
+import '../../models/item_category_full.dart';
+import '../../models/items_full.dart';
 
 class ItemsRepository {
   final ItemsDao itemsDao;

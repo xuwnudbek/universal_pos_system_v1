@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
-import 'package:universal_pos_system_v1/data/repositories/category_colors_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/item_categories_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/items/category_colors_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
 
 class CategoriesProvider extends ChangeNotifier {
   final ItemCategoriesRepository _itemCategoriesRepo;
