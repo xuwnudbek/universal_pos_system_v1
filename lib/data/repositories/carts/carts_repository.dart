@@ -1,5 +1,5 @@
-import 'package:universal_pos_system_v1/data/local/dao/carts/carts_dao.dart';
-import 'package:universal_pos_system_v1/data/local/dao/cart_items/cart_items_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/carts/carts_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/cart_items/cart_items_dao.dart';
 // import 'package:universal_pos_system_v1/data/models/cart_full.dart';
 
 class CartsRepository {

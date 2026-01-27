@@ -12,9 +12,12 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
 
   Future<List<Item>> getAll() => select(items).get();
 
+  Future<Item> getById(int id) {
+    return (select(items)..where((c) => c.id.equals(id))).getSingle();
+  }
+
   Future<int> insertItem(
     String name,
-    double price,
     String barcode,
     int unitId,
     int? categoryId,
@@ -22,7 +25,6 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return into(items).insert(
       ItemsCompanion.insert(
         name: name,
-        price: price,
         barcode: barcode,
         unitId: unitId,
         categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
@@ -33,7 +35,6 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   Future<int> updateItem(
     int id,
     String name,
-    double price,
     String barcode,
     int unitId,
     int? categoryId,
@@ -43,7 +44,6 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return query.write(
       ItemsCompanion(
         name: Value(name),
-        price: Value(price),
         barcode: Value(barcode),
         unitId: Value(unitId),
         categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),

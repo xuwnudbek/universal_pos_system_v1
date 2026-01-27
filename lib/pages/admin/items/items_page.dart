@@ -277,16 +277,6 @@ class _ItemsPageState extends State<ItemsPage> {
                                       },
                                     ),
                                     DataColumn2(
-                                      label: Text(
-                                        'Narx',
-                                        style: textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      size: ColumnSize.M,
-                                      numeric: true,
-                                    ),
-                                    DataColumn2(
                                       headingRowAlignment: MainAxisAlignment.center,
                                       label: Text(
                                         'O\'lchov',
@@ -401,15 +391,6 @@ class ItemsDataSource extends DataTableSource {
               style: textTheme.bodySmall?.copyWith(
                 color: item.category != null ? Colors.white : Colors.black,
               ),
-            ),
-          ),
-        ),
-        // Price cell
-        DataCell(
-          Text(
-            item.price.toSum,
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
             ),
           ),
         ),

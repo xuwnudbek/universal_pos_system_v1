@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/data/models/procurement_full.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/procurements/procurement_items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/procurements/procurements_repository.dart';
+import 'package:universal_pos_system_v1/models/procurements/procurement_form_result.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/modals/add_procurements_modal.dart';
+import 'package:universal_pos_system_v1/pages/admin/procurements/modals/delete_procurement_modal.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/providers/procurements_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
@@ -61,7 +64,7 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
 
                       if (!context.mounted) return;
 
-                      final result = await showDialog<Map<String, dynamic>>(
+                      final result = await showDialog<ProcurementFormResult>(
                         context: context,
                         builder: (context) => AddProcurementsModal(items: items),
                       );
@@ -69,10 +72,10 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                       if (result != null && context.mounted) {
                         final provider = context.read<ProcurementsProvider>();
                         await provider.addProcurement(
-                          supplierName: result['supplierName'],
-                          procurementDate: result['procurementDate'],
-                          location: result['location'],
-                          items: result['items'],
+                          supplierName: result.supplierName,
+                          procurementDate: result.procurementDate,
+                          location: result.location,
+                          items: result.items,
                         );
                       }
                     },
@@ -98,7 +101,7 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                     return AppLoader();
                   }
 
-                  return Selector<ProcurementsProvider, List<ProcurementWithItems>>(
+                  return Selector<ProcurementsProvider, List<ProcurementFull>>(
                     selector: (_, provider) => provider.procurements,
                     builder: (context, procurements, _) {
                       if (procurements.isEmpty) {
@@ -122,9 +125,8 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                         ),
                         itemCount: procurements.length,
                         itemBuilder: (context, index) {
-                          final procurementWithItems = procurements[index];
-                          final procurement = procurementWithItems.procurement;
-                          final items = procurementWithItems.items;
+                          final procurement = procurements[index];
+                          final items = procurement.items;
 
                           // Calculate total
                           double totalCost = 0;
@@ -164,20 +166,7 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                                         onPressed: () async {
                                           final confirm = await showDialog<bool>(
                                             context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: Text('O\'chirish'),
-                                              content: Text('Ushbu olib kelishni o\'chirmoqchimisiz?'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context, false),
-                                                  child: Text('Yo\'q'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context, true),
-                                                  child: Text('Ha'),
-                                                ),
-                                              ],
-                                            ),
+                                            builder: (context) => DeleteProcurementModal(procurement: procurement),
                                           );
 
                                           if (confirm == true && context.mounted) {

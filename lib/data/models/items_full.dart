@@ -5,7 +5,6 @@ class ItemFull {
   final int id;
   final String name;
   final String barcode;
-  final double price;
   final Unit unit;
   final bool isActive;
 
@@ -15,7 +14,6 @@ class ItemFull {
     required this.id,
     required this.name,
     required this.barcode,
-    required this.price,
     required this.unit,
     required this.isActive,
     this.category,
@@ -30,7 +28,6 @@ class ItemFull {
       id: item.id,
       name: item.name,
       barcode: item.barcode,
-      price: item.price,
       isActive: item.isActive,
       unit: unit,
       category: category,

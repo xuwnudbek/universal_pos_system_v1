@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
+import 'package:universal_pos_system_v1/data/models/procurement_full.dart';
 
 import '../../app_database.dart';
 import '../../tables/procurements_table.dart';
@@ -11,20 +12,20 @@ class ProcurementsDao extends DatabaseAccessor<AppDatabase> with _$ProcurementsD
   ProcurementsDao(super.db);
 
   // Get All Procurements
-  Future<List<Procurement>> getAll() => (select(procurements)..orderBy([(p) => OrderingTerm.desc(p.createdAt)])).get();
+  Future<List<ProcurementFull>> getAll() => (select(procurements)..orderBy([(p) => OrderingTerm.desc(p.createdAt)])).get();
 
   // Get Procurement By Id
-  Future<Procurement?> getById(int id) => (select(procurements)..where((p) => p.id.equals(id))).getSingleOrNull();
+  Future<ProcurementFull?> getById(int id) => (select(procurements)..where((p) => p.id.equals(id))).getSingleOrNull();
 
   // Get Procurements By Location
-  Future<List<Procurement>> getByLocation(LocationsEnum location) =>
+  Future<List<ProcurementFull>> getByLocation(LocationsEnum location) =>
       (select(procurements)
             ..where((p) => p.location.equalsValue(location))
             ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))
           .get();
 
   // Get Procurements By Date Range
-  Future<List<Procurement>> getByDateRange(DateTime start, DateTime end) =>
+  Future<List<ProcurementFull>> getByDateRange(DateTime start, DateTime end) =>
       (select(procurements)
             ..where((p) => p.procurementDate.isBiggerOrEqualValue(start) & p.procurementDate.isSmallerOrEqualValue(end))
             ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))

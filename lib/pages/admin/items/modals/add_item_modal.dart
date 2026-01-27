@@ -29,7 +29,6 @@ class _AddItemModalState extends State<AddItemModal> {
 
   final _nameCtrl = TextEditingController();
   final _barcodeCtrl = TextEditingController();
-  final _priceCtrl = TextEditingController();
 
   ItemCategoryFull? _selectedCategory;
   Unit? _selectedUnit;
@@ -41,7 +40,6 @@ class _AddItemModalState extends State<AddItemModal> {
     if (item != null) {
       _nameCtrl.text = item.name;
       _barcodeCtrl.text = item.barcode;
-      _priceCtrl.text = item.price.toString();
 
       // Find the matching category from widget.categories by ID
       _selectedCategory = widget.categories.where((c) => c.id == item.category?.id).firstOrNull;
@@ -71,7 +69,6 @@ class _AddItemModalState extends State<AddItemModal> {
     final result = ItemFormResult(
       name: _nameCtrl.text.trim(),
       barcode: _barcodeCtrl.text.trim(),
-      price: double.parse(_priceCtrl.text),
       categoryId: _selectedCategory!.id,
       unitId: _selectedUnit!.id,
     );
@@ -83,7 +80,6 @@ class _AddItemModalState extends State<AddItemModal> {
   void dispose() {
     _nameCtrl.dispose();
     _barcodeCtrl.dispose();
-    _priceCtrl.dispose();
     super.dispose();
   }
 
@@ -99,7 +95,17 @@ class _AddItemModalState extends State<AddItemModal> {
         minWidth: mq.size.width * 0.5,
         maxHeight: mq.size.height * 0.8,
       ),
-      title: Text(widget.item == null ? "Yangi mahsulot" : "Mahsulotni tahrirlash"),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(widget.item == null ? "Yangi mahsulot" : "Mahsulotni tahrirlash"),
+          ),
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -131,14 +137,6 @@ class _AddItemModalState extends State<AddItemModal> {
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         decoration: InputDecoration(labelText: 'Kategoriya'),
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child: _field(
-                      _priceCtrl,
-                      'Sotish narxi',
-                      isNumber: true,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
                   ),
                   Expanded(

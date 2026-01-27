@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:universal_pos_system_v1/pages/admin/admin_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/categories/categories_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/items/items_page.dart';
+import 'package:universal_pos_system_v1/pages/admin/procurements/procurements_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/warehouse/warehouse_page.dart';
 import 'package:universal_pos_system_v1/pages/splash_page.dart';
 
@@ -152,7 +153,7 @@ final appRouter = GoRouter(
           path: AppRoute.procurement.path,
           name: AppRoute.procurement.name,
           builder: (context, state) {
-            return SizedBox.shrink();
+            return ProcurementsPage();
           },
         ),
         GoRoute(

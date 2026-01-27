@@ -254,14 +254,7 @@ class Unit extends DataClass implements Insertable<Unit> {
   @override
   int get hashCode => Object.hash(id, name, shortName, isActive, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Unit &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.shortName == this.shortName &&
-          other.isActive == this.isActive &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is Unit && other.id == this.id && other.name == this.name && other.shortName == this.shortName && other.isActive == this.isActive && other.createdAt == this.createdAt);
 }
 
 class UnitsCompanion extends UpdateCompanion<Unit> {
@@ -389,15 +382,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _priceMeta = const VerificationMeta('price');
-  @override
-  late final GeneratedColumn<double> price = GeneratedColumn<double>(
-    'price',
-    aliasedName,
-    false,
-    type: DriftSqlType.double,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _unitIdMeta = const VerificationMeta('unitId');
   @override
   late final GeneratedColumn<int> unitId = GeneratedColumn<int>(
@@ -453,7 +437,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
     id,
     name,
     barcode,
-    price,
     unitId,
     isActive,
     categoryId,
@@ -489,14 +472,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
       );
     } else if (isInserting) {
       context.missing(_barcodeMeta);
-    }
-    if (data.containsKey('price')) {
-      context.handle(
-        _priceMeta,
-        price.isAcceptableOrUnknown(data['price']!, _priceMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_priceMeta);
     }
     if (data.containsKey('unit_id')) {
       context.handle(
@@ -545,10 +520,6 @@ class $ItemsTable extends Items with TableInfo<$ItemsTable, Item> {
         DriftSqlType.string,
         data['${effectivePrefix}barcode'],
       )!,
-      price: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}price'],
-      )!,
       unitId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}unit_id'],
@@ -578,7 +549,6 @@ class Item extends DataClass implements Insertable<Item> {
   final int id;
   final String name;
   final String barcode;
-  final double price;
   final int unitId;
   final bool isActive;
   final int? categoryId;
@@ -587,7 +557,6 @@ class Item extends DataClass implements Insertable<Item> {
     required this.id,
     required this.name,
     required this.barcode,
-    required this.price,
     required this.unitId,
     required this.isActive,
     this.categoryId,
@@ -599,7 +568,6 @@ class Item extends DataClass implements Insertable<Item> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['barcode'] = Variable<String>(barcode);
-    map['price'] = Variable<double>(price);
     map['unit_id'] = Variable<int>(unitId);
     map['is_active'] = Variable<bool>(isActive);
     if (!nullToAbsent || categoryId != null) {
@@ -614,12 +582,9 @@ class Item extends DataClass implements Insertable<Item> {
       id: Value(id),
       name: Value(name),
       barcode: Value(barcode),
-      price: Value(price),
       unitId: Value(unitId),
       isActive: Value(isActive),
-      categoryId: categoryId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(categoryId),
+      categoryId: categoryId == null && nullToAbsent ? const Value.absent() : Value(categoryId),
       createdAt: Value(createdAt),
     );
   }
@@ -633,7 +598,6 @@ class Item extends DataClass implements Insertable<Item> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       barcode: serializer.fromJson<String>(json['barcode']),
-      price: serializer.fromJson<double>(json['price']),
       unitId: serializer.fromJson<int>(json['unitId']),
       isActive: serializer.fromJson<bool>(json['isActive']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
@@ -647,7 +611,6 @@ class Item extends DataClass implements Insertable<Item> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'barcode': serializer.toJson<String>(barcode),
-      'price': serializer.toJson<double>(price),
       'unitId': serializer.toJson<int>(unitId),
       'isActive': serializer.toJson<bool>(isActive),
       'categoryId': serializer.toJson<int?>(categoryId),
@@ -659,7 +622,6 @@ class Item extends DataClass implements Insertable<Item> {
     int? id,
     String? name,
     String? barcode,
-    double? price,
     int? unitId,
     bool? isActive,
     Value<int?> categoryId = const Value.absent(),
@@ -668,7 +630,6 @@ class Item extends DataClass implements Insertable<Item> {
     id: id ?? this.id,
     name: name ?? this.name,
     barcode: barcode ?? this.barcode,
-    price: price ?? this.price,
     unitId: unitId ?? this.unitId,
     isActive: isActive ?? this.isActive,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
@@ -679,12 +640,9 @@ class Item extends DataClass implements Insertable<Item> {
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       barcode: data.barcode.present ? data.barcode.value : this.barcode,
-      price: data.price.present ? data.price.value : this.price,
       unitId: data.unitId.present ? data.unitId.value : this.unitId,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
-      categoryId: data.categoryId.present
-          ? data.categoryId.value
-          : this.categoryId,
+      categoryId: data.categoryId.present ? data.categoryId.value : this.categoryId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -695,7 +653,6 @@ class Item extends DataClass implements Insertable<Item> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('barcode: $barcode, ')
-          ..write('price: $price, ')
           ..write('unitId: $unitId, ')
           ..write('isActive: $isActive, ')
           ..write('categoryId: $categoryId, ')
@@ -705,35 +662,15 @@ class Item extends DataClass implements Insertable<Item> {
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    name,
-    barcode,
-    price,
-    unitId,
-    isActive,
-    categoryId,
-    createdAt,
-  );
+  int get hashCode => Object.hash(id, name, barcode, unitId, isActive, categoryId, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Item &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.barcode == this.barcode &&
-          other.price == this.price &&
-          other.unitId == this.unitId &&
-          other.isActive == this.isActive &&
-          other.categoryId == this.categoryId &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is Item && other.id == this.id && other.name == this.name && other.barcode == this.barcode && other.unitId == this.unitId && other.isActive == this.isActive && other.categoryId == this.categoryId && other.createdAt == this.createdAt);
 }
 
 class ItemsCompanion extends UpdateCompanion<Item> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> barcode;
-  final Value<double> price;
   final Value<int> unitId;
   final Value<bool> isActive;
   final Value<int?> categoryId;
@@ -742,7 +679,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.barcode = const Value.absent(),
-    this.price = const Value.absent(),
     this.unitId = const Value.absent(),
     this.isActive = const Value.absent(),
     this.categoryId = const Value.absent(),
@@ -752,20 +688,17 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     this.id = const Value.absent(),
     required String name,
     required String barcode,
-    required double price,
     required int unitId,
     this.isActive = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name),
        barcode = Value(barcode),
-       price = Value(price),
        unitId = Value(unitId);
   static Insertable<Item> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? barcode,
-    Expression<double>? price,
     Expression<int>? unitId,
     Expression<bool>? isActive,
     Expression<int>? categoryId,
@@ -775,7 +708,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (barcode != null) 'barcode': barcode,
-      if (price != null) 'price': price,
       if (unitId != null) 'unit_id': unitId,
       if (isActive != null) 'is_active': isActive,
       if (categoryId != null) 'category_id': categoryId,
@@ -787,7 +719,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     Value<int>? id,
     Value<String>? name,
     Value<String>? barcode,
-    Value<double>? price,
     Value<int>? unitId,
     Value<bool>? isActive,
     Value<int?>? categoryId,
@@ -797,7 +728,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
       id: id ?? this.id,
       name: name ?? this.name,
       barcode: barcode ?? this.barcode,
-      price: price ?? this.price,
       unitId: unitId ?? this.unitId,
       isActive: isActive ?? this.isActive,
       categoryId: categoryId ?? this.categoryId,
@@ -816,9 +746,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
     }
     if (barcode.present) {
       map['barcode'] = Variable<String>(barcode.value);
-    }
-    if (price.present) {
-      map['price'] = Variable<double>(price.value);
     }
     if (unitId.present) {
       map['unit_id'] = Variable<int>(unitId.value);
@@ -841,7 +768,6 @@ class ItemsCompanion extends UpdateCompanion<Item> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('barcode: $barcode, ')
-          ..write('price: $price, ')
           ..write('unitId: $unitId, ')
           ..write('isActive: $isActive, ')
           ..write('categoryId: $categoryId, ')
@@ -851,8 +777,7 @@ class ItemsCompanion extends UpdateCompanion<Item> {
   }
 }
 
-class $CategoryColorsTable extends CategoryColors
-    with TableInfo<$CategoryColorsTable, CategoryColor> {
+class $CategoryColorsTable extends CategoryColors with TableInfo<$CategoryColorsTable, CategoryColor> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -999,12 +924,11 @@ class CategoryColor extends DataClass implements Insertable<CategoryColor> {
     };
   }
 
-  CategoryColor copyWith({int? id, String? hex, DateTime? createdAt}) =>
-      CategoryColor(
-        id: id ?? this.id,
-        hex: hex ?? this.hex,
-        createdAt: createdAt ?? this.createdAt,
-      );
+  CategoryColor copyWith({int? id, String? hex, DateTime? createdAt}) => CategoryColor(
+    id: id ?? this.id,
+    hex: hex ?? this.hex,
+    createdAt: createdAt ?? this.createdAt,
+  );
   CategoryColor copyWithCompanion(CategoryColorsCompanion data) {
     return CategoryColor(
       id: data.id.present ? data.id.value : this.id,
@@ -1026,12 +950,7 @@ class CategoryColor extends DataClass implements Insertable<CategoryColor> {
   @override
   int get hashCode => Object.hash(id, hex, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CategoryColor &&
-          other.id == this.id &&
-          other.hex == this.hex &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is CategoryColor && other.id == this.id && other.hex == this.hex && other.createdAt == this.createdAt);
 }
 
 class CategoryColorsCompanion extends UpdateCompanion<CategoryColor> {
@@ -1098,8 +1017,7 @@ class CategoryColorsCompanion extends UpdateCompanion<CategoryColor> {
   }
 }
 
-class $ItemCategoriesTable extends ItemCategories
-    with TableInfo<$ItemCategoriesTable, ItemCategory> {
+class $ItemCategoriesTable extends ItemCategories with TableInfo<$ItemCategoriesTable, ItemCategory> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1250,9 +1168,7 @@ class ItemCategory extends DataClass implements Insertable<ItemCategory> {
     return ItemCategoriesCompanion(
       id: Value(id),
       name: Value(name),
-      colorId: colorId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(colorId),
+      colorId: colorId == null && nullToAbsent ? const Value.absent() : Value(colorId),
       createdAt: Value(createdAt),
     );
   }
@@ -1314,13 +1230,7 @@ class ItemCategory extends DataClass implements Insertable<ItemCategory> {
   @override
   int get hashCode => Object.hash(id, name, colorId, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ItemCategory &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.colorId == this.colorId &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is ItemCategory && other.id == this.id && other.name == this.name && other.colorId == this.colorId && other.createdAt == this.createdAt);
 }
 
 class ItemCategoriesCompanion extends UpdateCompanion<ItemCategory> {
@@ -1512,8 +1422,7 @@ class Cart extends DataClass implements Insertable<Cart> {
     };
   }
 
-  Cart copyWith({int? id, DateTime? createdAt}) =>
-      Cart(id: id ?? this.id, createdAt: createdAt ?? this.createdAt);
+  Cart copyWith({int? id, DateTime? createdAt}) => Cart(id: id ?? this.id, createdAt: createdAt ?? this.createdAt);
   Cart copyWithCompanion(CartsCompanion data) {
     return Cart(
       id: data.id.present ? data.id.value : this.id,
@@ -1533,11 +1442,7 @@ class Cart extends DataClass implements Insertable<Cart> {
   @override
   int get hashCode => Object.hash(id, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Cart &&
-          other.id == this.id &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is Cart && other.id == this.id && other.createdAt == this.createdAt);
 }
 
 class CartsCompanion extends UpdateCompanion<Cart> {
@@ -1590,8 +1495,7 @@ class CartsCompanion extends UpdateCompanion<Cart> {
   }
 }
 
-class $CartItemsTable extends CartItems
-    with TableInfo<$CartItemsTable, CartItem> {
+class $CartItemsTable extends CartItems with TableInfo<$CartItemsTable, CartItem> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1771,13 +1675,12 @@ class CartItem extends DataClass implements Insertable<CartItem> {
     };
   }
 
-  CartItem copyWith({int? id, int? cartId, int? itemId, int? quantity}) =>
-      CartItem(
-        id: id ?? this.id,
-        cartId: cartId ?? this.cartId,
-        itemId: itemId ?? this.itemId,
-        quantity: quantity ?? this.quantity,
-      );
+  CartItem copyWith({int? id, int? cartId, int? itemId, int? quantity}) => CartItem(
+    id: id ?? this.id,
+    cartId: cartId ?? this.cartId,
+    itemId: itemId ?? this.itemId,
+    quantity: quantity ?? this.quantity,
+  );
   CartItem copyWithCompanion(CartItemsCompanion data) {
     return CartItem(
       id: data.id.present ? data.id.value : this.id,
@@ -1801,13 +1704,7 @@ class CartItem extends DataClass implements Insertable<CartItem> {
   @override
   int get hashCode => Object.hash(id, cartId, itemId, quantity);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CartItem &&
-          other.id == this.id &&
-          other.cartId == this.cartId &&
-          other.itemId == this.itemId &&
-          other.quantity == this.quantity);
+  bool operator ==(Object other) => identical(this, other) || (other is CartItem && other.id == this.id && other.cartId == this.cartId && other.itemId == this.itemId && other.quantity == this.quantity);
 }
 
 class CartItemsCompanion extends UpdateCompanion<CartItem> {
@@ -1886,8 +1783,7 @@ class CartItemsCompanion extends UpdateCompanion<CartItem> {
   }
 }
 
-class $SaleHistoriesTable extends SaleHistories
-    with TableInfo<$SaleHistoriesTable, SaleHistory> {
+class $SaleHistoriesTable extends SaleHistories with TableInfo<$SaleHistoriesTable, SaleHistory> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2036,9 +1932,7 @@ class SaleHistory extends DataClass implements Insertable<SaleHistory> {
     return SaleHistoriesCompanion(
       id: Value(id),
       cartId: Value(cartId),
-      total: total == null && nullToAbsent
-          ? const Value.absent()
-          : Value(total),
+      total: total == null && nullToAbsent ? const Value.absent() : Value(total),
       createdAt: Value(createdAt),
     );
   }
@@ -2100,13 +1994,7 @@ class SaleHistory extends DataClass implements Insertable<SaleHistory> {
   @override
   int get hashCode => Object.hash(id, cartId, total, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SaleHistory &&
-          other.id == this.id &&
-          other.cartId == this.cartId &&
-          other.total == this.total &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is SaleHistory && other.id == this.id && other.cartId == this.cartId && other.total == this.total && other.createdAt == this.createdAt);
 }
 
 class SaleHistoriesCompanion extends UpdateCompanion<SaleHistory> {
@@ -2215,14 +2103,13 @@ class $StocksTable extends Stocks with TableInfo<$StocksTable, Stock> {
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<LocationsEnum, String> location =
-      GeneratedColumn<String>(
-        'location',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<LocationsEnum>($StocksTable.$converterlocation);
+  late final GeneratedColumnWithTypeConverter<LocationsEnum, String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<LocationsEnum>($StocksTable.$converterlocation);
   static const VerificationMeta _quantityMeta = const VerificationMeta(
     'quantity',
   );
@@ -2301,8 +2188,7 @@ class $StocksTable extends Stocks with TableInfo<$StocksTable, Stock> {
     return $StocksTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<LocationsEnum, String, String> $converterlocation =
-      const EnumNameConverter<LocationsEnum>(LocationsEnum.values);
+  static JsonTypeConverter2<LocationsEnum, String, String> $converterlocation = const EnumNameConverter<LocationsEnum>(LocationsEnum.values);
 }
 
 class Stock extends DataClass implements Insertable<Stock> {
@@ -2400,13 +2286,7 @@ class Stock extends DataClass implements Insertable<Stock> {
   @override
   int get hashCode => Object.hash(id, itemId, location, quantity);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Stock &&
-          other.id == this.id &&
-          other.itemId == this.itemId &&
-          other.location == this.location &&
-          other.quantity == this.quantity);
+  bool operator ==(Object other) => identical(this, other) || (other is Stock && other.id == this.id && other.itemId == this.itemId && other.location == this.location && other.quantity == this.quantity);
 }
 
 class StocksCompanion extends UpdateCompanion<Stock> {
@@ -2487,8 +2367,7 @@ class StocksCompanion extends UpdateCompanion<Stock> {
   }
 }
 
-class $TransfersTable extends Transfers
-    with TableInfo<$TransfersTable, Transfer> {
+class $TransfersTable extends Transfers with TableInfo<$TransfersTable, Transfer> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2519,8 +2398,7 @@ class $TransfersTable extends Transfers
     ),
   );
   @override
-  late final GeneratedColumnWithTypeConverter<LocationsEnum, String>
-  fromLocation = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<LocationsEnum, String> fromLocation = GeneratedColumn<String>(
     'from_location',
     aliasedName,
     false,
@@ -2528,8 +2406,7 @@ class $TransfersTable extends Transfers
     requiredDuringInsert: true,
   ).withConverter<LocationsEnum>($TransfersTable.$converterfromLocation);
   @override
-  late final GeneratedColumnWithTypeConverter<LocationsEnum, String>
-  toLocation = GeneratedColumn<String>(
+  late final GeneratedColumnWithTypeConverter<LocationsEnum, String> toLocation = GeneratedColumn<String>(
     'to_location',
     aliasedName,
     false,
@@ -2670,12 +2547,10 @@ class $TransfersTable extends Transfers
     return $TransfersTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<LocationsEnum, String, String>
-  $converterfromLocation = const EnumNameConverter<LocationsEnum>(
+  static JsonTypeConverter2<LocationsEnum, String, String> $converterfromLocation = const EnumNameConverter<LocationsEnum>(
     LocationsEnum.values,
   );
-  static JsonTypeConverter2<LocationsEnum, String, String>
-  $convertertoLocation = const EnumNameConverter<LocationsEnum>(
+  static JsonTypeConverter2<LocationsEnum, String, String> $convertertoLocation = const EnumNameConverter<LocationsEnum>(
     LocationsEnum.values,
   );
 }
@@ -2790,12 +2665,8 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     return Transfer(
       id: data.id.present ? data.id.value : this.id,
       itemId: data.itemId.present ? data.itemId.value : this.itemId,
-      fromLocation: data.fromLocation.present
-          ? data.fromLocation.value
-          : this.fromLocation,
-      toLocation: data.toLocation.present
-          ? data.toLocation.value
-          : this.toLocation,
+      fromLocation: data.fromLocation.present ? data.fromLocation.value : this.fromLocation,
+      toLocation: data.toLocation.present ? data.toLocation.value : this.toLocation,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -2827,16 +2698,7 @@ class Transfer extends DataClass implements Insertable<Transfer> {
     createdAt,
   );
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Transfer &&
-          other.id == this.id &&
-          other.itemId == this.itemId &&
-          other.fromLocation == this.fromLocation &&
-          other.toLocation == this.toLocation &&
-          other.quantity == this.quantity &&
-          other.note == this.note &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is Transfer && other.id == this.id && other.itemId == this.itemId && other.fromLocation == this.fromLocation && other.toLocation == this.toLocation && other.quantity == this.quantity && other.note == this.note && other.createdAt == this.createdAt);
 }
 
 class TransfersCompanion extends UpdateCompanion<Transfer> {
@@ -2954,8 +2816,7 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
   }
 }
 
-class $ProcurementsTable extends Procurements
-    with TableInfo<$ProcurementsTable, Procurement> {
+class $ProcurementsTable extends Procurements with TableInfo<$ProcurementsTable, Procurement> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -2988,23 +2849,21 @@ class $ProcurementsTable extends Procurements
     'procurementDate',
   );
   @override
-  late final GeneratedColumn<DateTime> procurementDate =
-      GeneratedColumn<DateTime>(
-        'procurement_date',
-        aliasedName,
-        false,
-        type: DriftSqlType.dateTime,
-        requiredDuringInsert: true,
-      );
+  late final GeneratedColumn<DateTime> procurementDate = GeneratedColumn<DateTime>(
+    'procurement_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
   @override
-  late final GeneratedColumnWithTypeConverter<LocationsEnum, String> location =
-      GeneratedColumn<String>(
-        'location',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      ).withConverter<LocationsEnum>($ProcurementsTable.$converterlocation);
+  late final GeneratedColumnWithTypeConverter<LocationsEnum, String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<LocationsEnum>($ProcurementsTable.$converterlocation);
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -3127,8 +2986,7 @@ class $ProcurementsTable extends Procurements
     return $ProcurementsTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<LocationsEnum, String, String> $converterlocation =
-      const EnumNameConverter<LocationsEnum>(LocationsEnum.values);
+  static JsonTypeConverter2<LocationsEnum, String, String> $converterlocation = const EnumNameConverter<LocationsEnum>(LocationsEnum.values);
 }
 
 class Procurement extends DataClass implements Insertable<Procurement> {
@@ -3224,12 +3082,8 @@ class Procurement extends DataClass implements Insertable<Procurement> {
   Procurement copyWithCompanion(ProcurementsCompanion data) {
     return Procurement(
       id: data.id.present ? data.id.value : this.id,
-      supplierName: data.supplierName.present
-          ? data.supplierName.value
-          : this.supplierName,
-      procurementDate: data.procurementDate.present
-          ? data.procurementDate.value
-          : this.procurementDate,
+      supplierName: data.supplierName.present ? data.supplierName.value : this.supplierName,
+      procurementDate: data.procurementDate.present ? data.procurementDate.value : this.procurementDate,
       location: data.location.present ? data.location.value : this.location,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -3250,18 +3104,9 @@ class Procurement extends DataClass implements Insertable<Procurement> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, supplierName, procurementDate, location, note, createdAt);
+  int get hashCode => Object.hash(id, supplierName, procurementDate, location, note, createdAt);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Procurement &&
-          other.id == this.id &&
-          other.supplierName == this.supplierName &&
-          other.procurementDate == this.procurementDate &&
-          other.location == this.location &&
-          other.note == this.note &&
-          other.createdAt == this.createdAt);
+  bool operator ==(Object other) => identical(this, other) || (other is Procurement && other.id == this.id && other.supplierName == this.supplierName && other.procurementDate == this.procurementDate && other.location == this.location && other.note == this.note && other.createdAt == this.createdAt);
 }
 
 class ProcurementsCompanion extends UpdateCompanion<Procurement> {
@@ -3365,8 +3210,7 @@ class ProcurementsCompanion extends UpdateCompanion<Procurement> {
   }
 }
 
-class $ProcurementItemsTable extends ProcurementItems
-    with TableInfo<$ProcurementItemsTable, ProcurementItem> {
+class $ProcurementItemsTable extends ProcurementItems with TableInfo<$ProcurementItemsTable, ProcurementItem> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -3606,14 +3450,10 @@ class ProcurementItem extends DataClass implements Insertable<ProcurementItem> {
   ProcurementItem copyWithCompanion(ProcurementItemsCompanion data) {
     return ProcurementItem(
       id: data.id.present ? data.id.value : this.id,
-      procurementId: data.procurementId.present
-          ? data.procurementId.value
-          : this.procurementId,
+      procurementId: data.procurementId.present ? data.procurementId.value : this.procurementId,
       itemId: data.itemId.present ? data.itemId.value : this.itemId,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
-      purchasePrice: data.purchasePrice.present
-          ? data.purchasePrice.value
-          : this.purchasePrice,
+      purchasePrice: data.purchasePrice.present ? data.purchasePrice.value : this.purchasePrice,
     );
   }
 
@@ -3630,17 +3470,9 @@ class ProcurementItem extends DataClass implements Insertable<ProcurementItem> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, procurementId, itemId, quantity, purchasePrice);
+  int get hashCode => Object.hash(id, procurementId, itemId, quantity, purchasePrice);
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ProcurementItem &&
-          other.id == this.id &&
-          other.procurementId == this.procurementId &&
-          other.itemId == this.itemId &&
-          other.quantity == this.quantity &&
-          other.purchasePrice == this.purchasePrice);
+  bool operator ==(Object other) => identical(this, other) || (other is ProcurementItem && other.id == this.id && other.procurementId == this.procurementId && other.itemId == this.itemId && other.quantity == this.quantity && other.purchasePrice == this.purchasePrice);
 }
 
 class ProcurementItemsCompanion extends UpdateCompanion<ProcurementItem> {
@@ -3749,8 +3581,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   @override
-  Iterable<TableInfo<Table, Object?>> get allTables =>
-      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     units,
@@ -3794,8 +3625,7 @@ typedef $$UnitsTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-final class $$UnitsTableReferences
-    extends BaseReferences<_$AppDatabase, $UnitsTable, Unit> {
+final class $$UnitsTableReferences extends BaseReferences<_$AppDatabase, $UnitsTable, Unit> {
   $$UnitsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static MultiTypedResultKey<$ItemsTable, List<Item>> _itemsRefsTable(
@@ -3869,16 +3699,14 @@ class $$UnitsTableFilterComposer extends Composer<_$AppDatabase, $UnitsTable> {
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$UnitsTableOrderingComposer
-    extends Composer<_$AppDatabase, $UnitsTable> {
+class $$UnitsTableOrderingComposer extends Composer<_$AppDatabase, $UnitsTable> {
   $$UnitsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -3912,8 +3740,7 @@ class $$UnitsTableOrderingComposer
   );
 }
 
-class $$UnitsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $UnitsTable> {
+class $$UnitsTableAnnotationComposer extends Composer<_$AppDatabase, $UnitsTable> {
   $$UnitsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -3921,20 +3748,15 @@ class $$UnitsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
+  GeneratedColumn<String> get name => $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get shortName =>
-      $composableBuilder(column: $table.shortName, builder: (column) => column);
+  GeneratedColumn<String> get shortName => $composableBuilder(column: $table.shortName, builder: (column) => column);
 
-  GeneratedColumn<bool> get isActive =>
-      $composableBuilder(column: $table.isActive, builder: (column) => column);
+  GeneratedColumn<bool> get isActive => $composableBuilder(column: $table.isActive, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   Expression<T> itemsRefs<T extends Object>(
     Expression<T> Function($$ItemsTableAnnotationComposer a) f,
@@ -3954,40 +3776,22 @@ class $$UnitsTableAnnotationComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$UnitsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $UnitsTable,
-          Unit,
-          $$UnitsTableFilterComposer,
-          $$UnitsTableOrderingComposer,
-          $$UnitsTableAnnotationComposer,
-          $$UnitsTableCreateCompanionBuilder,
-          $$UnitsTableUpdateCompanionBuilder,
-          (Unit, $$UnitsTableReferences),
-          Unit,
-          PrefetchHooks Function({bool itemsRefs})
-        > {
+class $$UnitsTableTableManager extends RootTableManager<_$AppDatabase, $UnitsTable, Unit, $$UnitsTableFilterComposer, $$UnitsTableOrderingComposer, $$UnitsTableAnnotationComposer, $$UnitsTableCreateCompanionBuilder, $$UnitsTableUpdateCompanionBuilder, (Unit, $$UnitsTableReferences), Unit, PrefetchHooks Function({bool itemsRefs})> {
   $$UnitsTableTableManager(_$AppDatabase db, $UnitsTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$UnitsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$UnitsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$UnitsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$UnitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$UnitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$UnitsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -4018,8 +3822,7 @@ class $$UnitsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$UnitsTableReferences(db, table, e)),
+                (e) => (e.readTable(table), $$UnitsTableReferences(db, table, e)),
               )
               .toList(),
           prefetchHooksCallback: ({itemsRefs = false}) {
@@ -4035,10 +3838,8 @@ class $$UnitsTableTableManager
                       referencedTable: $$UnitsTableReferences._itemsRefsTable(
                         db,
                       ),
-                      managerFromTypedResult: (p0) =>
-                          $$UnitsTableReferences(db, table, p0).itemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.unitId == item.id),
+                      managerFromTypedResult: (p0) => $$UnitsTableReferences(db, table, p0).itemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where((e) => e.unitId == item.id),
                       typedResults: items,
                     ),
                 ];
@@ -4049,26 +3850,12 @@ class $$UnitsTableTableManager
       );
 }
 
-typedef $$UnitsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $UnitsTable,
-      Unit,
-      $$UnitsTableFilterComposer,
-      $$UnitsTableOrderingComposer,
-      $$UnitsTableAnnotationComposer,
-      $$UnitsTableCreateCompanionBuilder,
-      $$UnitsTableUpdateCompanionBuilder,
-      (Unit, $$UnitsTableReferences),
-      Unit,
-      PrefetchHooks Function({bool itemsRefs})
-    >;
+typedef $$UnitsTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $UnitsTable, Unit, $$UnitsTableFilterComposer, $$UnitsTableOrderingComposer, $$UnitsTableAnnotationComposer, $$UnitsTableCreateCompanionBuilder, $$UnitsTableUpdateCompanionBuilder, (Unit, $$UnitsTableReferences), Unit, PrefetchHooks Function({bool itemsRefs})>;
 typedef $$ItemsTableCreateCompanionBuilder =
     ItemsCompanion Function({
       Value<int> id,
       required String name,
       required String barcode,
-      required double price,
       required int unitId,
       Value<bool> isActive,
       Value<int?> categoryId,
@@ -4079,19 +3866,16 @@ typedef $$ItemsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> name,
       Value<String> barcode,
-      Value<double> price,
       Value<int> unitId,
       Value<bool> isActive,
       Value<int?> categoryId,
       Value<DateTime> createdAt,
     });
 
-final class $$ItemsTableReferences
-    extends BaseReferences<_$AppDatabase, $ItemsTable, Item> {
+final class $$ItemsTableReferences extends BaseReferences<_$AppDatabase, $ItemsTable, Item> {
   $$ItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $UnitsTable _unitIdTable(_$AppDatabase db) =>
-      db.units.createAlias($_aliasNameGenerator(db.items.unitId, db.units.id));
+  static $UnitsTable _unitIdTable(_$AppDatabase db) => db.units.createAlias($_aliasNameGenerator(db.items.unitId, db.units.id));
 
   $$UnitsTableProcessedTableManager get unitId {
     final $_column = $_itemColumn<int>('unit_id')!;
@@ -4107,8 +3891,7 @@ final class $$ItemsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$CartItemsTable, List<CartItem>>
-  _cartItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$CartItemsTable, List<CartItem>> _cartItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.cartItems,
     aliasName: $_aliasNameGenerator(db.items.id, db.cartItems.itemId),
   );
@@ -4144,8 +3927,7 @@ final class $$ItemsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$TransfersTable, List<Transfer>>
-  _transfersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$TransfersTable, List<Transfer>> _transfersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.transfers,
     aliasName: $_aliasNameGenerator(db.items.id, db.transfers.itemId),
   );
@@ -4162,8 +3944,7 @@ final class $$ItemsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$ProcurementItemsTable, List<ProcurementItem>>
-  _procurementItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$ProcurementItemsTable, List<ProcurementItem>> _procurementItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.procurementItems,
     aliasName: $_aliasNameGenerator(db.items.id, db.procurementItems.itemId),
   );
@@ -4206,11 +3987,6 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get price => $composableBuilder(
-    column: $table.price,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
     builder: (column) => ColumnFilters(column),
@@ -4242,8 +4018,7 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
             $table: $db.units,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4267,8 +4042,7 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
             $table: $db.cartItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4292,8 +4066,7 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
             $table: $db.stocks,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4317,8 +4090,7 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
             $table: $db.transfers,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4342,16 +4114,14 @@ class $$ItemsTableFilterComposer extends Composer<_$AppDatabase, $ItemsTable> {
             $table: $db.procurementItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$ItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ItemsTable> {
+class $$ItemsTableOrderingComposer extends Composer<_$AppDatabase, $ItemsTable> {
   $$ItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -4371,11 +4141,6 @@ class $$ItemsTableOrderingComposer
 
   ColumnOrderings<String> get barcode => $composableBuilder(
     column: $table.barcode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get price => $composableBuilder(
-    column: $table.price,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4410,16 +4175,14 @@ class $$ItemsTableOrderingComposer
             $table: $db.units,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ItemsTable> {
+class $$ItemsTableAnnotationComposer extends Composer<_$AppDatabase, $ItemsTable> {
   $$ItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -4427,28 +4190,20 @@ class $$ItemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
+  GeneratedColumn<String> get name => $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get barcode =>
-      $composableBuilder(column: $table.barcode, builder: (column) => column);
+  GeneratedColumn<String> get barcode => $composableBuilder(column: $table.barcode, builder: (column) => column);
 
-  GeneratedColumn<double> get price =>
-      $composableBuilder(column: $table.price, builder: (column) => column);
-
-  GeneratedColumn<bool> get isActive =>
-      $composableBuilder(column: $table.isActive, builder: (column) => column);
+  GeneratedColumn<bool> get isActive => $composableBuilder(column: $table.isActive, builder: (column) => column);
 
   GeneratedColumn<int> get categoryId => $composableBuilder(
     column: $table.categoryId,
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   $$UnitsTableAnnotationComposer get unitId {
     final $$UnitsTableAnnotationComposer composer = $composerBuilder(
@@ -4466,8 +4221,7 @@ class $$ItemsTableAnnotationComposer
             $table: $db.units,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4491,8 +4245,7 @@ class $$ItemsTableAnnotationComposer
             $table: $db.cartItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4516,8 +4269,7 @@ class $$ItemsTableAnnotationComposer
             $table: $db.stocks,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4541,8 +4293,7 @@ class $$ItemsTableAnnotationComposer
             $table: $db.transfers,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4566,8 +4317,7 @@ class $$ItemsTableAnnotationComposer
             $table: $db.procurementItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -4600,18 +4350,14 @@ class $$ItemsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ItemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> barcode = const Value.absent(),
-                Value<double> price = const Value.absent(),
                 Value<int> unitId = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
@@ -4620,7 +4366,6 @@ class $$ItemsTableTableManager
                 id: id,
                 name: name,
                 barcode: barcode,
-                price: price,
                 unitId: unitId,
                 isActive: isActive,
                 categoryId: categoryId,
@@ -4631,7 +4376,6 @@ class $$ItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String name,
                 required String barcode,
-                required double price,
                 required int unitId,
                 Value<bool> isActive = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
@@ -4640,7 +4384,6 @@ class $$ItemsTableTableManager
                 id: id,
                 name: name,
                 barcode: barcode,
-                price: price,
                 unitId: unitId,
                 isActive: isActive,
                 categoryId: categoryId,
@@ -4648,8 +4391,7 @@ class $$ItemsTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$ItemsTableReferences(db, table, e)),
+                (e) => (e.readTable(table), $$ItemsTableReferences(db, table, e)),
               )
               .toList(),
           prefetchHooksCallback:
@@ -4668,106 +4410,72 @@ class $$ItemsTableTableManager
                     if (transfersRefs) db.transfers,
                     if (procurementItemsRefs) db.procurementItems,
                   ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (unitId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.unitId,
-                                    referencedTable: $$ItemsTableReferences
-                                        ._unitIdTable(db),
-                                    referencedColumn: $$ItemsTableReferences
-                                        ._unitIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
+                  addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                    if (unitId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.unitId,
+                                referencedTable: $$ItemsTableReferences._unitIdTable(db),
+                                referencedColumn: $$ItemsTableReferences._unitIdTable(db).id,
+                              )
+                              as T;
+                    }
 
-                        return state;
-                      },
+                    return state;
+                  },
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (cartItemsRefs)
                         await $_getPrefetchedData<Item, $ItemsTable, CartItem>(
                           currentTable: table,
-                          referencedTable: $$ItemsTableReferences
-                              ._cartItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ItemsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).cartItemsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.itemId == item.id,
-                              ),
+                          referencedTable: $$ItemsTableReferences._cartItemsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ItemsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).cartItemsRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.itemId == item.id,
+                          ),
                           typedResults: items,
                         ),
                       if (stocksRefs)
                         await $_getPrefetchedData<Item, $ItemsTable, Stock>(
                           currentTable: table,
-                          referencedTable: $$ItemsTableReferences
-                              ._stocksRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ItemsTableReferences(db, table, p0).stocksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.itemId == item.id,
-                              ),
+                          referencedTable: $$ItemsTableReferences._stocksRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ItemsTableReferences(db, table, p0).stocksRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.itemId == item.id,
+                          ),
                           typedResults: items,
                         ),
                       if (transfersRefs)
                         await $_getPrefetchedData<Item, $ItemsTable, Transfer>(
                           currentTable: table,
-                          referencedTable: $$ItemsTableReferences
-                              ._transfersRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ItemsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).transfersRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.itemId == item.id,
-                              ),
+                          referencedTable: $$ItemsTableReferences._transfersRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ItemsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).transfersRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.itemId == item.id,
+                          ),
                           typedResults: items,
                         ),
                       if (procurementItemsRefs)
-                        await $_getPrefetchedData<
-                          Item,
-                          $ItemsTable,
-                          ProcurementItem
-                        >(
+                        await $_getPrefetchedData<Item, $ItemsTable, ProcurementItem>(
                           currentTable: table,
-                          referencedTable: $$ItemsTableReferences
-                              ._procurementItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ItemsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).procurementItemsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.itemId == item.id,
-                              ),
+                          referencedTable: $$ItemsTableReferences._procurementItemsRefsTable(db),
+                          managerFromTypedResult: (p0) => $$ItemsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).procurementItemsRefs,
+                          referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                            (e) => e.itemId == item.id,
+                          ),
                           typedResults: items,
                         ),
                     ];
@@ -4811,16 +4519,14 @@ typedef $$CategoryColorsTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-final class $$CategoryColorsTableReferences
-    extends BaseReferences<_$AppDatabase, $CategoryColorsTable, CategoryColor> {
+final class $$CategoryColorsTableReferences extends BaseReferences<_$AppDatabase, $CategoryColorsTable, CategoryColor> {
   $$CategoryColorsTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
   );
 
-  static MultiTypedResultKey<$ItemCategoriesTable, List<ItemCategory>>
-  _itemCategoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$ItemCategoriesTable, List<ItemCategory>> _itemCategoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.itemCategories,
     aliasName: $_aliasNameGenerator(
       db.categoryColors.id,
@@ -4841,8 +4547,7 @@ final class $$CategoryColorsTableReferences
   }
 }
 
-class $$CategoryColorsTableFilterComposer
-    extends Composer<_$AppDatabase, $CategoryColorsTable> {
+class $$CategoryColorsTableFilterComposer extends Composer<_$AppDatabase, $CategoryColorsTable> {
   $$CategoryColorsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -4883,16 +4588,14 @@ class $$CategoryColorsTableFilterComposer
             $table: $db.itemCategories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$CategoryColorsTableOrderingComposer
-    extends Composer<_$AppDatabase, $CategoryColorsTable> {
+class $$CategoryColorsTableOrderingComposer extends Composer<_$AppDatabase, $CategoryColorsTable> {
   $$CategoryColorsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -4916,8 +4619,7 @@ class $$CategoryColorsTableOrderingComposer
   );
 }
 
-class $$CategoryColorsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CategoryColorsTable> {
+class $$CategoryColorsTableAnnotationComposer extends Composer<_$AppDatabase, $CategoryColorsTable> {
   $$CategoryColorsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -4925,14 +4627,11 @@ class $$CategoryColorsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get hex =>
-      $composableBuilder(column: $table.hex, builder: (column) => column);
+  GeneratedColumn<String> get hex => $composableBuilder(column: $table.hex, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   Expression<T> itemCategoriesRefs<T extends Object>(
     Expression<T> Function($$ItemCategoriesTableAnnotationComposer a) f,
@@ -4952,29 +4651,14 @@ class $$CategoryColorsTableAnnotationComposer
             $table: $db.itemCategories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$CategoryColorsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $CategoryColorsTable,
-          CategoryColor,
-          $$CategoryColorsTableFilterComposer,
-          $$CategoryColorsTableOrderingComposer,
-          $$CategoryColorsTableAnnotationComposer,
-          $$CategoryColorsTableCreateCompanionBuilder,
-          $$CategoryColorsTableUpdateCompanionBuilder,
-          (CategoryColor, $$CategoryColorsTableReferences),
-          CategoryColor,
-          PrefetchHooks Function({bool itemCategoriesRefs})
-        > {
+class $$CategoryColorsTableTableManager extends RootTableManager<_$AppDatabase, $CategoryColorsTable, CategoryColor, $$CategoryColorsTableFilterComposer, $$CategoryColorsTableOrderingComposer, $$CategoryColorsTableAnnotationComposer, $$CategoryColorsTableCreateCompanionBuilder, $$CategoryColorsTableUpdateCompanionBuilder, (CategoryColor, $$CategoryColorsTableReferences), CategoryColor, PrefetchHooks Function({bool itemCategoriesRefs})> {
   $$CategoryColorsTableTableManager(
     _$AppDatabase db,
     $CategoryColorsTable table,
@@ -4982,12 +4666,9 @@ class $$CategoryColorsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$CategoryColorsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CategoryColorsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CategoryColorsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$CategoryColorsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$CategoryColorsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$CategoryColorsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -5026,22 +4707,15 @@ class $$CategoryColorsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (itemCategoriesRefs)
-                    await $_getPrefetchedData<
-                      CategoryColor,
-                      $CategoryColorsTable,
-                      ItemCategory
-                    >(
+                    await $_getPrefetchedData<CategoryColor, $CategoryColorsTable, ItemCategory>(
                       currentTable: table,
-                      referencedTable: $$CategoryColorsTableReferences
-                          ._itemCategoriesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$CategoryColorsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).itemCategoriesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.colorId == item.id),
+                      referencedTable: $$CategoryColorsTableReferences._itemCategoriesRefsTable(db),
+                      managerFromTypedResult: (p0) => $$CategoryColorsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).itemCategoriesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where((e) => e.colorId == item.id),
                       typedResults: items,
                     ),
                 ];
@@ -5052,20 +4726,7 @@ class $$CategoryColorsTableTableManager
       );
 }
 
-typedef $$CategoryColorsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CategoryColorsTable,
-      CategoryColor,
-      $$CategoryColorsTableFilterComposer,
-      $$CategoryColorsTableOrderingComposer,
-      $$CategoryColorsTableAnnotationComposer,
-      $$CategoryColorsTableCreateCompanionBuilder,
-      $$CategoryColorsTableUpdateCompanionBuilder,
-      (CategoryColor, $$CategoryColorsTableReferences),
-      CategoryColor,
-      PrefetchHooks Function({bool itemCategoriesRefs})
-    >;
+typedef $$CategoryColorsTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $CategoryColorsTable, CategoryColor, $$CategoryColorsTableFilterComposer, $$CategoryColorsTableOrderingComposer, $$CategoryColorsTableAnnotationComposer, $$CategoryColorsTableCreateCompanionBuilder, $$CategoryColorsTableUpdateCompanionBuilder, (CategoryColor, $$CategoryColorsTableReferences), CategoryColor, PrefetchHooks Function({bool itemCategoriesRefs})>;
 typedef $$ItemCategoriesTableCreateCompanionBuilder =
     ItemCategoriesCompanion Function({
       Value<int> id,
@@ -5081,18 +4742,16 @@ typedef $$ItemCategoriesTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-final class $$ItemCategoriesTableReferences
-    extends BaseReferences<_$AppDatabase, $ItemCategoriesTable, ItemCategory> {
+final class $$ItemCategoriesTableReferences extends BaseReferences<_$AppDatabase, $ItemCategoriesTable, ItemCategory> {
   $$ItemCategoriesTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
   );
 
-  static $CategoryColorsTable _colorIdTable(_$AppDatabase db) =>
-      db.categoryColors.createAlias(
-        $_aliasNameGenerator(db.itemCategories.colorId, db.categoryColors.id),
-      );
+  static $CategoryColorsTable _colorIdTable(_$AppDatabase db) => db.categoryColors.createAlias(
+    $_aliasNameGenerator(db.itemCategories.colorId, db.categoryColors.id),
+  );
 
   $$CategoryColorsTableProcessedTableManager? get colorId {
     final $_column = $_itemColumn<int>('color_id');
@@ -5109,8 +4768,7 @@ final class $$ItemCategoriesTableReferences
   }
 }
 
-class $$ItemCategoriesTableFilterComposer
-    extends Composer<_$AppDatabase, $ItemCategoriesTable> {
+class $$ItemCategoriesTableFilterComposer extends Composer<_$AppDatabase, $ItemCategoriesTable> {
   $$ItemCategoriesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -5149,16 +4807,14 @@ class $$ItemCategoriesTableFilterComposer
             $table: $db.categoryColors,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ItemCategoriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $ItemCategoriesTable> {
+class $$ItemCategoriesTableOrderingComposer extends Composer<_$AppDatabase, $ItemCategoriesTable> {
   $$ItemCategoriesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -5197,16 +4853,14 @@ class $$ItemCategoriesTableOrderingComposer
             $table: $db.categoryColors,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ItemCategoriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ItemCategoriesTable> {
+class $$ItemCategoriesTableAnnotationComposer extends Composer<_$AppDatabase, $ItemCategoriesTable> {
   $$ItemCategoriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -5214,14 +4868,11 @@ class $$ItemCategoriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
+  GeneratedColumn<String> get name => $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   $$CategoryColorsTableAnnotationComposer get colorId {
     final $$CategoryColorsTableAnnotationComposer composer = $composerBuilder(
@@ -5239,29 +4890,14 @@ class $$ItemCategoriesTableAnnotationComposer
             $table: $db.categoryColors,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ItemCategoriesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $ItemCategoriesTable,
-          ItemCategory,
-          $$ItemCategoriesTableFilterComposer,
-          $$ItemCategoriesTableOrderingComposer,
-          $$ItemCategoriesTableAnnotationComposer,
-          $$ItemCategoriesTableCreateCompanionBuilder,
-          $$ItemCategoriesTableUpdateCompanionBuilder,
-          (ItemCategory, $$ItemCategoriesTableReferences),
-          ItemCategory,
-          PrefetchHooks Function({bool colorId})
-        > {
+class $$ItemCategoriesTableTableManager extends RootTableManager<_$AppDatabase, $ItemCategoriesTable, ItemCategory, $$ItemCategoriesTableFilterComposer, $$ItemCategoriesTableOrderingComposer, $$ItemCategoriesTableAnnotationComposer, $$ItemCategoriesTableCreateCompanionBuilder, $$ItemCategoriesTableUpdateCompanionBuilder, (ItemCategory, $$ItemCategoriesTableReferences), ItemCategory, PrefetchHooks Function({bool colorId})> {
   $$ItemCategoriesTableTableManager(
     _$AppDatabase db,
     $ItemCategoriesTable table,
@@ -5269,12 +4905,9 @@ class $$ItemCategoriesTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ItemCategoriesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ItemCategoriesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ItemCategoriesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ItemCategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ItemCategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ItemCategoriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -5311,39 +4944,20 @@ class $$ItemCategoriesTableTableManager
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (colorId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.colorId,
-                                referencedTable: $$ItemCategoriesTableReferences
-                                    ._colorIdTable(db),
-                                referencedColumn:
-                                    $$ItemCategoriesTableReferences
-                                        ._colorIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
+              addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                if (colorId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.colorId,
+                            referencedTable: $$ItemCategoriesTableReferences._colorIdTable(db),
+                            referencedColumn: $$ItemCategoriesTableReferences._colorIdTable(db).id,
+                          )
+                          as T;
+                }
 
-                    return state;
-                  },
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -5353,31 +4967,14 @@ class $$ItemCategoriesTableTableManager
       );
 }
 
-typedef $$ItemCategoriesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $ItemCategoriesTable,
-      ItemCategory,
-      $$ItemCategoriesTableFilterComposer,
-      $$ItemCategoriesTableOrderingComposer,
-      $$ItemCategoriesTableAnnotationComposer,
-      $$ItemCategoriesTableCreateCompanionBuilder,
-      $$ItemCategoriesTableUpdateCompanionBuilder,
-      (ItemCategory, $$ItemCategoriesTableReferences),
-      ItemCategory,
-      PrefetchHooks Function({bool colorId})
-    >;
-typedef $$CartsTableCreateCompanionBuilder =
-    CartsCompanion Function({Value<int> id, Value<DateTime> createdAt});
-typedef $$CartsTableUpdateCompanionBuilder =
-    CartsCompanion Function({Value<int> id, Value<DateTime> createdAt});
+typedef $$ItemCategoriesTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $ItemCategoriesTable, ItemCategory, $$ItemCategoriesTableFilterComposer, $$ItemCategoriesTableOrderingComposer, $$ItemCategoriesTableAnnotationComposer, $$ItemCategoriesTableCreateCompanionBuilder, $$ItemCategoriesTableUpdateCompanionBuilder, (ItemCategory, $$ItemCategoriesTableReferences), ItemCategory, PrefetchHooks Function({bool colorId})>;
+typedef $$CartsTableCreateCompanionBuilder = CartsCompanion Function({Value<int> id, Value<DateTime> createdAt});
+typedef $$CartsTableUpdateCompanionBuilder = CartsCompanion Function({Value<int> id, Value<DateTime> createdAt});
 
-final class $$CartsTableReferences
-    extends BaseReferences<_$AppDatabase, $CartsTable, Cart> {
+final class $$CartsTableReferences extends BaseReferences<_$AppDatabase, $CartsTable, Cart> {
   $$CartsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$CartItemsTable, List<CartItem>>
-  _cartItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$CartItemsTable, List<CartItem>> _cartItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.cartItems,
     aliasName: $_aliasNameGenerator(db.carts.id, db.cartItems.cartId),
   );
@@ -5394,8 +4991,7 @@ final class $$CartsTableReferences
     );
   }
 
-  static MultiTypedResultKey<$SaleHistoriesTable, List<SaleHistory>>
-  _saleHistoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$SaleHistoriesTable, List<SaleHistory>> _saleHistoriesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.saleHistories,
     aliasName: $_aliasNameGenerator(db.carts.id, db.saleHistories.cartId),
   );
@@ -5449,8 +5045,7 @@ class $$CartsTableFilterComposer extends Composer<_$AppDatabase, $CartsTable> {
             $table: $db.cartItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -5474,16 +5069,14 @@ class $$CartsTableFilterComposer extends Composer<_$AppDatabase, $CartsTable> {
             $table: $db.saleHistories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$CartsTableOrderingComposer
-    extends Composer<_$AppDatabase, $CartsTable> {
+class $$CartsTableOrderingComposer extends Composer<_$AppDatabase, $CartsTable> {
   $$CartsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -5502,8 +5095,7 @@ class $$CartsTableOrderingComposer
   );
 }
 
-class $$CartsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CartsTable> {
+class $$CartsTableAnnotationComposer extends Composer<_$AppDatabase, $CartsTable> {
   $$CartsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -5511,11 +5103,9 @@ class $$CartsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   Expression<T> cartItemsRefs<T extends Object>(
     Expression<T> Function($$CartItemsTableAnnotationComposer a) f,
@@ -5535,8 +5125,7 @@ class $$CartsTableAnnotationComposer
             $table: $db.cartItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -5560,40 +5149,22 @@ class $$CartsTableAnnotationComposer
             $table: $db.saleHistories,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$CartsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $CartsTable,
-          Cart,
-          $$CartsTableFilterComposer,
-          $$CartsTableOrderingComposer,
-          $$CartsTableAnnotationComposer,
-          $$CartsTableCreateCompanionBuilder,
-          $$CartsTableUpdateCompanionBuilder,
-          (Cart, $$CartsTableReferences),
-          Cart,
-          PrefetchHooks Function({bool cartItemsRefs, bool saleHistoriesRefs})
-        > {
+class $$CartsTableTableManager extends RootTableManager<_$AppDatabase, $CartsTable, Cart, $$CartsTableFilterComposer, $$CartsTableOrderingComposer, $$CartsTableAnnotationComposer, $$CartsTableCreateCompanionBuilder, $$CartsTableUpdateCompanionBuilder, (Cart, $$CartsTableReferences), Cart, PrefetchHooks Function({bool cartItemsRefs, bool saleHistoriesRefs})> {
   $$CartsTableTableManager(_$AppDatabase db, $CartsTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$CartsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CartsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CartsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$CartsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$CartsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$CartsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -5606,81 +5177,56 @@ class $$CartsTableTableManager
               }) => CartsCompanion.insert(id: id, createdAt: createdAt),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$CartsTableReferences(db, table, e)),
+                (e) => (e.readTable(table), $$CartsTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback:
-              ({cartItemsRefs = false, saleHistoriesRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (cartItemsRefs) db.cartItems,
-                    if (saleHistoriesRefs) db.saleHistories,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (cartItemsRefs)
-                        await $_getPrefetchedData<Cart, $CartsTable, CartItem>(
-                          currentTable: table,
-                          referencedTable: $$CartsTableReferences
-                              ._cartItemsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CartsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).cartItemsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.cartId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (saleHistoriesRefs)
-                        await $_getPrefetchedData<
-                          Cart,
-                          $CartsTable,
-                          SaleHistory
-                        >(
-                          currentTable: table,
-                          referencedTable: $$CartsTableReferences
-                              ._saleHistoriesRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$CartsTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).saleHistoriesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.cartId == item.id,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
+          prefetchHooksCallback: ({cartItemsRefs = false, saleHistoriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (cartItemsRefs) db.cartItems,
+                if (saleHistoriesRefs) db.saleHistories,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (cartItemsRefs)
+                    await $_getPrefetchedData<Cart, $CartsTable, CartItem>(
+                      currentTable: table,
+                      referencedTable: $$CartsTableReferences._cartItemsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$CartsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).cartItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                        (e) => e.cartId == item.id,
+                      ),
+                      typedResults: items,
+                    ),
+                  if (saleHistoriesRefs)
+                    await $_getPrefetchedData<Cart, $CartsTable, SaleHistory>(
+                      currentTable: table,
+                      referencedTable: $$CartsTableReferences._saleHistoriesRefsTable(db),
+                      managerFromTypedResult: (p0) => $$CartsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).saleHistoriesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                        (e) => e.cartId == item.id,
+                      ),
+                      typedResults: items,
+                    ),
+                ];
               },
+            );
+          },
         ),
       );
 }
 
-typedef $$CartsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CartsTable,
-      Cart,
-      $$CartsTableFilterComposer,
-      $$CartsTableOrderingComposer,
-      $$CartsTableAnnotationComposer,
-      $$CartsTableCreateCompanionBuilder,
-      $$CartsTableUpdateCompanionBuilder,
-      (Cart, $$CartsTableReferences),
-      Cart,
-      PrefetchHooks Function({bool cartItemsRefs, bool saleHistoriesRefs})
-    >;
+typedef $$CartsTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $CartsTable, Cart, $$CartsTableFilterComposer, $$CartsTableOrderingComposer, $$CartsTableAnnotationComposer, $$CartsTableCreateCompanionBuilder, $$CartsTableUpdateCompanionBuilder, (Cart, $$CartsTableReferences), Cart, PrefetchHooks Function({bool cartItemsRefs, bool saleHistoriesRefs})>;
 typedef $$CartItemsTableCreateCompanionBuilder =
     CartItemsCompanion Function({
       Value<int> id,
@@ -5696,8 +5242,7 @@ typedef $$CartItemsTableUpdateCompanionBuilder =
       Value<int> quantity,
     });
 
-final class $$CartItemsTableReferences
-    extends BaseReferences<_$AppDatabase, $CartItemsTable, CartItem> {
+final class $$CartItemsTableReferences extends BaseReferences<_$AppDatabase, $CartItemsTable, CartItem> {
   $$CartItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $CartsTable _cartIdTable(_$AppDatabase db) => db.carts.createAlias(
@@ -5737,8 +5282,7 @@ final class $$CartItemsTableReferences
   }
 }
 
-class $$CartItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $CartItemsTable> {
+class $$CartItemsTableFilterComposer extends Composer<_$AppDatabase, $CartItemsTable> {
   $$CartItemsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -5772,8 +5316,7 @@ class $$CartItemsTableFilterComposer
             $table: $db.carts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -5795,16 +5338,14 @@ class $$CartItemsTableFilterComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$CartItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $CartItemsTable> {
+class $$CartItemsTableOrderingComposer extends Composer<_$AppDatabase, $CartItemsTable> {
   $$CartItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -5838,8 +5379,7 @@ class $$CartItemsTableOrderingComposer
             $table: $db.carts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -5861,16 +5401,14 @@ class $$CartItemsTableOrderingComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$CartItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $CartItemsTable> {
+class $$CartItemsTableAnnotationComposer extends Composer<_$AppDatabase, $CartItemsTable> {
   $$CartItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -5878,11 +5416,9 @@ class $$CartItemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get quantity =>
-      $composableBuilder(column: $table.quantity, builder: (column) => column);
+  GeneratedColumn<int> get quantity => $composableBuilder(column: $table.quantity, builder: (column) => column);
 
   $$CartsTableAnnotationComposer get cartId {
     final $$CartsTableAnnotationComposer composer = $composerBuilder(
@@ -5900,8 +5436,7 @@ class $$CartItemsTableAnnotationComposer
             $table: $db.carts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -5923,40 +5458,22 @@ class $$CartItemsTableAnnotationComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$CartItemsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $CartItemsTable,
-          CartItem,
-          $$CartItemsTableFilterComposer,
-          $$CartItemsTableOrderingComposer,
-          $$CartItemsTableAnnotationComposer,
-          $$CartItemsTableCreateCompanionBuilder,
-          $$CartItemsTableUpdateCompanionBuilder,
-          (CartItem, $$CartItemsTableReferences),
-          CartItem,
-          PrefetchHooks Function({bool cartId, bool itemId})
-        > {
+class $$CartItemsTableTableManager extends RootTableManager<_$AppDatabase, $CartItemsTable, CartItem, $$CartItemsTableFilterComposer, $$CartItemsTableOrderingComposer, $$CartItemsTableAnnotationComposer, $$CartItemsTableCreateCompanionBuilder, $$CartItemsTableUpdateCompanionBuilder, (CartItem, $$CartItemsTableReferences), CartItem, PrefetchHooks Function({bool cartId, bool itemId})> {
   $$CartItemsTableTableManager(_$AppDatabase db, $CartItemsTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$CartItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$CartItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$CartItemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$CartItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$CartItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$CartItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -5993,51 +5510,30 @@ class $$CartItemsTableTableManager
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (cartId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.cartId,
-                                referencedTable: $$CartItemsTableReferences
-                                    ._cartIdTable(db),
-                                referencedColumn: $$CartItemsTableReferences
-                                    ._cartIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (itemId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.itemId,
-                                referencedTable: $$CartItemsTableReferences
-                                    ._itemIdTable(db),
-                                referencedColumn: $$CartItemsTableReferences
-                                    ._itemIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+              addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                if (cartId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.cartId,
+                            referencedTable: $$CartItemsTableReferences._cartIdTable(db),
+                            referencedColumn: $$CartItemsTableReferences._cartIdTable(db).id,
+                          )
+                          as T;
+                }
+                if (itemId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.itemId,
+                            referencedTable: $$CartItemsTableReferences._itemIdTable(db),
+                            referencedColumn: $$CartItemsTableReferences._itemIdTable(db).id,
+                          )
+                          as T;
+                }
 
-                    return state;
-                  },
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -6047,20 +5543,7 @@ class $$CartItemsTableTableManager
       );
 }
 
-typedef $$CartItemsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $CartItemsTable,
-      CartItem,
-      $$CartItemsTableFilterComposer,
-      $$CartItemsTableOrderingComposer,
-      $$CartItemsTableAnnotationComposer,
-      $$CartItemsTableCreateCompanionBuilder,
-      $$CartItemsTableUpdateCompanionBuilder,
-      (CartItem, $$CartItemsTableReferences),
-      CartItem,
-      PrefetchHooks Function({bool cartId, bool itemId})
-    >;
+typedef $$CartItemsTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $CartItemsTable, CartItem, $$CartItemsTableFilterComposer, $$CartItemsTableOrderingComposer, $$CartItemsTableAnnotationComposer, $$CartItemsTableCreateCompanionBuilder, $$CartItemsTableUpdateCompanionBuilder, (CartItem, $$CartItemsTableReferences), CartItem, PrefetchHooks Function({bool cartId, bool itemId})>;
 typedef $$SaleHistoriesTableCreateCompanionBuilder =
     SaleHistoriesCompanion Function({
       Value<int> id,
@@ -6076,8 +5559,7 @@ typedef $$SaleHistoriesTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-final class $$SaleHistoriesTableReferences
-    extends BaseReferences<_$AppDatabase, $SaleHistoriesTable, SaleHistory> {
+final class $$SaleHistoriesTableReferences extends BaseReferences<_$AppDatabase, $SaleHistoriesTable, SaleHistory> {
   $$SaleHistoriesTableReferences(
     super.$_db,
     super.$_table,
@@ -6103,8 +5585,7 @@ final class $$SaleHistoriesTableReferences
   }
 }
 
-class $$SaleHistoriesTableFilterComposer
-    extends Composer<_$AppDatabase, $SaleHistoriesTable> {
+class $$SaleHistoriesTableFilterComposer extends Composer<_$AppDatabase, $SaleHistoriesTable> {
   $$SaleHistoriesTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -6143,16 +5624,14 @@ class $$SaleHistoriesTableFilterComposer
             $table: $db.carts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$SaleHistoriesTableOrderingComposer
-    extends Composer<_$AppDatabase, $SaleHistoriesTable> {
+class $$SaleHistoriesTableOrderingComposer extends Composer<_$AppDatabase, $SaleHistoriesTable> {
   $$SaleHistoriesTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -6191,16 +5670,14 @@ class $$SaleHistoriesTableOrderingComposer
             $table: $db.carts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$SaleHistoriesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SaleHistoriesTable> {
+class $$SaleHistoriesTableAnnotationComposer extends Composer<_$AppDatabase, $SaleHistoriesTable> {
   $$SaleHistoriesTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -6208,14 +5685,11 @@ class $$SaleHistoriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<double> get total =>
-      $composableBuilder(column: $table.total, builder: (column) => column);
+  GeneratedColumn<double> get total => $composableBuilder(column: $table.total, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   $$CartsTableAnnotationComposer get cartId {
     final $$CartsTableAnnotationComposer composer = $composerBuilder(
@@ -6233,40 +5707,22 @@ class $$SaleHistoriesTableAnnotationComposer
             $table: $db.carts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$SaleHistoriesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $SaleHistoriesTable,
-          SaleHistory,
-          $$SaleHistoriesTableFilterComposer,
-          $$SaleHistoriesTableOrderingComposer,
-          $$SaleHistoriesTableAnnotationComposer,
-          $$SaleHistoriesTableCreateCompanionBuilder,
-          $$SaleHistoriesTableUpdateCompanionBuilder,
-          (SaleHistory, $$SaleHistoriesTableReferences),
-          SaleHistory,
-          PrefetchHooks Function({bool cartId})
-        > {
+class $$SaleHistoriesTableTableManager extends RootTableManager<_$AppDatabase, $SaleHistoriesTable, SaleHistory, $$SaleHistoriesTableFilterComposer, $$SaleHistoriesTableOrderingComposer, $$SaleHistoriesTableAnnotationComposer, $$SaleHistoriesTableCreateCompanionBuilder, $$SaleHistoriesTableUpdateCompanionBuilder, (SaleHistory, $$SaleHistoriesTableReferences), SaleHistory, PrefetchHooks Function({bool cartId})> {
   $$SaleHistoriesTableTableManager(_$AppDatabase db, $SaleHistoriesTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$SaleHistoriesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$SaleHistoriesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$SaleHistoriesTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$SaleHistoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$SaleHistoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$SaleHistoriesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -6303,38 +5759,20 @@ class $$SaleHistoriesTableTableManager
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (cartId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.cartId,
-                                referencedTable: $$SaleHistoriesTableReferences
-                                    ._cartIdTable(db),
-                                referencedColumn: $$SaleHistoriesTableReferences
-                                    ._cartIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+              addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                if (cartId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.cartId,
+                            referencedTable: $$SaleHistoriesTableReferences._cartIdTable(db),
+                            referencedColumn: $$SaleHistoriesTableReferences._cartIdTable(db).id,
+                          )
+                          as T;
+                }
 
-                    return state;
-                  },
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -6344,20 +5782,7 @@ class $$SaleHistoriesTableTableManager
       );
 }
 
-typedef $$SaleHistoriesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $SaleHistoriesTable,
-      SaleHistory,
-      $$SaleHistoriesTableFilterComposer,
-      $$SaleHistoriesTableOrderingComposer,
-      $$SaleHistoriesTableAnnotationComposer,
-      $$SaleHistoriesTableCreateCompanionBuilder,
-      $$SaleHistoriesTableUpdateCompanionBuilder,
-      (SaleHistory, $$SaleHistoriesTableReferences),
-      SaleHistory,
-      PrefetchHooks Function({bool cartId})
-    >;
+typedef $$SaleHistoriesTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $SaleHistoriesTable, SaleHistory, $$SaleHistoriesTableFilterComposer, $$SaleHistoriesTableOrderingComposer, $$SaleHistoriesTableAnnotationComposer, $$SaleHistoriesTableCreateCompanionBuilder, $$SaleHistoriesTableUpdateCompanionBuilder, (SaleHistory, $$SaleHistoriesTableReferences), SaleHistory, PrefetchHooks Function({bool cartId})>;
 typedef $$StocksTableCreateCompanionBuilder =
     StocksCompanion Function({
       Value<int> id,
@@ -6373,12 +5798,10 @@ typedef $$StocksTableUpdateCompanionBuilder =
       Value<double> quantity,
     });
 
-final class $$StocksTableReferences
-    extends BaseReferences<_$AppDatabase, $StocksTable, Stock> {
+final class $$StocksTableReferences extends BaseReferences<_$AppDatabase, $StocksTable, Stock> {
   $$StocksTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static $ItemsTable _itemIdTable(_$AppDatabase db) =>
-      db.items.createAlias($_aliasNameGenerator(db.stocks.itemId, db.items.id));
+  static $ItemsTable _itemIdTable(_$AppDatabase db) => db.items.createAlias($_aliasNameGenerator(db.stocks.itemId, db.items.id));
 
   $$ItemsTableProcessedTableManager get itemId {
     final $_column = $_itemColumn<int>('item_id')!;
@@ -6395,8 +5818,7 @@ final class $$StocksTableReferences
   }
 }
 
-class $$StocksTableFilterComposer
-    extends Composer<_$AppDatabase, $StocksTable> {
+class $$StocksTableFilterComposer extends Composer<_$AppDatabase, $StocksTable> {
   $$StocksTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -6409,8 +5831,7 @@ class $$StocksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String>
-  get location => $composableBuilder(
+  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String> get location => $composableBuilder(
     column: $table.location,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -6436,16 +5857,14 @@ class $$StocksTableFilterComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$StocksTableOrderingComposer
-    extends Composer<_$AppDatabase, $StocksTable> {
+class $$StocksTableOrderingComposer extends Composer<_$AppDatabase, $StocksTable> {
   $$StocksTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -6484,16 +5903,14 @@ class $$StocksTableOrderingComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$StocksTableAnnotationComposer
-    extends Composer<_$AppDatabase, $StocksTable> {
+class $$StocksTableAnnotationComposer extends Composer<_$AppDatabase, $StocksTable> {
   $$StocksTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -6501,14 +5918,11 @@ class $$StocksTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<LocationsEnum, String> get location =>
-      $composableBuilder(column: $table.location, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<LocationsEnum, String> get location => $composableBuilder(column: $table.location, builder: (column) => column);
 
-  GeneratedColumn<double> get quantity =>
-      $composableBuilder(column: $table.quantity, builder: (column) => column);
+  GeneratedColumn<double> get quantity => $composableBuilder(column: $table.quantity, builder: (column) => column);
 
   $$ItemsTableAnnotationComposer get itemId {
     final $$ItemsTableAnnotationComposer composer = $composerBuilder(
@@ -6526,40 +5940,22 @@ class $$StocksTableAnnotationComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$StocksTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $StocksTable,
-          Stock,
-          $$StocksTableFilterComposer,
-          $$StocksTableOrderingComposer,
-          $$StocksTableAnnotationComposer,
-          $$StocksTableCreateCompanionBuilder,
-          $$StocksTableUpdateCompanionBuilder,
-          (Stock, $$StocksTableReferences),
-          Stock,
-          PrefetchHooks Function({bool itemId})
-        > {
+class $$StocksTableTableManager extends RootTableManager<_$AppDatabase, $StocksTable, Stock, $$StocksTableFilterComposer, $$StocksTableOrderingComposer, $$StocksTableAnnotationComposer, $$StocksTableCreateCompanionBuilder, $$StocksTableUpdateCompanionBuilder, (Stock, $$StocksTableReferences), Stock, PrefetchHooks Function({bool itemId})> {
   $$StocksTableTableManager(_$AppDatabase db, $StocksTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$StocksTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$StocksTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$StocksTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$StocksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$StocksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$StocksTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -6586,46 +5982,27 @@ class $$StocksTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$StocksTableReferences(db, table, e)),
+                (e) => (e.readTable(table), $$StocksTableReferences(db, table, e)),
               )
               .toList(),
           prefetchHooksCallback: ({itemId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (itemId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.itemId,
-                                referencedTable: $$StocksTableReferences
-                                    ._itemIdTable(db),
-                                referencedColumn: $$StocksTableReferences
-                                    ._itemIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+              addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                if (itemId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.itemId,
+                            referencedTable: $$StocksTableReferences._itemIdTable(db),
+                            referencedColumn: $$StocksTableReferences._itemIdTable(db).id,
+                          )
+                          as T;
+                }
 
-                    return state;
-                  },
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -6635,20 +6012,7 @@ class $$StocksTableTableManager
       );
 }
 
-typedef $$StocksTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $StocksTable,
-      Stock,
-      $$StocksTableFilterComposer,
-      $$StocksTableOrderingComposer,
-      $$StocksTableAnnotationComposer,
-      $$StocksTableCreateCompanionBuilder,
-      $$StocksTableUpdateCompanionBuilder,
-      (Stock, $$StocksTableReferences),
-      Stock,
-      PrefetchHooks Function({bool itemId})
-    >;
+typedef $$StocksTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $StocksTable, Stock, $$StocksTableFilterComposer, $$StocksTableOrderingComposer, $$StocksTableAnnotationComposer, $$StocksTableCreateCompanionBuilder, $$StocksTableUpdateCompanionBuilder, (Stock, $$StocksTableReferences), Stock, PrefetchHooks Function({bool itemId})>;
 typedef $$TransfersTableCreateCompanionBuilder =
     TransfersCompanion Function({
       Value<int> id,
@@ -6670,8 +6034,7 @@ typedef $$TransfersTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-final class $$TransfersTableReferences
-    extends BaseReferences<_$AppDatabase, $TransfersTable, Transfer> {
+final class $$TransfersTableReferences extends BaseReferences<_$AppDatabase, $TransfersTable, Transfer> {
   $$TransfersTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $ItemsTable _itemIdTable(_$AppDatabase db) => db.items.createAlias(
@@ -6693,8 +6056,7 @@ final class $$TransfersTableReferences
   }
 }
 
-class $$TransfersTableFilterComposer
-    extends Composer<_$AppDatabase, $TransfersTable> {
+class $$TransfersTableFilterComposer extends Composer<_$AppDatabase, $TransfersTable> {
   $$TransfersTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -6707,14 +6069,12 @@ class $$TransfersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String>
-  get fromLocation => $composableBuilder(
+  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String> get fromLocation => $composableBuilder(
     column: $table.fromLocation,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String>
-  get toLocation => $composableBuilder(
+  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String> get toLocation => $composableBuilder(
     column: $table.toLocation,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -6750,16 +6110,14 @@ class $$TransfersTableFilterComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$TransfersTableOrderingComposer
-    extends Composer<_$AppDatabase, $TransfersTable> {
+class $$TransfersTableOrderingComposer extends Composer<_$AppDatabase, $TransfersTable> {
   $$TransfersTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -6813,16 +6171,14 @@ class $$TransfersTableOrderingComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$TransfersTableAnnotationComposer
-    extends Composer<_$AppDatabase, $TransfersTable> {
+class $$TransfersTableAnnotationComposer extends Composer<_$AppDatabase, $TransfersTable> {
   $$TransfersTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -6830,29 +6186,23 @@ class $$TransfersTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<LocationsEnum, String> get fromLocation =>
-      $composableBuilder(
-        column: $table.fromLocation,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<LocationsEnum, String> get fromLocation => $composableBuilder(
+    column: $table.fromLocation,
+    builder: (column) => column,
+  );
 
-  GeneratedColumnWithTypeConverter<LocationsEnum, String> get toLocation =>
-      $composableBuilder(
-        column: $table.toLocation,
-        builder: (column) => column,
-      );
+  GeneratedColumnWithTypeConverter<LocationsEnum, String> get toLocation => $composableBuilder(
+    column: $table.toLocation,
+    builder: (column) => column,
+  );
 
-  GeneratedColumn<double> get quantity =>
-      $composableBuilder(column: $table.quantity, builder: (column) => column);
+  GeneratedColumn<double> get quantity => $composableBuilder(column: $table.quantity, builder: (column) => column);
 
-  GeneratedColumn<String> get note =>
-      $composableBuilder(column: $table.note, builder: (column) => column);
+  GeneratedColumn<String> get note => $composableBuilder(column: $table.note, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   $$ItemsTableAnnotationComposer get itemId {
     final $$ItemsTableAnnotationComposer composer = $composerBuilder(
@@ -6870,40 +6220,22 @@ class $$TransfersTableAnnotationComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$TransfersTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $TransfersTable,
-          Transfer,
-          $$TransfersTableFilterComposer,
-          $$TransfersTableOrderingComposer,
-          $$TransfersTableAnnotationComposer,
-          $$TransfersTableCreateCompanionBuilder,
-          $$TransfersTableUpdateCompanionBuilder,
-          (Transfer, $$TransfersTableReferences),
-          Transfer,
-          PrefetchHooks Function({bool itemId})
-        > {
+class $$TransfersTableTableManager extends RootTableManager<_$AppDatabase, $TransfersTable, Transfer, $$TransfersTableFilterComposer, $$TransfersTableOrderingComposer, $$TransfersTableAnnotationComposer, $$TransfersTableCreateCompanionBuilder, $$TransfersTableUpdateCompanionBuilder, (Transfer, $$TransfersTableReferences), Transfer, PrefetchHooks Function({bool itemId})> {
   $$TransfersTableTableManager(_$AppDatabase db, $TransfersTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$TransfersTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$TransfersTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$TransfersTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$TransfersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$TransfersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$TransfersTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -6952,38 +6284,20 @@ class $$TransfersTableTableManager
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (itemId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.itemId,
-                                referencedTable: $$TransfersTableReferences
-                                    ._itemIdTable(db),
-                                referencedColumn: $$TransfersTableReferences
-                                    ._itemIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+              addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                if (itemId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.itemId,
+                            referencedTable: $$TransfersTableReferences._itemIdTable(db),
+                            referencedColumn: $$TransfersTableReferences._itemIdTable(db).id,
+                          )
+                          as T;
+                }
 
-                    return state;
-                  },
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -6993,20 +6307,7 @@ class $$TransfersTableTableManager
       );
 }
 
-typedef $$TransfersTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $TransfersTable,
-      Transfer,
-      $$TransfersTableFilterComposer,
-      $$TransfersTableOrderingComposer,
-      $$TransfersTableAnnotationComposer,
-      $$TransfersTableCreateCompanionBuilder,
-      $$TransfersTableUpdateCompanionBuilder,
-      (Transfer, $$TransfersTableReferences),
-      Transfer,
-      PrefetchHooks Function({bool itemId})
-    >;
+typedef $$TransfersTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $TransfersTable, Transfer, $$TransfersTableFilterComposer, $$TransfersTableOrderingComposer, $$TransfersTableAnnotationComposer, $$TransfersTableCreateCompanionBuilder, $$TransfersTableUpdateCompanionBuilder, (Transfer, $$TransfersTableReferences), Transfer, PrefetchHooks Function({bool itemId})>;
 typedef $$ProcurementsTableCreateCompanionBuilder =
     ProcurementsCompanion Function({
       Value<int> id,
@@ -7026,12 +6327,10 @@ typedef $$ProcurementsTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-final class $$ProcurementsTableReferences
-    extends BaseReferences<_$AppDatabase, $ProcurementsTable, Procurement> {
+final class $$ProcurementsTableReferences extends BaseReferences<_$AppDatabase, $ProcurementsTable, Procurement> {
   $$ProcurementsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$ProcurementItemsTable, List<ProcurementItem>>
-  _procurementItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+  static MultiTypedResultKey<$ProcurementItemsTable, List<ProcurementItem>> _procurementItemsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.procurementItems,
     aliasName: $_aliasNameGenerator(
       db.procurements.id,
@@ -7054,8 +6353,7 @@ final class $$ProcurementsTableReferences
   }
 }
 
-class $$ProcurementsTableFilterComposer
-    extends Composer<_$AppDatabase, $ProcurementsTable> {
+class $$ProcurementsTableFilterComposer extends Composer<_$AppDatabase, $ProcurementsTable> {
   $$ProcurementsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -7078,8 +6376,7 @@ class $$ProcurementsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String>
-  get location => $composableBuilder(
+  ColumnWithTypeConverterFilters<LocationsEnum, LocationsEnum, String> get location => $composableBuilder(
     column: $table.location,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
@@ -7112,16 +6409,14 @@ class $$ProcurementsTableFilterComposer
             $table: $db.procurementItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$ProcurementsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ProcurementsTable> {
+class $$ProcurementsTableOrderingComposer extends Composer<_$AppDatabase, $ProcurementsTable> {
   $$ProcurementsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -7160,8 +6455,7 @@ class $$ProcurementsTableOrderingComposer
   );
 }
 
-class $$ProcurementsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ProcurementsTable> {
+class $$ProcurementsTableAnnotationComposer extends Composer<_$AppDatabase, $ProcurementsTable> {
   $$ProcurementsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -7169,8 +6463,7 @@ class $$ProcurementsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get supplierName => $composableBuilder(
     column: $table.supplierName,
@@ -7182,14 +6475,11 @@ class $$ProcurementsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<LocationsEnum, String> get location =>
-      $composableBuilder(column: $table.location, builder: (column) => column);
+  GeneratedColumnWithTypeConverter<LocationsEnum, String> get location => $composableBuilder(column: $table.location, builder: (column) => column);
 
-  GeneratedColumn<String> get note =>
-      $composableBuilder(column: $table.note, builder: (column) => column);
+  GeneratedColumn<String> get note => $composableBuilder(column: $table.note, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   Expression<T> procurementItemsRefs<T extends Object>(
     Expression<T> Function($$ProcurementItemsTableAnnotationComposer a) f,
@@ -7209,40 +6499,22 @@ class $$ProcurementsTableAnnotationComposer
             $table: $db.procurementItems,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 }
 
-class $$ProcurementsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $ProcurementsTable,
-          Procurement,
-          $$ProcurementsTableFilterComposer,
-          $$ProcurementsTableOrderingComposer,
-          $$ProcurementsTableAnnotationComposer,
-          $$ProcurementsTableCreateCompanionBuilder,
-          $$ProcurementsTableUpdateCompanionBuilder,
-          (Procurement, $$ProcurementsTableReferences),
-          Procurement,
-          PrefetchHooks Function({bool procurementItemsRefs})
-        > {
+class $$ProcurementsTableTableManager extends RootTableManager<_$AppDatabase, $ProcurementsTable, Procurement, $$ProcurementsTableFilterComposer, $$ProcurementsTableOrderingComposer, $$ProcurementsTableAnnotationComposer, $$ProcurementsTableCreateCompanionBuilder, $$ProcurementsTableUpdateCompanionBuilder, (Procurement, $$ProcurementsTableReferences), Procurement, PrefetchHooks Function({bool procurementItemsRefs})> {
   $$ProcurementsTableTableManager(_$AppDatabase db, $ProcurementsTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ProcurementsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ProcurementsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ProcurementsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ProcurementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ProcurementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ProcurementsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -7293,24 +6565,17 @@ class $$ProcurementsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (procurementItemsRefs)
-                    await $_getPrefetchedData<
-                      Procurement,
-                      $ProcurementsTable,
-                      ProcurementItem
-                    >(
+                    await $_getPrefetchedData<Procurement, $ProcurementsTable, ProcurementItem>(
                       currentTable: table,
-                      referencedTable: $$ProcurementsTableReferences
-                          ._procurementItemsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ProcurementsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).procurementItemsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.procurementId == item.id,
-                          ),
+                      referencedTable: $$ProcurementsTableReferences._procurementItemsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$ProcurementsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).procurementItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) => referencedItems.where(
+                        (e) => e.procurementId == item.id,
+                      ),
                       typedResults: items,
                     ),
                 ];
@@ -7321,20 +6586,7 @@ class $$ProcurementsTableTableManager
       );
 }
 
-typedef $$ProcurementsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $ProcurementsTable,
-      Procurement,
-      $$ProcurementsTableFilterComposer,
-      $$ProcurementsTableOrderingComposer,
-      $$ProcurementsTableAnnotationComposer,
-      $$ProcurementsTableCreateCompanionBuilder,
-      $$ProcurementsTableUpdateCompanionBuilder,
-      (Procurement, $$ProcurementsTableReferences),
-      Procurement,
-      PrefetchHooks Function({bool procurementItemsRefs})
-    >;
+typedef $$ProcurementsTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $ProcurementsTable, Procurement, $$ProcurementsTableFilterComposer, $$ProcurementsTableOrderingComposer, $$ProcurementsTableAnnotationComposer, $$ProcurementsTableCreateCompanionBuilder, $$ProcurementsTableUpdateCompanionBuilder, (Procurement, $$ProcurementsTableReferences), Procurement, PrefetchHooks Function({bool procurementItemsRefs})>;
 typedef $$ProcurementItemsTableCreateCompanionBuilder =
     ProcurementItemsCompanion Function({
       Value<int> id,
@@ -7352,22 +6604,19 @@ typedef $$ProcurementItemsTableUpdateCompanionBuilder =
       Value<double> purchasePrice,
     });
 
-final class $$ProcurementItemsTableReferences
-    extends
-        BaseReferences<_$AppDatabase, $ProcurementItemsTable, ProcurementItem> {
+final class $$ProcurementItemsTableReferences extends BaseReferences<_$AppDatabase, $ProcurementItemsTable, ProcurementItem> {
   $$ProcurementItemsTableReferences(
     super.$_db,
     super.$_table,
     super.$_typedResult,
   );
 
-  static $ProcurementsTable _procurementIdTable(_$AppDatabase db) =>
-      db.procurements.createAlias(
-        $_aliasNameGenerator(
-          db.procurementItems.procurementId,
-          db.procurements.id,
-        ),
-      );
+  static $ProcurementsTable _procurementIdTable(_$AppDatabase db) => db.procurements.createAlias(
+    $_aliasNameGenerator(
+      db.procurementItems.procurementId,
+      db.procurements.id,
+    ),
+  );
 
   $$ProcurementsTableProcessedTableManager get procurementId {
     final $_column = $_itemColumn<int>('procurement_id')!;
@@ -7402,8 +6651,7 @@ final class $$ProcurementItemsTableReferences
   }
 }
 
-class $$ProcurementItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $ProcurementItemsTable> {
+class $$ProcurementItemsTableFilterComposer extends Composer<_$AppDatabase, $ProcurementItemsTable> {
   $$ProcurementItemsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -7442,8 +6690,7 @@ class $$ProcurementItemsTableFilterComposer
             $table: $db.procurements,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -7465,16 +6712,14 @@ class $$ProcurementItemsTableFilterComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ProcurementItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ProcurementItemsTable> {
+class $$ProcurementItemsTableOrderingComposer extends Composer<_$AppDatabase, $ProcurementItemsTable> {
   $$ProcurementItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -7513,8 +6758,7 @@ class $$ProcurementItemsTableOrderingComposer
             $table: $db.procurements,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -7536,16 +6780,14 @@ class $$ProcurementItemsTableOrderingComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ProcurementItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ProcurementItemsTable> {
+class $$ProcurementItemsTableAnnotationComposer extends Composer<_$AppDatabase, $ProcurementItemsTable> {
   $$ProcurementItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -7553,11 +6795,9 @@ class $$ProcurementItemsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<double> get quantity =>
-      $composableBuilder(column: $table.quantity, builder: (column) => column);
+  GeneratedColumn<double> get quantity => $composableBuilder(column: $table.quantity, builder: (column) => column);
 
   GeneratedColumn<double> get purchasePrice => $composableBuilder(
     column: $table.purchasePrice,
@@ -7580,8 +6820,7 @@ class $$ProcurementItemsTableAnnotationComposer
             $table: $db.procurements,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -7603,29 +6842,14 @@ class $$ProcurementItemsTableAnnotationComposer
             $table: $db.items,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 }
 
-class $$ProcurementItemsTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $ProcurementItemsTable,
-          ProcurementItem,
-          $$ProcurementItemsTableFilterComposer,
-          $$ProcurementItemsTableOrderingComposer,
-          $$ProcurementItemsTableAnnotationComposer,
-          $$ProcurementItemsTableCreateCompanionBuilder,
-          $$ProcurementItemsTableUpdateCompanionBuilder,
-          (ProcurementItem, $$ProcurementItemsTableReferences),
-          ProcurementItem,
-          PrefetchHooks Function({bool procurementId, bool itemId})
-        > {
+class $$ProcurementItemsTableTableManager extends RootTableManager<_$AppDatabase, $ProcurementItemsTable, ProcurementItem, $$ProcurementItemsTableFilterComposer, $$ProcurementItemsTableOrderingComposer, $$ProcurementItemsTableAnnotationComposer, $$ProcurementItemsTableCreateCompanionBuilder, $$ProcurementItemsTableUpdateCompanionBuilder, (ProcurementItem, $$ProcurementItemsTableReferences), ProcurementItem, PrefetchHooks Function({bool procurementId, bool itemId})> {
   $$ProcurementItemsTableTableManager(
     _$AppDatabase db,
     $ProcurementItemsTable table,
@@ -7633,12 +6857,9 @@ class $$ProcurementItemsTableTableManager
         TableManagerState(
           db: db,
           table: table,
-          createFilteringComposer: () =>
-              $$ProcurementItemsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$ProcurementItemsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$ProcurementItemsTableAnnotationComposer($db: db, $table: table),
+          createFilteringComposer: () => $$ProcurementItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ProcurementItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ProcurementItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -7679,55 +6900,30 @@ class $$ProcurementItemsTableTableManager
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (procurementId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.procurementId,
-                                referencedTable:
-                                    $$ProcurementItemsTableReferences
-                                        ._procurementIdTable(db),
-                                referencedColumn:
-                                    $$ProcurementItemsTableReferences
-                                        ._procurementIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
-                    if (itemId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.itemId,
-                                referencedTable:
-                                    $$ProcurementItemsTableReferences
-                                        ._itemIdTable(db),
-                                referencedColumn:
-                                    $$ProcurementItemsTableReferences
-                                        ._itemIdTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
+              addJoins: <T extends TableManagerState<dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic, dynamic>>(state) {
+                if (procurementId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.procurementId,
+                            referencedTable: $$ProcurementItemsTableReferences._procurementIdTable(db),
+                            referencedColumn: $$ProcurementItemsTableReferences._procurementIdTable(db).id,
+                          )
+                          as T;
+                }
+                if (itemId) {
+                  state =
+                      state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.itemId,
+                            referencedTable: $$ProcurementItemsTableReferences._itemIdTable(db),
+                            referencedColumn: $$ProcurementItemsTableReferences._itemIdTable(db).id,
+                          )
+                          as T;
+                }
 
-                    return state;
-                  },
+                return state;
+              },
               getPrefetchedDataCallback: (items) async {
                 return [];
               },
@@ -7737,44 +6933,20 @@ class $$ProcurementItemsTableTableManager
       );
 }
 
-typedef $$ProcurementItemsTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $ProcurementItemsTable,
-      ProcurementItem,
-      $$ProcurementItemsTableFilterComposer,
-      $$ProcurementItemsTableOrderingComposer,
-      $$ProcurementItemsTableAnnotationComposer,
-      $$ProcurementItemsTableCreateCompanionBuilder,
-      $$ProcurementItemsTableUpdateCompanionBuilder,
-      (ProcurementItem, $$ProcurementItemsTableReferences),
-      ProcurementItem,
-      PrefetchHooks Function({bool procurementId, bool itemId})
-    >;
+typedef $$ProcurementItemsTableProcessedTableManager = ProcessedTableManager<_$AppDatabase, $ProcurementItemsTable, ProcurementItem, $$ProcurementItemsTableFilterComposer, $$ProcurementItemsTableOrderingComposer, $$ProcurementItemsTableAnnotationComposer, $$ProcurementItemsTableCreateCompanionBuilder, $$ProcurementItemsTableUpdateCompanionBuilder, (ProcurementItem, $$ProcurementItemsTableReferences), ProcurementItem, PrefetchHooks Function({bool procurementId, bool itemId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$UnitsTableTableManager get units =>
-      $$UnitsTableTableManager(_db, _db.units);
-  $$ItemsTableTableManager get items =>
-      $$ItemsTableTableManager(_db, _db.items);
-  $$CategoryColorsTableTableManager get categoryColors =>
-      $$CategoryColorsTableTableManager(_db, _db.categoryColors);
-  $$ItemCategoriesTableTableManager get itemCategories =>
-      $$ItemCategoriesTableTableManager(_db, _db.itemCategories);
-  $$CartsTableTableManager get carts =>
-      $$CartsTableTableManager(_db, _db.carts);
-  $$CartItemsTableTableManager get cartItems =>
-      $$CartItemsTableTableManager(_db, _db.cartItems);
-  $$SaleHistoriesTableTableManager get saleHistories =>
-      $$SaleHistoriesTableTableManager(_db, _db.saleHistories);
-  $$StocksTableTableManager get stocks =>
-      $$StocksTableTableManager(_db, _db.stocks);
-  $$TransfersTableTableManager get transfers =>
-      $$TransfersTableTableManager(_db, _db.transfers);
-  $$ProcurementsTableTableManager get procurements =>
-      $$ProcurementsTableTableManager(_db, _db.procurements);
-  $$ProcurementItemsTableTableManager get procurementItems =>
-      $$ProcurementItemsTableTableManager(_db, _db.procurementItems);
+  $$UnitsTableTableManager get units => $$UnitsTableTableManager(_db, _db.units);
+  $$ItemsTableTableManager get items => $$ItemsTableTableManager(_db, _db.items);
+  $$CategoryColorsTableTableManager get categoryColors => $$CategoryColorsTableTableManager(_db, _db.categoryColors);
+  $$ItemCategoriesTableTableManager get itemCategories => $$ItemCategoriesTableTableManager(_db, _db.itemCategories);
+  $$CartsTableTableManager get carts => $$CartsTableTableManager(_db, _db.carts);
+  $$CartItemsTableTableManager get cartItems => $$CartItemsTableTableManager(_db, _db.cartItems);
+  $$SaleHistoriesTableTableManager get saleHistories => $$SaleHistoriesTableTableManager(_db, _db.saleHistories);
+  $$StocksTableTableManager get stocks => $$StocksTableTableManager(_db, _db.stocks);
+  $$TransfersTableTableManager get transfers => $$TransfersTableTableManager(_db, _db.transfers);
+  $$ProcurementsTableTableManager get procurements => $$ProcurementsTableTableManager(_db, _db.procurements);
+  $$ProcurementItemsTableTableManager get procurementItems => $$ProcurementItemsTableTableManager(_db, _db.procurementItems);
 }

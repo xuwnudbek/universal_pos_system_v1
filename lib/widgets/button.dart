@@ -35,7 +35,7 @@ class _ButtonState extends State<Button> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         ),
         onPressed: widget.onPressed,
         child: Padding(

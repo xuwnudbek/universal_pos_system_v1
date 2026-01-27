@@ -6,7 +6,6 @@ class Items extends Table {
   TextColumn get name => text()();
 
   TextColumn get barcode => text()();
-  RealColumn get price => real()();
   IntColumn get unitId => integer().references(Units, #id)();
 
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();

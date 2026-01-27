@@ -1,5 +1,5 @@
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
-import 'package:universal_pos_system_v1/data/local/dao/units/units_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/units/units_dao.dart';
 
 class UnitsRepository {
   final UnitsDao unitsDao;

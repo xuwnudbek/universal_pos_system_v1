@@ -78,7 +78,17 @@ class _AddCategoryModalState extends State<AddCategoryModal> {
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      title: Text(widget.category == null ? "Yangi kategoriya" : "Kategoriya tahrirlash"),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(widget.category == null ? "Yangi kategoriya" : "Kategoriya tahrirlash"),
+          ),
+          IconButton(
+            icon: Icon(LucideIcons.x),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:universal_pos_system_v1/data/models/items_full.dart';
+import 'package:universal_pos_system_v1/data/models/procurement_full.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 
-class DeleteItemModal extends StatelessWidget {
-  const DeleteItemModal({
+class DeleteProcurementModal extends StatelessWidget {
+  const DeleteProcurementModal({
     super.key,
-    required this.item,
+    required this.procurement,
   });
 
-  final ItemFull item;
+  final ProcurementFull procurement;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class DeleteItemModal extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              "Mahsulotni o'chirish",
+              "Olib kelishni o'chirish",
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -39,7 +38,7 @@ class DeleteItemModal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Ushbu mahsulotni o'chirishni xohlaysizmi?",
+            "Ushbu olib kelishni o'chirishni xohlaysizmi?",
             style: textTheme.bodyLarge,
           ),
           SizedBox(height: AppSpacing.md),
@@ -58,7 +57,7 @@ class DeleteItemModal extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      "Nomi:",
+                      "Yetkazib beruvchi:",
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -66,7 +65,7 @@ class DeleteItemModal extends StatelessWidget {
                     SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        item.name,
+                        procurement.supplierName,
                         style: textTheme.bodyMedium,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -77,14 +76,14 @@ class DeleteItemModal extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      "Barcode:",
+                      "Sana:",
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(width: AppSpacing.sm),
                     Text(
-                      item.barcode,
+                      '${procurement.procurementDate.day}/${procurement.procurementDate.month}/${procurement.procurementDate.year}',
                       style: textTheme.bodyMedium,
                     ),
                   ],
@@ -93,14 +92,14 @@ class DeleteItemModal extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      "Kategoriya:",
+                      "Joylashgan:",
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(width: AppSpacing.sm),
                     Text(
-                      item.category?.name ?? "N/A",
+                      procurement.location.name == 'warehouse' ? 'Ombor' : 'Do\'kon',
                       style: textTheme.bodyMedium,
                     ),
                   ],
@@ -139,7 +138,7 @@ class DeleteItemModal extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => appRouter.pop(),
+          onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Bekor qilish'),
         ),
         Button(

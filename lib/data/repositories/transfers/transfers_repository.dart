@@ -1,5 +1,5 @@
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
-import 'package:universal_pos_system_v1/data/local/dao/transfers/transfers_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/transfers/transfers_dao.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
 
 class TransfersRepository {

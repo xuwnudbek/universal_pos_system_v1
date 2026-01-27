@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
+import 'package:universal_pos_system_v1/data/models/procurement_full.dart';
 import 'package:universal_pos_system_v1/data/repositories/procurements/procurement_items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/procurements/procurements_repository.dart';
-
-class ProcurementWithItems {
-  final Procurement procurement;
-  final List<ProcurementItem> items;
-
-  ProcurementWithItems({
-    required this.procurement,
-    required this.items,
-  });
-}
+import 'package:universal_pos_system_v1/models/procurements/procurement_item_data.dart';
 
 class ProcurementsProvider extends ChangeNotifier {
   final ProcurementsRepository procurementsRepository;
@@ -28,8 +20,8 @@ class ProcurementsProvider extends ChangeNotifier {
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
-  List<ProcurementWithItems> _procurements = [];
-  List<ProcurementWithItems> get procurements => _procurements;
+  List<ProcurementFull> _procurements = [];
+  List<ProcurementFull> get procurements => _procurements;
 
   Future<void> _initialize() async {
     try {
@@ -42,20 +34,15 @@ class ProcurementsProvider extends ChangeNotifier {
   }
 
   Future<void> loadProcurements() async {
-    final allProcurements = await procurementsRepository.getAll();
-    _procurements = [];
+    try {
+      final allProcurements = await procurementsRepository.getAll();
 
-    for (var procurement in allProcurements) {
-      final items = await procurementItemsRepository.getByProcurementId(procurement.id);
-      _procurements.add(
-        ProcurementWithItems(
-          procurement: procurement,
-          items: items,
-        ),
-      );
+      _procurements = allProcurements;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading procurements: $e');
+      rethrow;
     }
-
-    notifyListeners();
   }
 
   Future<void> addProcurement({
@@ -100,16 +87,4 @@ class ProcurementsProvider extends ChangeNotifier {
       rethrow;
     }
   }
-}
-
-class ProcurementItemData {
-  final int itemId;
-  final double quantity;
-  final double purchasePrice;
-
-  ProcurementItemData({
-    required this.itemId,
-    required this.quantity,
-    required this.purchasePrice,
-  });
 }

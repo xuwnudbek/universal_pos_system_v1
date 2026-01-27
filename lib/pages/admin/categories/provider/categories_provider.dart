@@ -31,29 +31,48 @@ class CategoriesProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
-    await getAllCategoryColors();
-    await getAllCategories();
+    try {
+      await getAllCategoryColors();
+      await getAllCategories();
 
-    _isInitialized = true;
-    notifyListeners();
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error initializing categories: $e');
+    }
   }
 
   Future<void> getAllCategoryColors() async {
-    var res = await _categoryColorsRepo.getAll();
-    this._colors = res;
+    try {
+      var res = await _categoryColorsRepo.getAll();
+      this._colors = res;
 
-    notifyListeners();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error getting category colors: $e');
+      rethrow;
+    }
   }
 
   Future<void> getAllCategories() async {
-    this._categories = await _itemCategoriesRepo.getAll();
+    try {
+      this._categories = await _itemCategoriesRepo.getAll();
 
-    notifyListeners();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error getting categories: $e');
+      rethrow;
+    }
   }
 
   Future<void> addCategory(String name, int? colorId) async {
-    await _itemCategoriesRepo.create(name, colorId);
-    await getAllCategories();
+    try {
+      await _itemCategoriesRepo.create(name, colorId);
+      await getAllCategories();
+    } catch (e) {
+      debugPrint('Error adding category: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateCategory(
@@ -61,13 +80,23 @@ class CategoriesProvider extends ChangeNotifier {
     String categoryName,
     int? colorId,
   ) async {
-    await _itemCategoriesRepo.update(categoryId, categoryName, colorId);
-    await getAllCategories();
+    try {
+      await _itemCategoriesRepo.update(categoryId, categoryName, colorId);
+      await getAllCategories();
+    } catch (e) {
+      debugPrint('Error updating category: $e');
+      rethrow;
+    }
   }
 
   Future<void> removeCategory(int categoryId) async {
-    await _itemCategoriesRepo.delete(categoryId);
+    try {
+      await _itemCategoriesRepo.delete(categoryId);
 
-    await getAllCategories();
+      await getAllCategories();
+    } catch (e) {
+      debugPrint('Error removing category: $e');
+      rethrow;
+    }
   }
 }

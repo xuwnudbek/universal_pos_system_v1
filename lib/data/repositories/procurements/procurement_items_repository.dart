@@ -1,18 +1,18 @@
-import 'package:universal_pos_system_v1/data/local/app_database.dart';
-import 'package:universal_pos_system_v1/data/local/dao/procurements/procurement_items_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/procurements/procurement_items_dao.dart';
+import 'package:universal_pos_system_v1/data/models/procurement_item_full.dart';
 
 class ProcurementItemsRepository {
   final ProcurementItemsDao procurementItemsDao;
 
   const ProcurementItemsRepository(this.procurementItemsDao);
 
-  Future<List<ProcurementItem>> getAll() => procurementItemsDao.getAll();
+  Future<List<ProcurementItemFull>> getAll() => procurementItemsDao.getAll();
 
-  Future<ProcurementItem?> getById(int id) => procurementItemsDao.getById(id);
+  Future<ProcurementItemFull?> getById(int id) => procurementItemsDao.getById(id);
 
-  Future<List<ProcurementItem>> getByProcurementId(int procurementId) => procurementItemsDao.getByProcurementId(procurementId);
+  Future<List<ProcurementItemFull>> getByProcurementId(int procurementId) => procurementItemsDao.getByProcurementId(procurementId);
 
-  Future<List<ProcurementItem>> getByItemId(int itemId) => procurementItemsDao.getByItemId(itemId);
+  Future<List<ProcurementItemFull>> getByItemId(int itemId) => procurementItemsDao.getByItemId(itemId);
 
   Future<int> create({
     required int procurementId,

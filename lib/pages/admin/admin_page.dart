@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_pos_system_v1/data/local/dao/stocks/stocks_dao.dart';
-import 'package:universal_pos_system_v1/data/local/dao/transfers/transfers_dao.dart';
-import 'package:universal_pos_system_v1/data/local/dao/units/units_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/procurements/procurement_items_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/procurements/procurements_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/stocks/stocks_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/transfers/transfers_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/units/units_dao.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/category_colors_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/procurements/procurement_items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/procurements/procurements_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/transfers/transfers_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/units/units_repository.dart';
 import 'sidebar/app_sidebar.dart' as admin_sidebar;
 
 import '../../data/local/app_database.dart';
-import '../../data/local/dao/colors/category_colors_dao.dart';
-import '../../data/local/dao/item_categories/item_categories_dao.dart';
-import '../../data/local/dao/items/items_dao.dart';
+import '../../data/local/daos/colors/category_colors_dao.dart';
+import '../../data/local/daos/item_categories/item_categories_dao.dart';
+import '../../data/local/daos/items/items_dao.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({
@@ -60,6 +64,14 @@ class AdminPage extends StatelessWidget {
           update: (_, db, _) => TransfersDao(db),
           lazy: true,
         ),
+        ProxyProvider<AppDatabase, ProcurementsDao>(
+          update: (_, db, _) => ProcurementsDao(db),
+          lazy: true,
+        ),
+        ProxyProvider<AppDatabase, ProcurementItemsDao>(
+          update: (_, db, _) => ProcurementItemsDao(db),
+          lazy: true,
+        ),
         // Repositories
         ProxyProvider<UnitsDao, UnitsRepository>(
           update: (_, dao, _) => UnitsRepository(dao),
@@ -83,6 +95,14 @@ class AdminPage extends StatelessWidget {
         ),
         ProxyProvider<TransfersDao, TransfersRepository>(
           update: (_, dao, _) => TransfersRepository(dao),
+          lazy: true,
+        ),
+        ProxyProvider2<ProcurementsDao, ProcurementItemsDao, ProcurementsRepository>(
+          update: (_, dao0, dao1, _) => ProcurementsRepository(dao0, dao1),
+          lazy: true,
+        ),
+        ProxyProvider<ProcurementItemsDao, ProcurementItemsRepository>(
+          update: (_, dao, _) => ProcurementItemsRepository(dao),
           lazy: true,
         ),
       ],

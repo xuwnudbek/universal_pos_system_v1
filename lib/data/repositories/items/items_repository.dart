@@ -1,7 +1,7 @@
-import '../../local/dao/colors/category_colors_dao.dart';
-import '../../local/dao/item_categories/item_categories_dao.dart';
-import '../../local/dao/items/items_dao.dart';
-import '../../local/dao/units/units_dao.dart';
+import '../../local/daos/colors/category_colors_dao.dart';
+import '../../local/daos/item_categories/item_categories_dao.dart';
+import '../../local/daos/items/items_dao.dart';
+import '../../local/daos/units/units_dao.dart';
 import '../../models/item_category_full.dart';
 import '../../models/items_full.dart';
 
@@ -50,20 +50,18 @@ class ItemsRepository {
 
   Future<int> create({
     required String name,
-    required double price,
     required String barcode,
     required int unitId,
     required int categoryId,
-  }) => itemsDao.insertItem(name, price, barcode, unitId, categoryId);
+  }) => itemsDao.insertItem(name, barcode, unitId, categoryId);
 
   Future<void> update({
     required int id,
     required String name,
-    required double price,
     required String barcode,
     required int unitId,
     required int categoryId,
-  }) => itemsDao.updateItem(id, name, price, barcode, unitId, categoryId);
+  }) => itemsDao.updateItem(id, name, barcode, unitId, categoryId);
 
   Future delete(int id) => itemsDao.deleteItem(id);
 }

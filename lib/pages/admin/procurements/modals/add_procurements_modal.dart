@@ -2,16 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
-import 'package:universal_pos_system_v1/pages/admin/procurements/providers/procurements_provider.dart';
+import 'package:universal_pos_system_v1/models/procurements/procurement_form_result.dart';
+import 'package:universal_pos_system_v1/models/procurements/procurement_item_data.dart';
+import 'package:universal_pos_system_v1/pages/admin/procurements/widgets/searchable_item_dialog.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
+import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
+import 'package:universal_pos_system_v1/utils/formatters/sum_input_formatter.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
+import 'package:universal_pos_system_v1/widgets/icon_button2.dart';
 
 class AddProcurementsModal extends StatefulWidget {
   final List<ItemFull> items;
+  final ProcurementFormResult? initialData;
 
   const AddProcurementsModal({
     super.key,
     required this.items,
+    this.initialData,
   });
 
   @override
@@ -25,11 +32,47 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
   LocationsEnum _selectedLocation = LocationsEnum.warehouse;
 
   final List<ProcurementItemRow> _items = [];
+  double _totalSum = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialData = widget.initialData;
+
+    if (initialData != null) {
+      _supplierNameController.text = initialData.supplierName;
+      _selectedDate = initialData.procurementDate;
+      _selectedLocation = initialData.location;
+
+      if (initialData.items.isNotEmpty) {
+        for (final itemData in initialData.items) {
+          final matchedItems = widget.items.where((i) => i.id == itemData.itemId);
+          final selectedItem = matchedItems.isNotEmpty ? matchedItems.first : null;
+
+          final row = ProcurementItemRow(
+            selectedItem: selectedItem,
+            quantityController: TextEditingController(text: itemData.quantity.toString()),
+            purchasePriceController: TextEditingController(text: itemData.purchasePrice.toString()),
+          );
+          row.quantityController.addListener(_recalculateTotal);
+          row.purchasePriceController.addListener(_recalculateTotal);
+          _items.add(row);
+        }
+        _recalculateTotal();
+        return;
+      }
+    }
+
+    // Default holatda 1 ta maydon qo'shish
+    _addItem();
+  }
 
   @override
   void dispose() {
     _supplierNameController.dispose();
     for (var item in _items) {
+      item.quantityController.removeListener(_recalculateTotal);
+      item.purchasePriceController.removeListener(_recalculateTotal);
       item.quantityController.dispose();
       item.purchasePriceController.dispose();
     }
@@ -38,21 +81,26 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
 
   void _addItem() {
     setState(() {
-      _items.add(
-        ProcurementItemRow(
-          quantityController: TextEditingController(),
-          purchasePriceController: TextEditingController(),
-        ),
+      final newItem = ProcurementItemRow(
+        quantityController: TextEditingController(),
+        purchasePriceController: TextEditingController(),
       );
+      newItem.quantityController.addListener(_recalculateTotal);
+      newItem.purchasePriceController.addListener(_recalculateTotal);
+      _items.add(newItem);
     });
+    _recalculateTotal();
   }
 
   void _removeItem(int index) {
     setState(() {
+      _items[index].quantityController.removeListener(_recalculateTotal);
+      _items[index].purchasePriceController.removeListener(_recalculateTotal);
       _items[index].quantityController.dispose();
       _items[index].purchasePriceController.dispose();
       _items.removeAt(index);
     });
+    _recalculateTotal();
   }
 
   void _submit() {
@@ -64,20 +112,53 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
         return;
       }
 
+      // Validate all items have selected item
+      for (var item in _items) {
+        if (item.selectedItem == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Barcha maxsulotlarni tanlang')),
+          );
+          return;
+        }
+      }
+
       final itemsData = _items.map((item) {
         return ProcurementItemData(
           itemId: item.selectedItem!.id,
-          quantity: double.parse(item.quantityController.text),
-          purchasePrice: double.parse(item.purchasePriceController.text),
+          quantity: double.parse(item.quantityController.text.replaceAll(' ', '')),
+          purchasePrice: double.parse(item.purchasePriceController.text.replaceAll(' ', '')),
         );
       }).toList();
 
-      Navigator.of(context).pop({
-        'supplierName': _supplierNameController.text,
-        'procurementDate': _selectedDate,
-        'location': _selectedLocation,
-        'items': itemsData,
-      });
+      Navigator.of(context).pop(
+        ProcurementFormResult(
+          supplierName: _supplierNameController.text,
+          procurementDate: _selectedDate,
+          location: _selectedLocation,
+          items: itemsData,
+        ),
+      );
+    }
+  }
+
+  double _calculateTotal() {
+    double total = 0;
+    for (var item in _items) {
+      final quantityText = item.quantityController.text.replaceAll(' ', '');
+      final priceText = item.purchasePriceController.text.replaceAll(' ', '');
+
+      final quantity = double.tryParse(quantityText) ?? 0;
+      final price = double.tryParse(priceText) ?? 0;
+
+      total += quantity * price;
+    }
+    return total;
+  }
+
+  void _recalculateTotal() {
+    final total = _calculateTotal();
+    if (total != _totalSum) {
+      setState(() => _totalSum = total);
     }
   }
 
@@ -85,6 +166,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final isEditMode = widget.initialData != null;
 
     return Dialog(
       child: Container(
@@ -107,7 +189,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
               child: Row(
                 children: [
                   Text(
-                    'Yangi olib kelish',
+                    isEditMode ? 'Olib kelishni tahrirlash' : 'Yangi olib kelish',
                     style: textTheme.titleLarge,
                   ),
                   Spacer(),
@@ -121,79 +203,100 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
 
             // Content
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(AppSpacing.lg),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Supplier name
-                      TextFormField(
-                        controller: _supplierNameController,
-                        decoration: InputDecoration(
-                          labelText: 'Yetkazib beruvchi nomi',
-                          hintText: 'Nomi kiriting',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Yetkazib beruvchi nomini kiriting';
-                          }
-                          return null;
-                        },
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // Header section (supplier, date, location) - Fixed
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        0,
                       ),
-                      SizedBox(height: AppSpacing.md),
-
-                      // Date picker
-                      InkWell(
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: _selectedDate,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          );
-                          if (date != null) {
-                            setState(() => _selectedDate = date);
-                          }
-                        },
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Olib kelingan sana',
-                            suffixIcon: Icon(LucideIcons.calendar),
-                          ),
-                          child: Text(
-                            '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                            style: textTheme.bodyLarge,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: AppSpacing.md),
-
-                      // Location dropdown
-                      DropdownButtonFormField<LocationsEnum>(
-                        initialValue: _selectedLocation,
-                        decoration: InputDecoration(
-                          labelText: 'Qayerga keladi',
-                        ),
-                        items: LocationsEnum.values.map((location) {
-                          return DropdownMenuItem(
-                            value: location,
-                            child: Text(
-                              location == LocationsEnum.warehouse ? 'Ombor' : 'Do\'kon',
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _supplierNameController,
+                              decoration: InputDecoration(
+                                labelText: 'Yetkazib beruvchi nomi',
+                                hintText: 'Nomi kiriting',
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Yetkazib beruvchi nomini kiriting';
+                                }
+                                return null;
+                              },
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedLocation = value);
-                          }
-                        },
+                          ),
+                          SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                final date = await showDatePicker(
+                                  context: context,
+                                  initialDate: _selectedDate,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2100),
+                                );
+                                if (date != null) {
+                                  setState(() => _selectedDate = date);
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  labelText: 'Olib kelingan sana',
+                                  suffixIcon: Icon(
+                                    LucideIcons.calendar,
+                                    size: 18,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                                  style: textTheme.bodyLarge,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: DropdownButtonFormField<LocationsEnum>(
+                              initialValue: _selectedLocation,
+                              decoration: InputDecoration(
+                                labelText: 'Qayerga keladi',
+                              ),
+                              items: LocationsEnum.values.map((location) {
+                                return DropdownMenuItem(
+                                  value: location,
+                                  child: Text(
+                                    location == LocationsEnum.warehouse ? 'Ombor' : 'Do\'kon',
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() => _selectedLocation = value);
+                                }
+                              },
+                              alignment: AlignmentDirectional.bottomCenter,
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              menuMaxHeight: 300,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: AppSpacing.lg),
+                    ),
+                    SizedBox(height: AppSpacing.lg),
 
-                      // Items section
-                      Row(
+                    // Items section header - Fixed
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
@@ -202,7 +305,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          Button(
+                          TextButton(
                             onPressed: _addItem,
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -215,120 +318,32 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
                           ),
                         ],
                       ),
-                      SizedBox(height: AppSpacing.md),
+                    ),
+                    SizedBox(height: AppSpacing.md),
 
-                      // Items list
-                      if (_items.isEmpty)
-                        Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(AppSpacing.lg),
-                            child: Text(
-                              'Maxsulot qo\'shilmagan',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey,
+                    // Items list - Scrollable
+                    Expanded(
+                      child: _items.isEmpty
+                          ? Center(child: Text('Maxsulotlar mavjud emas'))
+                          : GridView.builder(
+                              padding: EdgeInsets.only(
+                                left: AppSpacing.lg,
+                                right: AppSpacing.lg,
+                                bottom: AppSpacing.lg,
                               ),
-                            ),
-                          ),
-                        )
-                      else
-                        ..._items.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final item = entry.value;
-
-                          return Card(
-                            margin: EdgeInsets.only(bottom: AppSpacing.md),
-                            child: Padding(
-                              padding: EdgeInsets.all(AppSpacing.md),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Maxsulot ${index + 1}',
-                                        style: textTheme.titleSmall,
-                                      ),
-                                      Spacer(),
-                                      IconButton(
-                                        icon: Icon(LucideIcons.trash2, size: 18),
-                                        color: Colors.red,
-                                        onPressed: () => _removeItem(index),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: AppSpacing.sm),
-                                  DropdownButtonFormField<ItemFull>(
-                                    initialValue: item.selectedItem,
-                                    decoration: InputDecoration(
-                                      labelText: 'Maxsulot',
-                                      isDense: true,
-                                    ),
-                                    items: widget.items.map((itemFull) {
-                                      return DropdownMenuItem(
-                                        value: itemFull,
-                                        child: Text(itemFull.name),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() => item.selectedItem = value);
-                                    },
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return 'Maxsulot tanlang';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  SizedBox(height: AppSpacing.sm),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: item.quantityController,
-                                          decoration: InputDecoration(
-                                            labelText: 'Miqdori',
-                                            isDense: true,
-                                          ),
-                                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                          validator: (value) {
-                                            if (value == null || value.isEmpty) {
-                                              return 'Miqdorni kiriting';
-                                            }
-                                            if (double.tryParse(value) == null) {
-                                              return 'Raqam kiriting';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                      SizedBox(width: AppSpacing.sm),
-                                      Expanded(
-                                        child: TextFormField(
-                                          controller: item.purchasePriceController,
-                                          decoration: InputDecoration(
-                                            labelText: 'Sotib olish narxi',
-                                            isDense: true,
-                                          ),
-                                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                          validator: (value) {
-                                            if (value == null || value.isEmpty) {
-                                              return 'Narxni kiriting';
-                                            }
-                                            if (double.tryParse(value) == null) {
-                                              return 'Raqam kiriting';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: AppSpacing.md,
+                                mainAxisSpacing: AppSpacing.md,
+                                mainAxisExtent: 205,
                               ),
+                              itemCount: _items.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(index, _items[index]);
+                              },
                             ),
-                          );
-                        }),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -347,6 +362,32 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  // Total sum display
+                  Row(
+                    spacing: AppSpacing.sm,
+                    children: [
+                      Icon(
+                        LucideIcons.calculator,
+                        size: 20,
+                        color: theme.colorScheme.primary,
+                      ),
+                      Text(
+                        'Jami:',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      Text(
+                        _totalSum.toSum,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: Text('Bekor qilish'),
@@ -354,10 +395,115 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
                   SizedBox(width: AppSpacing.sm),
                   Button(
                     onPressed: _submit,
-                    child: Text('Saqlash'),
+                    child: Text(isEditMode ? 'Yangilash' : 'Saqlash'),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemCard(int index, ProcurementItemRow item) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Maxsulot ${index + 1}',
+                  style: textTheme.titleSmall,
+                ),
+                Spacer(),
+                IconButton2(
+                  icon: LucideIcons.trash2,
+                  type: IconButton2Type.danger,
+                  onPressed: () => _removeItem(index),
+                ),
+              ],
+            ),
+            SizedBox(height: AppSpacing.sm),
+            InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              onTap: () async {
+                final selectedItem = await showDialog<ItemFull>(
+                  context: context,
+                  builder: (context) => SearchableItemDialog(
+                    items: widget.items,
+                    initialItem: item.selectedItem,
+                  ),
+                );
+                if (selectedItem != null) {
+                  setState(() => item.selectedItem = selectedItem);
+                }
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Maxsulot',
+                  isDense: true,
+                  suffixIcon: Icon(LucideIcons.search, size: 18),
+                ),
+                child: Text(
+                  item.selectedItem?.name ?? 'Maxsulot tanlang',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: item.selectedItem == null ? Colors.grey : null,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: AppSpacing.sm),
+            TextFormField(
+              controller: item.quantityController,
+              decoration: InputDecoration(
+                labelText: item.selectedItem != null ? 'Miqdori (${item.selectedItem!.unit.shortName})' : 'Miqdori',
+                isDense: true,
+              ),
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [SumInputFormatter()],
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                value = value?.replaceAll(' ', '');
+
+                if (value == null || value.isEmpty) {
+                  return 'Miqdorni kiriting';
+                }
+
+                if (double.tryParse(value) == null) {
+                  return 'Raqam kiriting';
+                }
+                return null;
+              },
+            ),
+            SizedBox(height: AppSpacing.sm),
+            TextFormField(
+              controller: item.purchasePriceController,
+              decoration: InputDecoration(
+                labelText: 'Sotib olingan narxi ${item.selectedItem != null ? '( 1 ${item.selectedItem!.unit.name.toLowerCase()} )' : ''}',
+                isDense: true,
+              ),
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [SumInputFormatter()],
+              textInputAction: index < _items.length - 1 ? TextInputAction.next : TextInputAction.done,
+              validator: (value) {
+                value = value?.replaceAll(' ', '');
+                if (value == null || value.isEmpty) {
+                  return 'Narxni kiriting';
+                }
+                if (double.tryParse(value.trim()) == null) {
+                  return 'Raqam kiriting';
+                }
+                return null;
+              },
             ),
           ],
         ),

@@ -1,5 +1,5 @@
-import 'package:universal_pos_system_v1/data/local/dao/colors/category_colors_dao.dart';
-import 'package:universal_pos_system_v1/data/local/dao/item_categories/item_categories_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/colors/category_colors_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/item_categories/item_categories_dao.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 
 class ItemCategoriesRepository {

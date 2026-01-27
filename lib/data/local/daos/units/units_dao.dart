@@ -13,11 +13,11 @@ class UnitsDao extends DatabaseAccessor<AppDatabase> with _$UnitsDaoMixin {
   Future<List<Unit>> getAll() => select(units).get();
 
   // Get Cart By Id
-  Future<Unit?> getById(int id) =>
+  Future<Unit> getById(int id) =>
       (select(units)..where(
             (c) => c.id.equals(id),
           ))
-          .getSingleOrNull();
+          .getSingle();
 
   // Insert Unit
   Future<int> insertUnit(

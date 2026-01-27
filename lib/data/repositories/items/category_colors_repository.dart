@@ -1,5 +1,5 @@
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
-import 'package:universal_pos_system_v1/data/local/dao/colors/category_colors_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/colors/category_colors_dao.dart';
 
 class CategoryColorsRepository {
   final CategoryColorsDao dao;

@@ -32,7 +32,17 @@ class _DeleteCategoryModalState extends State<DeleteCategoryModal> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      title: Text("Kategoriya o'chirish"),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text("Kategoriya o'chirish"),
+          ),
+          IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

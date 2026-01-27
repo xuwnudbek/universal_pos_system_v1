@@ -94,56 +94,88 @@ class ItemsProvider extends ChangeNotifier {
   }
 
   Future<void> _init() async {
-    await getAllItems();
-    await getAllCategories();
-    await getAllUnits();
+    try {
+      await getAllItems();
+      await getAllCategories();
+      await getAllUnits();
 
-    isInitialized = true;
+      isInitialized = true;
+    } catch (e) {
+      debugPrint('Error initializing items: $e');
+    }
   }
 
   Future<void> getAllItems() async {
-    _items = await _itemsRepository.getAll();
-    notifyListeners();
+    try {
+      _items = await _itemsRepository.getAll();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error getting items: $e');
+      rethrow;
+    }
   }
 
   Future<void> getAllUnits() async {
-    _units = await _unitsRepository.getAll();
-    notifyListeners();
+    try {
+      _units = await _unitsRepository.getAll();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error getting units: $e');
+      rethrow;
+    }
   }
 
   Future<void> getAllCategories() async {
-    _categories = await _categoriesRepository.getAll();
-    notifyListeners();
+    try {
+      _categories = await _categoriesRepository.getAll();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error getting categories: $e');
+      rethrow;
+    }
   }
 
   Future<void> addItem(ItemFormResult result) async {
-    await _itemsRepository.create(
-      name: result.name,
-      barcode: result.barcode,
-      price: result.price,
-      categoryId: result.categoryId,
-      unitId: result.unitId,
-    );
+    try {
+      await _itemsRepository.create(
+        name: result.name,
+        barcode: result.barcode,
+        categoryId: result.categoryId,
+        unitId: result.unitId,
+      );
 
-    await getAllItems();
+      await getAllItems();
+    } catch (e) {
+      debugPrint('Error adding item: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateItem(int id, ItemFormResult result) async {
-    await _itemsRepository.update(
-      id: id,
-      name: result.name,
-      barcode: result.barcode,
-      price: result.price,
-      categoryId: result.categoryId,
-      unitId: result.unitId,
-    );
+    try {
+      await _itemsRepository.update(
+        id: id,
+        name: result.name,
+        barcode: result.barcode,
+        categoryId: result.categoryId,
+        unitId: result.unitId,
+      );
 
-    await getAllItems();
+      await getAllItems();
+    } catch (e) {
+      debugPrint('Error updating item: $e');
+      rethrow;
+    }
   }
 
   Future<void> deleteItem(int id) async {
-    await _itemsRepository.delete(id);
-    await getAllItems();
+    try {
+      await _itemsRepository.delete(id);
+      await getAllItems();
+    } catch (e) {
+      debugPrint('Error deleting item: $e');
+      rethrow;
+    }
   }
 
   void sortByColumn(int columnIndex, bool ascending) {
