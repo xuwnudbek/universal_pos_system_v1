@@ -11,8 +11,8 @@ part 'item_categories_dao.g.dart';
 class ItemCategoriesDao extends DatabaseAccessor<AppDatabase> with _$ItemCategoriesDaoMixin {
   ItemCategoriesDao(super.db);
 
-  Future<List<ItemCategory>> getAll() => select(itemCategories).get();
-  Stream<List<ItemCategory>> streamAll() => select(itemCategories).watch();
+  Future<List<ItemCategory>> getAll() => (select(itemCategories)..orderBy([(ic) => OrderingTerm.desc(ic.createdAt)])).get();
+  Stream<List<ItemCategory>> streamAll() => (select(itemCategories)..orderBy([(ic) => OrderingTerm.desc(ic.createdAt)])).watch();
 
   Future<int> insertItemCategory(String name, int? colorId) {
     return into(itemCategories).insert(

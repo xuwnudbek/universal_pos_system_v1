@@ -1,23 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
+import 'package:universal_pos_system_v1/data/models/stock_full.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
-
-class WarehouseItem {
-  final ItemFull item;
-  final double warehouseQuantity;
-  final double shopQuantity;
-  final double totalQuantity;
-
-  WarehouseItem({
-    required this.item,
-    required this.warehouseQuantity,
-    required this.shopQuantity,
-    required this.totalQuantity,
-  });
-}
+import 'package:universal_pos_system_v1/models/warehouse/warehouse_item.dart';
 
 class WarehouseProvider extends ChangeNotifier {
   final ItemsRepository itemsRepository;
@@ -34,7 +21,7 @@ class WarehouseProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
 
   List<ItemFull> _allItems = [];
-  List<Stock> _stocks = [];
+  List<StockFull> _stocks = [];
 
   List<WarehouseItem> _warehouseItems = [];
   List<WarehouseItem> get warehouseItems {
@@ -74,7 +61,7 @@ class WarehouseProvider extends ChangeNotifier {
 
   void _buildWarehouseItems() {
     _warehouseItems = _allItems.map((item) {
-      final itemStocks = _stocks.where((stock) => stock.itemId == item.id).toList();
+      final itemStocks = _stocks.where((stock) => stock.item.id == item.id).toList();
 
       double warehouseQuantity = 0;
       double shopQuantity = 0;
@@ -82,7 +69,7 @@ class WarehouseProvider extends ChangeNotifier {
       for (var stock in itemStocks) {
         if (stock.location == LocationsEnum.warehouse) {
           warehouseQuantity = stock.quantity;
-        } else if (stock.location == LocationsEnum.store) {
+        } else if (stock.location == LocationsEnum.shop) {
           shopQuantity = stock.quantity;
         }
       }
@@ -94,6 +81,17 @@ class WarehouseProvider extends ChangeNotifier {
         totalQuantity: warehouseQuantity + shopQuantity,
       );
     }).toList();
+  }
+
+  Future<void> refresh() async {
+    try {
+      _allItems = await itemsRepository.getAll();
+      _stocks = await stocksRepository.getAll();
+      _buildWarehouseItems();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error refreshing warehouse: $e');
+    }
   }
 
   @override

@@ -4,10 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/transfers/transfers_repository.dart';
+import 'package:universal_pos_system_v1/models/warehouse/warehouse_item.dart';
+import 'package:universal_pos_system_v1/pages/admin/procurements/widgets/warehouse_data_source.dart';
+import 'package:universal_pos_system_v1/pages/admin/warehouse/modals/warehouse_transfer_modal.dart';
 import 'package:universal_pos_system_v1/pages/admin/warehouse/providers/warehouse_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
-import 'package:universal_pos_system_v1/utils/functions/string_to_hex.dart';
 import 'package:universal_pos_system_v1/utils/theme/app_colors.dart';
+import 'package:universal_pos_system_v1/widgets/button.dart';
 import 'package:universal_pos_system_v1/widgets/loaders/app_loader.dart';
 
 class WarehousePage extends StatefulWidget {
@@ -65,6 +69,64 @@ class _WarehousePageState extends State<WarehousePage> {
                         style: theme.textTheme.titleLarge,
                       ),
                       Spacer(),
+                      // Add Transfer Button
+                      Button(
+                        onPressed: () async {
+                          final provider = context.read<WarehouseProvider>();
+
+                          if (!provider.isInitialized) return;
+
+                          final result = await showDialog<TransferFormResult>(
+                            context: context,
+                            builder: (context) => WarehouseTransferModal(
+                              warehouseItems: provider.warehouseItems,
+                            ),
+                          );
+
+                          if (result != null && context.mounted) {
+                            final transfersRepo = context.read<TransfersRepository>();
+
+                            try {
+                              await transfersRepo.create(
+                                itemId: result.item.id,
+                                fromLocation: result.fromLocation,
+                                toLocation: result.toLocation,
+                                quantity: result.quantity,
+                                note: result.note,
+                              );
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Maxsulot muvaffaqiyatli ko\'chirildi'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+
+                                // Refresh the warehouse data
+                                await provider.refresh();
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Xatolik yuz berdi: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          }
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 8,
+                          children: [
+                            Icon(LucideIcons.arrowRightLeft),
+                            Text('Ko\'chirish'),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 16),
@@ -133,14 +195,16 @@ class _WarehousePageState extends State<WarehousePage> {
                                 padding: EdgeInsets.only(left: 1),
                                 child: PaginatedDataTable2(
                                   controller: _paginatorController,
-                                  columnSpacing: AppSpacing.md,
+                                  columnSpacing: AppSpacing.sm,
                                   horizontalMargin: AppSpacing.lg,
                                   minWidth: 1000,
                                   headingRowHeight: 56,
-                                  dataRowHeight: 60,
-                                  rowsPerPage: 10,
+                                  dataRowHeight: 50,
+                                  rowsPerPage: 20,
                                   availableRowsPerPage: const [10, 20, 50, 100],
-                                  border: TableBorder(),
+                                  border: TableBorder.all(
+                                    color: AppColors.surface,
+                                  ),
                                   headingRowDecoration: BoxDecoration(
                                     color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.vertical(
@@ -225,100 +289,4 @@ class _WarehousePageState extends State<WarehousePage> {
       },
     );
   }
-}
-
-class WarehouseDataSource extends DataTableSource {
-  final List<WarehouseItem> warehouseItems;
-  final BuildContext context;
-  final TextTheme textTheme;
-  final ThemeData theme;
-
-  WarehouseDataSource({
-    required this.warehouseItems,
-    required this.context,
-    required this.textTheme,
-    required this.theme,
-  });
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= warehouseItems.length) return null;
-    final warehouseItem = warehouseItems[index];
-    final item = warehouseItem.item;
-
-    return DataRow2(
-      cells: [
-        // Name cell with category color indicator
-        DataCell(
-          Row(
-            spacing: AppSpacing.sm,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (item.category != null)
-                Card(
-                  elevation: AppElevation.none,
-                  color: Color(hexToColor(item.category!.color!.hex)),
-                  child: SizedBox.square(dimension: 8),
-                ),
-              Flexible(
-                child: Text(
-                  item.name,
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Barcode cell
-        DataCell(
-          Text(
-            item.barcode,
-            style: textTheme.bodyMedium,
-          ),
-        ),
-        // Location quantity cells
-        DataCell(
-          Text(
-            warehouseItem.warehouseQuantity.toStringAsFixed(1),
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: warehouseItem.warehouseQuantity > 0 ? Colors.green : Colors.grey,
-            ),
-          ),
-        ),
-        DataCell(
-          Text(
-            warehouseItem.shopQuantity.toStringAsFixed(1),
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-              color: warehouseItem.shopQuantity > 0 ? Colors.blue : Colors.grey,
-            ),
-          ),
-        ),
-        // Total cell
-        DataCell(
-          Text(
-            warehouseItem.totalQuantity.toStringAsFixed(1),
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: warehouseItem.totalQuantity > 0 ? theme.colorScheme.primary : Colors.red,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => warehouseItems.length;
-
-  @override
-  int get selectedRowCount => 0;
 }

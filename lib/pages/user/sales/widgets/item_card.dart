@@ -3,7 +3,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 
-import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/widgets/hover_widget.dart';
 
 class ItemCard extends StatelessWidget {

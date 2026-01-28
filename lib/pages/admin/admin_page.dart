@@ -101,8 +101,8 @@ class AdminPage extends StatelessWidget {
           update: (_, dao0, dao1, _) => ProcurementsRepository(dao0, dao1),
           lazy: true,
         ),
-        ProxyProvider<ProcurementItemsDao, ProcurementItemsRepository>(
-          update: (_, dao, _) => ProcurementItemsRepository(dao),
+        ProxyProvider2<ProcurementItemsDao, ItemsRepository, ProcurementItemsRepository>(
+          update: (_, dao, itemsRepository, _) => ProcurementItemsRepository(dao, itemsRepository),
           lazy: true,
         ),
       ],

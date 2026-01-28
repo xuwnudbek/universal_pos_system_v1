@@ -7,10 +7,9 @@ import 'package:universal_pos_system_v1/data/repositories/procurements/procureme
 import 'package:universal_pos_system_v1/data/repositories/procurements/procurements_repository.dart';
 import 'package:universal_pos_system_v1/models/procurements/procurement_form_result.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/modals/add_procurements_modal.dart';
-import 'package:universal_pos_system_v1/pages/admin/procurements/modals/delete_procurement_modal.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/providers/procurements_provider.dart';
+import 'package:universal_pos_system_v1/pages/admin/procurements/widgets/procurement_card.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
-import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 import 'package:universal_pos_system_v1/widgets/loaders/app_loader.dart';
 
@@ -53,7 +52,7 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
               child: Row(
                 children: [
                   Text(
-                    "Olib kelishlar",
+                    "Olib kelish",
                     style: theme.textTheme.titleLarge,
                   ),
                   Spacer(),
@@ -118,118 +117,16 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                       return GridView.builder(
                         padding: EdgeInsets.all(AppSpacing.lg),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                          crossAxisCount: 2,
                           crossAxisSpacing: AppSpacing.lg,
                           mainAxisSpacing: AppSpacing.lg,
-                          childAspectRatio: 1.2,
+                          mainAxisExtent: 210,
                         ),
                         itemCount: procurements.length,
                         itemBuilder: (context, index) {
                           final procurement = procurements[index];
-                          final items = procurement.items;
 
-                          // Calculate total
-                          double totalCost = 0;
-                          for (var item in items) {
-                            totalCost += item.quantity * item.purchasePrice;
-                          }
-
-                          return Card(
-                            clipBehavior: Clip.antiAlias,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Header
-                                Container(
-                                  padding: EdgeInsets.all(AppSpacing.md),
-                                  color: theme.colorScheme.primary.withOpacity(0.1),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        LucideIcons.package,
-                                        color: theme.colorScheme.primary,
-                                      ),
-                                      SizedBox(width: AppSpacing.sm),
-                                      Expanded(
-                                        child: Text(
-                                          procurement.supplierName,
-                                          style: textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(LucideIcons.trash2, size: 18),
-                                        color: Colors.red,
-                                        onPressed: () async {
-                                          final confirm = await showDialog<bool>(
-                                            context: context,
-                                            builder: (context) => DeleteProcurementModal(procurement: procurement),
-                                          );
-
-                                          if (confirm == true && context.mounted) {
-                                            await context.read<ProcurementsProvider>().deleteProcurement(procurement.id);
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Content
-                                Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(AppSpacing.md),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(LucideIcons.calendar, size: 16, color: Colors.grey),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              '${procurement.procurementDate.day}/${procurement.procurementDate.month}/${procurement.procurementDate.year}',
-                                              style: textTheme.bodySmall,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            Icon(LucideIcons.mapPin, size: 16, color: Colors.grey),
-                                            SizedBox(width: 4),
-                                            Text(
-                                              procurement.location.name == 'warehouse' ? 'Ombor' : 'Do\'kon',
-                                              style: textTheme.bodySmall,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: AppSpacing.sm),
-                                        Divider(),
-                                        SizedBox(height: AppSpacing.sm),
-                                        Text(
-                                          'Maxsulotlar: ${items.length} ta',
-                                          style: textTheme.bodySmall?.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Jami: ${totalCost.toSum}',
-                                          style: textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: theme.colorScheme.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
+                          return ProcurementCard(procurement: procurement);
                         },
                       );
                     },

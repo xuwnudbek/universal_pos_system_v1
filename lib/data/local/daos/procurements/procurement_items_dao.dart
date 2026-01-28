@@ -1,79 +1,50 @@
 import 'package:drift/drift.dart';
-import 'package:universal_pos_system_v1/data/local/tables/units_table.dart';
+import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/data/models/procurement_item_full.dart';
 
-import '../../app_database.dart';
 import '../../tables/procurement_items_table.dart';
-import '../../tables/procurements_table.dart';
-import '../../tables/items_table.dart';
 
 part 'procurement_items_dao.g.dart';
 
-@DriftAccessor(tables: [ProcurementItems, Procurements, Items, Units])
+@DriftAccessor(tables: [ProcurementItems])
 class ProcurementItemsDao extends DatabaseAccessor<AppDatabase> with _$ProcurementItemsDaoMixin {
   ProcurementItemsDao(super.db);
 
-  ProcurementItemFull _mapProcurementItemFull(TypedResult row) {
-    final procurementItem = row.readTable(procurementItems);
-    final item = row.readTableOrNull(items);
-    final unit = row.readTableOrNull(units);
+  // Get Procurement Items By Procurement Id with Item[Unit] via JOIN
+  Future<List<ProcurementItemFull>> getByProcurementId(int procurementId) async {
+    final query =
+        select(procurementItems).join(
+            [
+              innerJoin(
+                db.items,
+                db.items.id.equalsExp(procurementItems.itemId),
+              ),
+              innerJoin(
+                db.units,
+                db.units.id.equalsExp(db.items.unitId),
+              ),
+            ],
+          )
+          ..where(procurementItems.procurementId.equals(procurementId))
+          ..orderBy(
+            [
+              OrderingTerm.asc(db.items.name),
+            ],
+          );
 
-    return ProcurementItemFull.from(
-      procurementItem: procurementItem,
-      item: item != null && unit != null ? ItemFull.from(item: item, unit: unit) : null,
-    );
-  }
+    final results = await query.get();
 
-  // Get All Procurement Items
-  Future<List<ProcurementItemFull>> getAll() => getAllWithItems();
+    return results.map((row) {
+      final procurementItem = row.readTable(procurementItems);
+      final item = row.readTable(db.items);
+      final unit = row.readTable(db.units);
 
-  // Get All Procurement Items With Items
-  Future<List<ProcurementItemFull>> getAllWithItems() {
-    final query = select(procurementItems).join(
-      [
-        leftOuterJoin(items, items.id.equalsExp(procurementItems.itemId)),
-        leftOuterJoin(units, units.id.equalsExp(items.unitId)),
-      ],
-    );
-
-    return query.map(_mapProcurementItemFull).get();
-  }
-
-  // Get Procurement Item By Id
-  Future<ProcurementItemFull?> getById(int id) {
-    final query = select(procurementItems).join(
-      [
-        leftOuterJoin(items, items.id.equalsExp(procurementItems.itemId)),
-        leftOuterJoin(units, units.id.equalsExp(items.unitId)),
-      ],
-    )..where(procurementItems.id.equals(id));
-
-    return query.map(_mapProcurementItemFull).getSingleOrNull();
-  }
-
-  // Get Procurement Items By Procurement Id
-  Future<List<ProcurementItemFull>> getByProcurementId(int procurementId) {
-    final query = select(procurementItems).join(
-      [
-        leftOuterJoin(items, items.id.equalsExp(procurementItems.itemId)),
-        leftOuterJoin(units, units.id.equalsExp(items.unitId)),
-      ],
-    )..where(procurementItems.procurementId.equals(procurementId));
-
-    return query.map(_mapProcurementItemFull).get();
-  }
-
-  // Get Procurement Items By Item Id
-  Future<List<ProcurementItemFull>> getByItemId(int itemId) {
-    final query = select(procurementItems).join(
-      [
-        leftOuterJoin(items, items.id.equalsExp(procurementItems.itemId)),
-        leftOuterJoin(units, units.id.equalsExp(items.unitId)),
-      ],
-    )..where(procurementItems.itemId.equals(itemId));
-
-    return query.map(_mapProcurementItemFull).get();
+      return ProcurementItemFull.from(
+        procurementItem: procurementItem,
+        item: ItemFull.from(item: item, unit: unit),
+      );
+    }).toList();
   }
 
   // Insert Procurement Item

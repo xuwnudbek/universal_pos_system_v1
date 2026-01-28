@@ -13,36 +13,21 @@ class ProcurementsRepository {
   );
 
   Future<List<ProcurementFull>> getAll() async {
-    final procurements = await procurementsDao.getAll();
-    final procurmentsItems = await procurementItemsDao.getAllWithItems();
-
-    return procurements.map((procurement) {
-      final items = procurmentsItems
-          .where(
-            (item) => item.procurementId == procurement.id,
-          )
-          .toList();
-
-      return ProcurementFull.from(
-        procurement: procurement,
-        items: items,
-      );
-    }).toList();
+    final allProcurements = await procurementsDao.getAll();
+    return allProcurements;
   }
 
   Future<ProcurementFull?> getById(int id) async {
-    final procurement = await procurementsDao.getById(id);
-    if (procurement == null) {
-      return null;
-    }
-    final items = await procurementItemsDao.getByProcurementId(id);
+    return procurementsDao.getById(id);
   }
 
   Future<List<ProcurementFull>> getByLocation(LocationsEnum location) async {
-    final procurements = await procurementsDao.getByLocation(location);
+    return procurementsDao.getByLocation(location);
   }
 
-  Future<List<ProcurementFull>> getByDateRange(DateTime start, DateTime end) => procurementsDao.getByDateRange(start, end);
+  Future<List<ProcurementFull>> getByDateRange(DateTime start, DateTime end) async {
+    return procurementsDao.getByDateRange(start, end);
+  }
 
   Future<int> create({
     required String supplierName,

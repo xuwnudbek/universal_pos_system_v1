@@ -9,7 +9,7 @@ class CartsDao extends DatabaseAccessor<AppDatabase> with _$CartsDaoMixin {
   CartsDao(super.db);
 
   // Get All Carts
-  Future<List<Cart>> getAll() => select(carts).get();
+  Future<List<Cart>> getAll() => (select(carts)..orderBy([(c) => OrderingTerm.desc(c.createdAt)])).get();
 
   // Get Cart By Id
   Future<Cart?> getById(int id) =>
@@ -19,7 +19,7 @@ class CartsDao extends DatabaseAccessor<AppDatabase> with _$CartsDaoMixin {
           .getSingleOrNull();
 
   // Get Carts as Stream
-  Stream<List<Cart>> watchAll() => select(carts).watch();
+  Stream<List<Cart>> watchAll() => (select(carts)..orderBy([(c) => OrderingTerm.desc(c.createdAt)])).watch();
 
   // Insert Cart
   Future<int> insertCart(CartsCompanion data) {

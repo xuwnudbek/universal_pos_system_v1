@@ -50,9 +50,13 @@ class AppTheme {
 
     // Card
     cardTheme: CardThemeData(
-      color: AppColors.card,
+      color: AppColors.surface,
       elevation: 1,
       margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      clipBehavior: Clip.antiAlias,
     ),
 
     // Text Theme

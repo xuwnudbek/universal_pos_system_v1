@@ -9,7 +9,7 @@ part 'category_colors_dao.g.dart';
 class CategoryColorsDao extends DatabaseAccessor<AppDatabase> with _$CategoryColorsDaoMixin {
   CategoryColorsDao(super.db);
 
-  Future<List<CategoryColor>> getAll() => select(categoryColors).get();
+  Future<List<CategoryColor>> getAll() => (select(categoryColors)..orderBy([(cc) => OrderingTerm.desc(cc.createdAt)])).get();
 
   Future<int> insertColor(String hex) {
     return into(categoryColors).insert(

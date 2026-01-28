@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
+import 'package:universal_pos_system_v1/data/models/stock_full.dart';
 
 import '../../app_database.dart';
 import '../../tables/stocks_table.dart';
@@ -12,19 +13,80 @@ class StocksDao extends DatabaseAccessor<AppDatabase> with _$StocksDaoMixin {
   StocksDao(super.db);
 
   // Get All Stocks
-  Future<List<Stock>> getAll() => select(stocks).get();
+  Future<List<StockFull>> getAll() {
+    final query = select(stocks).join([
+      leftOuterJoin(items, items.id.equalsExp(stocks.itemId)),
+    ]);
+
+    return query.map((row) {
+      final stock = row.readTable(stocks);
+      final item = row.readTable(items);
+
+      return StockFull.from(
+        stock: stock,
+        item: item,
+      );
+    }).get();
+  }
 
   // Get Stock By Id
-  Future<Stock?> getById(int id) => (select(stocks)..where((s) => s.id.equals(id))).getSingleOrNull();
+  Future<StockFull?> getById(int id) async {
+    final query = select(stocks).join([
+      leftOuterJoin(items, items.id.equalsExp(stocks.itemId)),
+    ])..where(stocks.id.equals(id));
+
+    final result = await query.getSingleOrNull();
+
+    if (result == null) {
+      return null;
+    }
+
+    final stock = result.readTable(stocks);
+    final item = result.readTable(items);
+
+    return StockFull.from(
+      stock: stock,
+      item: item,
+    );
+  }
 
   // Get Stock By Item and Location
-  Future<Stock?> getByItemAndLocation(int itemId, LocationsEnum location) => (select(stocks)..where((s) => s.itemId.equals(itemId) & s.location.equalsValue(location))).getSingleOrNull();
+  Future<StockFull?> getByItemAndLocation(int itemId, LocationsEnum location) async {
+    final query = select(stocks).join([
+      leftOuterJoin(items, items.id.equalsExp(stocks.itemId)),
+    ])..where(stocks.itemId.equals(itemId) & stocks.location.equalsValue(location));
 
-  // Get Stocks By Item
-  Future<List<Stock>> getByItem(int itemId) => (select(stocks)..where((s) => s.itemId.equals(itemId))).get();
+    final result = await query.getSingleOrNull();
+
+    if (result == null) {
+      return null;
+    }
+
+    final stock = result.readTable(stocks);
+    final item = result.readTable(items);
+
+    return StockFull.from(
+      stock: stock,
+      item: item,
+    );
+  }
 
   // Get Stocks By Location
-  Future<List<Stock>> getByLocation(LocationsEnum location) => (select(stocks)..where((s) => s.location.equalsValue(location))).get();
+  Future<List<StockFull>> getByLocation(LocationsEnum location) {
+    final query = select(stocks).join([
+      leftOuterJoin(items, items.id.equalsExp(stocks.itemId)),
+    ])..where(stocks.location.equalsValue(location));
+
+    return query.map((row) {
+      final stock = row.readTable(stocks);
+      final item = row.readTable(items);
+
+      return StockFull.from(
+        stock: stock,
+        item: item,
+      );
+    }).get();
+  }
 
   // Insert Stock
   Future<int> insertStock(
@@ -63,22 +125,6 @@ class StocksDao extends DatabaseAccessor<AppDatabase> with _$StocksDaoMixin {
   Future<int> updateQuantity(int id, double quantity) {
     final query = update(stocks)..where((s) => s.id.equals(id));
     return query.write(StocksCompanion(quantity: Value(quantity)));
-  }
-
-  // Increment Stock Quantity
-  Future<void> incrementQuantity(int id, double amount) async {
-    final stock = await getById(id);
-    if (stock != null) {
-      await updateQuantity(id, stock.quantity + amount);
-    }
-  }
-
-  // Decrement Stock Quantity
-  Future<void> decrementQuantity(int id, double amount) async {
-    final stock = await getById(id);
-    if (stock != null) {
-      await updateQuantity(id, stock.quantity - amount);
-    }
   }
 
   // Delete Stock

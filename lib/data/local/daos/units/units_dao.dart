@@ -10,7 +10,7 @@ class UnitsDao extends DatabaseAccessor<AppDatabase> with _$UnitsDaoMixin {
   UnitsDao(super.db);
 
   // Get All Units
-  Future<List<Unit>> getAll() => select(units).get();
+  Future<List<Unit>> getAll() => (select(units)..orderBy([(u) => OrderingTerm.desc(u.createdAt)])).get();
 
   // Get Cart By Id
   Future<Unit> getById(int id) =>

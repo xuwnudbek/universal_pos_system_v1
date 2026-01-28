@@ -12,7 +12,6 @@ import 'package:universal_pos_system_v1/pages/admin/items/provider/items_provide
 import 'package:universal_pos_system_v1/pages/admin/items/modals/add_item_modal.dart';
 import 'package:universal_pos_system_v1/pages/admin/items/modals/delete_item_modal.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
-import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/utils/functions/string_to_hex.dart';
 import 'package:universal_pos_system_v1/utils/theme/app_colors.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';

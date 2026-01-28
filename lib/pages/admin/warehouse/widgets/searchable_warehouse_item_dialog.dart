@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:universal_pos_system_v1/data/models/items_full.dart';
+import 'package:universal_pos_system_v1/models/warehouse/warehouse_item.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 
-class SearchableItemDialog extends StatefulWidget {
-  final List<ItemFull> items;
-  final ItemFull? initialItem;
+class SearchableWarehouseItemDialog extends StatefulWidget {
+  final List<WarehouseItem> warehouseItems;
+  final WarehouseItem? initialItem;
 
-  const SearchableItemDialog({
+  const SearchableWarehouseItemDialog({
     super.key,
-    required this.items,
+    required this.warehouseItems,
     this.initialItem,
   });
 
   @override
-  State<SearchableItemDialog> createState() => _SearchableItemDialogState();
+  State<SearchableWarehouseItemDialog> createState() => _SearchableWarehouseItemDialogState();
 }
 
-class _SearchableItemDialogState extends State<SearchableItemDialog> {
+class _SearchableWarehouseItemDialogState extends State<SearchableWarehouseItemDialog> {
   final _searchController = TextEditingController();
-  List<ItemFull> _filteredItems = [];
+  List<WarehouseItem> _filteredItems = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredItems = widget.items;
+    _filteredItems = widget.warehouseItems;
   }
 
   @override
@@ -36,10 +36,10 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
   void _filterItems(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredItems = widget.items;
+        _filteredItems = widget.warehouseItems;
       } else {
-        _filteredItems = widget.items.where((item) {
-          return item.name.toLowerCase().contains(query.toLowerCase()) || item.barcode.toLowerCase().contains(query.toLowerCase());
+        _filteredItems = widget.warehouseItems.where((warehouseItem) {
+          return warehouseItem.item.name.toLowerCase().contains(query.toLowerCase()) || warehouseItem.item.barcode.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
     });
@@ -51,10 +51,11 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
     final textTheme = theme.textTheme;
 
     return Dialog(
-      child: SizedBox(
-        width: 500,
-        height: 600,
+      child: Container(
+        width: 600,
+        constraints: BoxConstraints(maxHeight: 700),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Container(
@@ -69,9 +70,16 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
               ),
               child: Row(
                 children: [
+                  Icon(
+                    LucideIcons.package,
+                    color: theme.colorScheme.primary,
+                  ),
+                  SizedBox(width: AppSpacing.sm),
                   Text(
                     'Maxsulot tanlash',
-                    style: textTheme.titleLarge,
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Spacer(),
                   IconButton(
@@ -82,14 +90,14 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
               ),
             ),
 
-            // Search field
+            // Search Field
             Padding(
               padding: EdgeInsets.all(AppSpacing.lg),
-              child: TextField(
+              child: TextFormField(
                 controller: _searchController,
+                autofocus: true,
                 decoration: InputDecoration(
-                  labelText: 'Qidirish',
-                  hintText: 'Maxsulot nomi yoki barcode',
+                  hintText: 'Maxsulot qidirish...',
                   prefixIcon: Icon(LucideIcons.search),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
@@ -102,11 +110,10 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
                       : null,
                 ),
                 onChanged: _filterItems,
-                autofocus: true,
               ),
             ),
 
-            // Items list
+            // Items List
             Expanded(
               child: _filteredItems.isEmpty
                   ? Center(
@@ -120,8 +127,8 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
                   : ListView.builder(
                       itemCount: _filteredItems.length,
                       itemBuilder: (context, index) {
-                        final item = _filteredItems[index];
-                        final isSelected = widget.initialItem?.id == item.id;
+                        final warehouseItem = _filteredItems[index];
+                        final isSelected = widget.initialItem?.item.id == warehouseItem.item.id;
 
                         return ListTile(
                           selected: isSelected,
@@ -134,24 +141,46 @@ class _SearchableItemDialogState extends State<SearchableItemDialog> {
                             ),
                             child: Icon(
                               LucideIcons.package,
-                              size: 20,
                               color: theme.colorScheme.primary,
+                              size: 20,
                             ),
                           ),
-                          title: Text(item.name),
-                          subtitle: Text(
-                            'Barcode: ${item.barcode}',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
+                          title: Text(
+                            warehouseItem.item.name,
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          trailing: isSelected
-                              ? Icon(
-                                  LucideIcons.check,
-                                  color: theme.colorScheme.primary,
-                                )
-                              : null,
-                          onTap: () => Navigator.of(context).pop(item),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Barcode: ${warehouseItem.item.barcode}',
+                                style: textTheme.bodySmall,
+                              ),
+                              SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Ombor: ${warehouseItem.warehouseQuantity.toStringAsFixed(1)}',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: warehouseItem.warehouseQuantity > 0 ? Colors.green : Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'Do\'kon: ${warehouseItem.shopQuantity.toStringAsFixed(1)}',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: warehouseItem.shopQuantity > 0 ? Colors.blue : Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          onTap: () => Navigator.of(context).pop(warehouseItem),
                         );
                       },
                     ),

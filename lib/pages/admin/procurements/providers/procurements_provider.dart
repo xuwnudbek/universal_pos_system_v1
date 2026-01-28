@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
 import 'package:universal_pos_system_v1/data/models/procurement_full.dart';
 import 'package:universal_pos_system_v1/data/repositories/procurements/procurement_items_repository.dart';
@@ -25,7 +24,7 @@ class ProcurementsProvider extends ChangeNotifier {
 
   Future<void> _initialize() async {
     try {
-      await loadProcurements();
+      await loadAllProcurements();
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
@@ -33,7 +32,7 @@ class ProcurementsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadProcurements() async {
+  Future<void> loadAllProcurements() async {
     try {
       final allProcurements = await procurementsRepository.getAll();
 
@@ -71,7 +70,7 @@ class ProcurementsProvider extends ChangeNotifier {
         );
       }
 
-      await loadProcurements();
+      await loadAllProcurements();
     } catch (e) {
       debugPrint('Error adding procurement: $e');
       rethrow;
@@ -81,7 +80,7 @@ class ProcurementsProvider extends ChangeNotifier {
   Future<void> deleteProcurement(int id) async {
     try {
       await procurementsRepository.delete(id);
-      await loadProcurements();
+      await loadAllProcurements();
     } catch (e) {
       debugPrint('Error deleting procurement: $e');
       rethrow;

@@ -1,6 +1,5 @@
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
-import 'package:universal_pos_system_v1/data/models/procurement_item_full.dart';
 
 class ProcurementFull {
   final int id;
@@ -9,7 +8,8 @@ class ProcurementFull {
   final LocationsEnum location;
   final String? note;
   final DateTime createdAt;
-  final List<ProcurementItemFull> items;
+  final int itemsCount;
+  final double totalCost;
 
   ProcurementFull({
     required this.id,
@@ -18,12 +18,14 @@ class ProcurementFull {
     required this.location,
     required this.note,
     required this.createdAt,
-    required this.items,
+    required this.itemsCount,
+    required this.totalCost,
   });
 
   factory ProcurementFull.from({
     required Procurement procurement,
-    required List<ProcurementItemFull> items,
+    required int itemsCount,
+    required double totalCost,
   }) {
     return ProcurementFull(
       id: procurement.id,
@@ -32,7 +34,8 @@ class ProcurementFull {
       location: procurement.location,
       note: procurement.note,
       createdAt: procurement.createdAt,
-      items: items,
+      itemsCount: itemsCount,
+      totalCost: totalCost,
     );
   }
 }

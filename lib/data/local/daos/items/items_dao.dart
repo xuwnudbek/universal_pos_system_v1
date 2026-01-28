@@ -10,7 +10,7 @@ part 'items_dao.g.dart';
 class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
   ItemsDao(super.db);
 
-  Future<List<Item>> getAll() => select(items).get();
+  Future<List<Item>> getAll() => (select(items)..orderBy([(i) => OrderingTerm.desc(i.createdAt)])).get();
 
   Future<Item> getById(int id) {
     return (select(items)..where((c) => c.id.equals(id))).getSingle();
