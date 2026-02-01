@@ -6,10 +6,13 @@ class Items extends Table {
   TextColumn get name => text()();
 
   TextColumn get barcode => text()();
+
+  RealColumn get salePrice => real()();
+
   IntColumn get unitId => integer().references(Units, #id)();
+  IntColumn get categoryId => integer().nullable()();
 
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
-  IntColumn get categoryId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }

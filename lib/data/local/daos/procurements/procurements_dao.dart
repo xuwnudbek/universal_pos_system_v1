@@ -171,7 +171,8 @@ class ProcurementsDao extends DatabaseAccessor<AppDatabase> with _$ProcurementsD
   }
 
   // Delete Procurement
-  Future deleteProcurement(int id) {
+  Future deleteProcurement(int id) async {
+    // Then delete the procurement
     return (delete(procurements)..where((p) => p.id.equals(id))).go();
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:universal_pos_system_v1/data/local/app_database.dart';
+import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
+import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
+import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
 
 import 'package:universal_pos_system_v1/widgets/hover_widget.dart';
 
@@ -13,7 +15,7 @@ class ItemCard extends StatelessWidget {
     required this.onSecondaryTap,
   });
 
-  final Item item;
+  final ItemFull item;
   final VoidCallback onTap;
   final VoidCallback onSecondaryTap;
 
@@ -30,13 +32,13 @@ class ItemCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
               color: colorScheme.primary,
               width: AppBorderWidth.normal,
             ),
           ),
-          padding: EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.xs),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: AppSpacing.md,
@@ -44,21 +46,21 @@ class ItemCard extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Container(
-                  height: 150,
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withValues(alpha: .1),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
                   child: Center(
                     child: Icon(
                       LucideIcons.image,
-                      size: 48,
+                      size: 32,
                       color: colorScheme.primary,
                     ),
                   ),
                 ),
               ),
-              Expanded(
+              SizedBox(
+                height: 40,
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Column(
@@ -73,6 +75,14 @@ class ItemCard extends StatelessWidget {
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: AppSpacing.xs),
+                      Text(
+                        item.salePrice.intOrDouble.str.toSumString("UZS"),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),

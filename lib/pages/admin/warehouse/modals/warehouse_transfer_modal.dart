@@ -5,6 +5,7 @@ import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/models/warehouse/warehouse_item.dart';
 import 'package:universal_pos_system_v1/pages/admin/warehouse/widgets/searchable_warehouse_item_dialog.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
+import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 
 class TransferFormResult {
@@ -163,9 +164,9 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
 
                       if (_selectedWarehouseItem != null) ...[
                         SizedBox(height: AppSpacing.lg),
-
                         // Locations Row
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // From Location
                             Expanded(
@@ -181,9 +182,12 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                                   SizedBox(height: AppSpacing.sm),
                                   DropdownButtonFormField<LocationsEnum>(
                                     initialValue: _fromLocation,
+                                    borderRadius: BorderRadius.circular(AppRadius.md),
+                                    menuMaxHeight: 300,
                                     decoration: InputDecoration(
                                       prefixIcon: Icon(LucideIcons.mapPin, size: 18),
                                     ),
+                                    isDense: true,
                                     items: [
                                       DropdownMenuItem(
                                         value: LocationsEnum.warehouse,
@@ -212,6 +216,30 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                                       }
                                       return null;
                                     },
+                                  ),
+                                  SizedBox(height: AppSpacing.xs),
+                                  Row(
+                                    children: [
+                                      SizedBox(width: AppSpacing.sm),
+                                      Text(
+                                        'Qoldiq: ',
+                                        style: textTheme.bodySmall?.copyWith(),
+                                      ),
+                                      Text(
+                                        _fromLocation == LocationsEnum.warehouse ? _selectedWarehouseItem!.warehouseQuantity.intOrDouble.str : _selectedWarehouseItem!.shopQuantity.intOrDouble.str,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      // units
+                                      SizedBox(width: 4),
+                                      Text(
+                                        _selectedWarehouseItem!.item.unit.shortName,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -251,9 +279,12 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                                   SizedBox(height: AppSpacing.sm),
                                   DropdownButtonFormField<LocationsEnum>(
                                     initialValue: _toLocation,
+                                    borderRadius: BorderRadius.circular(AppRadius.md),
+                                    menuMaxHeight: 300,
                                     decoration: InputDecoration(
                                       prefixIcon: Icon(LucideIcons.mapPin, size: 18),
                                     ),
+
                                     items: [
                                       DropdownMenuItem(
                                         value: LocationsEnum.warehouse,
@@ -281,42 +312,33 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                                       return null;
                                     },
                                   ),
+                                  SizedBox(height: AppSpacing.xs),
+                                  Row(
+                                    children: [
+                                      SizedBox(width: AppSpacing.sm),
+                                      Text(
+                                        'Qoldiq: ',
+                                        style: textTheme.bodySmall?.copyWith(),
+                                      ),
+                                      Text(
+                                        _toLocation == LocationsEnum.warehouse ? _selectedWarehouseItem!.warehouseQuantity.intOrDouble.str : _selectedWarehouseItem!.shopQuantity.intOrDouble.str,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        _selectedWarehouseItem!.item.unit.shortName,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
                           ],
-                        ),
-
-                        SizedBox(height: AppSpacing.md),
-
-                        // Available Quantity Display
-                        Container(
-                          padding: EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                LucideIcons.packageCheck,
-                                color: theme.colorScheme.primary,
-                                size: 18,
-                              ),
-                              SizedBox(width: AppSpacing.sm),
-                              Text(
-                                'Mavjud miqdor: ',
-                                style: textTheme.bodyMedium,
-                              ),
-                              Text(
-                                _availableQuantity.toStringAsFixed(1),
-                                style: textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
 
                         SizedBox(height: AppSpacing.md),
@@ -335,7 +357,7 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                           decoration: InputDecoration(
                             hintText: 'Miqdorni kiriting',
                             prefixIcon: Icon(LucideIcons.hash, size: 18),
-                            helperText: 'Maksimal: ${_availableQuantity.toStringAsFixed(1)}',
+                            helperText: 'Maksimal: ${_availableQuantity.intOrDouble.str} ${_selectedWarehouseItem!.item.unit.shortName}',
                             helperStyle: textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.primary,
                             ),

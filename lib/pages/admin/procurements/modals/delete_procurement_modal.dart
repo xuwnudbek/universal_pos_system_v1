@@ -45,7 +45,7 @@ class DeleteProcurementModal extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
                 color: theme.colorScheme.outline.withValues(alpha: 0.3),
@@ -111,7 +111,7 @@ class DeleteProcurementModal extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer,
+              color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Row(
@@ -124,7 +124,7 @@ class DeleteProcurementModal extends StatelessWidget {
                 SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
-                    "Bu amal qaytarib bo'lmaydi!",
+                    "Bu amalni qaytarib bo'lmaydi!",
                     style: textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
                       fontWeight: FontWeight.w500,

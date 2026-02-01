@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:universal_pos_system_v1/models/warehouse/warehouse_item.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
+import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
+import 'package:universal_pos_system_v1/utils/functions/string_to_hex.dart';
 
 class SearchableWarehouseItemDialog extends StatefulWidget {
   final List<WarehouseItem> warehouseItems;
@@ -98,7 +100,10 @@ class _SearchableWarehouseItemDialogState extends State<SearchableWarehouseItemD
                 autofocus: true,
                 decoration: InputDecoration(
                   hintText: 'Maxsulot qidirish...',
-                  prefixIcon: Icon(LucideIcons.search),
+                  prefixIcon: Icon(
+                    LucideIcons.search,
+                    size: 18,
+                  ),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
                           icon: Icon(LucideIcons.x),
@@ -136,12 +141,12 @@ class _SearchableWarehouseItemDialogState extends State<SearchableWarehouseItemD
                           leading: Container(
                             padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                              color: Color(hexToColor(warehouseItem.item.category?.color?.hex ?? '000000')).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(AppRadius.sm),
                             ),
                             child: Icon(
                               LucideIcons.package,
-                              color: theme.colorScheme.primary,
+                              color: Color(hexToColor(warehouseItem.item.category?.color?.hex ?? '000000')),
                               size: 20,
                             ),
                           ),
@@ -162,7 +167,7 @@ class _SearchableWarehouseItemDialogState extends State<SearchableWarehouseItemD
                               Row(
                                 children: [
                                   Text(
-                                    'Ombor: ${warehouseItem.warehouseQuantity.toStringAsFixed(1)}',
+                                    'Ombor: ${warehouseItem.warehouseQuantity.intOrDouble.str}',
                                     style: textTheme.bodySmall?.copyWith(
                                       color: warehouseItem.warehouseQuantity > 0 ? Colors.green : Colors.grey,
                                       fontWeight: FontWeight.w500,
@@ -170,9 +175,17 @@ class _SearchableWarehouseItemDialogState extends State<SearchableWarehouseItemD
                                   ),
                                   SizedBox(width: 12),
                                   Text(
-                                    'Do\'kon: ${warehouseItem.shopQuantity.toStringAsFixed(1)}',
+                                    'Do\'kon: ${warehouseItem.shopQuantity.intOrDouble.str}',
                                     style: textTheme.bodySmall?.copyWith(
                                       color: warehouseItem.shopQuantity > 0 ? Colors.blue : Colors.grey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    'O\'lchov: ${warehouseItem.item.unit.shortName}',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: warehouseItem.totalQuantity > 0 ? Colors.purple : Colors.grey,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

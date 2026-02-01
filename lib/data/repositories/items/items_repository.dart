@@ -52,16 +52,18 @@ class ItemsRepository {
     required String name,
     required String barcode,
     required int unitId,
+    required double salePrice,
     required int categoryId,
-  }) => itemsDao.insertItem(name, barcode, unitId, categoryId);
+  }) => itemsDao.insertItem(name, barcode, unitId, salePrice, categoryId);
 
   Future<void> update({
     required int id,
     required String name,
     required String barcode,
     required int unitId,
+    required double salePrice,
     required int categoryId,
-  }) => itemsDao.updateItem(id, name, barcode, unitId, categoryId);
+  }) => itemsDao.updateItem(id, name, barcode, unitId, salePrice, categoryId);
 
   Future delete(int id) => itemsDao.deleteItem(id);
 }

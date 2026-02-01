@@ -2,12 +2,17 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:universal_pos_system_v1/pages/admin/admin_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/categories/categories_page.dart';
+import 'package:universal_pos_system_v1/pages/admin/expenses/expenses_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/items/items_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/procurements/procurements_page.dart';
+import 'package:universal_pos_system_v1/pages/admin/reports/reports_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/warehouse/warehouse_page.dart';
-import 'package:universal_pos_system_v1/pages/splash_page.dart';
+import 'package:universal_pos_system_v1/pages/auth/auth_page.dart';
+import 'package:universal_pos_system_v1/pages/splash/splash_page.dart';
+import 'package:universal_pos_system_v1/pages/user/sales/sales_page.dart';
 
 enum AppRoute {
+  auth,
   splash,
   home,
   sales,
@@ -25,6 +30,8 @@ enum AppRoute {
 
   String get name {
     switch (this) {
+      case AppRoute.auth:
+        return 'auth';
       case AppRoute.splash:
         return 'splash';
       case AppRoute.home:
@@ -56,6 +63,8 @@ enum AppRoute {
 
   String get path {
     switch (this) {
+      case AppRoute.auth:
+        return '/auth';
       case AppRoute.splash:
         return '/splash';
       case AppRoute.home:
@@ -90,12 +99,18 @@ final appRouter = GoRouter(
   observers: [
     // Add observers if needed
   ],
-  initialLocation: AppRoute.splash.path,
+  initialLocation: AppRoute.auth.path,
   routes: [
     GoRoute(
       path: AppRoute.splash.path,
       name: AppRoute.splash.name,
       builder: (_, _) => const SplashPage(),
+    ),
+
+    GoRoute(
+      path: AppRoute.auth.path,
+      name: AppRoute.auth.name,
+      builder: (_, _) => const AuthPage(),
     ),
 
     GoRoute(
@@ -124,8 +139,8 @@ final appRouter = GoRouter(
           path: AppRoute.sales.path,
           name: AppRoute.sales.name,
           builder: (context, state) {
-            return SizedBox.shrink();
-            // return SalesPage();
+            // return SizedBox.shrink();
+            return SalesPage();
           },
         ),
         GoRoute(
@@ -160,14 +175,14 @@ final appRouter = GoRouter(
           path: AppRoute.expenses.path,
           name: AppRoute.expenses.name,
           builder: (context, state) {
-            return SizedBox.shrink();
+            return ExpensesPage();
           },
         ),
         GoRoute(
           path: AppRoute.reports.path,
           name: AppRoute.reports.name,
           builder: (context, state) {
-            return SizedBox.shrink();
+            return ReportsPage();
           },
         ),
         GoRoute(

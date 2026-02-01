@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
-import 'package:universal_pos_system_v1/data/models/items_full.dart';
-import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/units/units_repository.dart';
-import 'package:universal_pos_system_v1/models/item_form_result.dart';
-import 'package:universal_pos_system_v1/pages/admin/items/provider/items_provider.dart';
-import 'package:universal_pos_system_v1/pages/admin/items/modals/add_item_modal.dart';
-import 'package:universal_pos_system_v1/pages/admin/items/modals/delete_item_modal.dart';
-import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
-import 'package:universal_pos_system_v1/utils/functions/string_to_hex.dart';
-import 'package:universal_pos_system_v1/utils/theme/app_colors.dart';
-import 'package:universal_pos_system_v1/widgets/button.dart';
-import 'package:universal_pos_system_v1/widgets/icon_button2.dart';
-import 'package:universal_pos_system_v1/widgets/loaders/app_loader.dart';
-import 'package:universal_pos_system_v1/widgets/loaders/app_shimmer_loader.dart';
+
+import '/data/models/item_category_full.dart';
+import '/data/models/items_full.dart';
+import '/data/repositories/items/item_categories_repository.dart';
+import '/data/repositories/items/items_repository.dart';
+import '/data/repositories/units/units_repository.dart';
+import '/models/item_form_result.dart';
+import '/pages/admin/items/provider/items_provider.dart';
+import '/pages/admin/items/modals/add_item_modal.dart';
+import '/pages/admin/items/modals/delete_item_modal.dart';
+import '/utils/constants/app_constants.dart';
+import '/utils/functions/string_to_hex.dart';
+import '/utils/theme/app_colors.dart';
+import '/widgets/button.dart';
+import '/widgets/icon_button2.dart';
+import '/widgets/loaders/app_loader.dart';
+import '/widgets/loaders/app_shimmer_loader.dart';
 
 class ItemsPage extends StatefulWidget {
   const ItemsPage({super.key});
@@ -165,8 +166,10 @@ class _ItemsPageState extends State<ItemsPage> {
                                           label: Text(category.name),
                                           selected: isSelected,
                                           onSelected: (selected) {
-                                            context.read<ItemsProvider>().onSelectCategory(category);
+                                            if (!mounted) return;
+
                                             _paginatorController.goToPageWithRow(0);
+                                            context.read<ItemsProvider>().onSelectCategory(category);
                                           },
                                         );
                                       },
@@ -230,12 +233,14 @@ class _ItemsPageState extends State<ItemsPage> {
                                   horizontalMargin: AppSpacing.lg,
                                   minWidth: 1200,
                                   headingRowHeight: 56,
-                                  dataRowHeight: 60,
+                                  dataRowHeight: 50,
                                   rowsPerPage: 10,
                                   availableRowsPerPage: const [10, 20, 50, 100],
                                   sortArrowIcon: LucideIcons.arrowDown,
                                   sortArrowIconColor: theme.colorScheme.primary,
-                                  border: TableBorder(),
+                                  border: TableBorder.all(
+                                    color: AppColors.surface,
+                                  ),
                                   headingRowDecoration: BoxDecoration(
                                     color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.vertical(
@@ -346,7 +351,6 @@ class ItemsDataSource extends DataTableSource {
         DataCell(
           Row(
             spacing: AppSpacing.sm,
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Card(
@@ -409,7 +413,7 @@ class ItemsDataSource extends DataTableSource {
             children: [
               IconButton2(
                 type: IconButton2Type.info,
-                icon: Icons.edit,
+                icon: LucideIcons.edit,
                 onPressed: () async {
                   final itemsProvider = context.read<ItemsProvider>();
 
@@ -429,7 +433,7 @@ class ItemsDataSource extends DataTableSource {
               ),
               IconButton2(
                 type: IconButton2Type.danger,
-                icon: Icons.delete,
+                icon: LucideIcons.trash2,
                 onPressed: () async {
                   final itemsProvider = context.read<ItemsProvider>();
 

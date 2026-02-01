@@ -71,6 +71,25 @@ class StocksDao extends DatabaseAccessor<AppDatabase> with _$StocksDaoMixin {
     );
   }
 
+  // Get Stocks By Item
+  Future<StockFull?> getByItem(int itemId) async {
+    final query =
+        select(stocks).join([
+            leftOuterJoin(items, items.id.equalsExp(stocks.itemId)),
+          ])
+          ..where(stocks.itemId.equals(itemId))
+          ..limit(1);
+
+    final row = await query.getSingleOrNull();
+
+    return row == null
+        ? null
+        : StockFull.from(
+            stock: row.readTable(stocks),
+            item: row.readTable(items),
+          );
+  }
+
   // Get Stocks By Location
   Future<List<StockFull>> getByLocation(LocationsEnum location) {
     final query = select(stocks).join([
@@ -122,9 +141,30 @@ class StocksDao extends DatabaseAccessor<AppDatabase> with _$StocksDaoMixin {
   }
 
   // Update Stock Quantity
-  Future<int> updateQuantity(int id, double quantity) {
-    final query = update(stocks)..where((s) => s.id.equals(id));
-    return query.write(StocksCompanion(quantity: Value(quantity)));
+  Future<int> updateQuantity(
+    int itemId,
+    LocationsEnum fromLocation,
+    LocationsEnum toLocation,
+    double quantity,
+  ) {
+    return transaction(() async {
+      final fromStock = await getByItemAndLocation(itemId, fromLocation);
+      final toStock = await getByItemAndLocation(itemId, toLocation);
+
+      if (fromStock != null) {
+        // Decrease quantity from the source location
+        await updateStock(fromStock.id, itemId, fromLocation, fromStock.quantity - quantity);
+      }
+
+      if (toStock != null) {
+        // Increase quantity at the destination location
+        await updateStock(toStock.id, itemId, toLocation, toStock.quantity + quantity);
+      } else {
+        await insertStock(itemId, toLocation, quantity);
+      }
+
+      return Future.value(0);
+    });
   }
 
   // Delete Stock

@@ -1,11 +1,14 @@
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/daos/transfers/transfers_dao.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
+import 'package:universal_pos_system_v1/data/models/transfer_full.dart';
 
 class TransfersRepository {
   final TransfersDao transfersDao;
 
   const TransfersRepository(this.transfersDao);
+
+  Future<List<TransferFull>> getAllWithItems() => transfersDao.getAllWithItems();
 
   Future<List<Transfer>> getAll() => transfersDao.getAll();
 

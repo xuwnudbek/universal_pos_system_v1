@@ -8,6 +8,7 @@ import 'package:universal_pos_system_v1/pages/admin/procurements/widgets/searcha
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/utils/formatters/sum_input_formatter.dart';
+import 'package:universal_pos_system_v1/utils/functions/show_snackbar.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 import 'package:universal_pos_system_v1/widgets/icon_button2.dart';
 
@@ -106,8 +107,10 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       if (_items.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kamida bitta maxsulot qo\'shing')),
+        showAppSnackBar(
+          context,
+          'Kamida bitta maxsulot qo\'shing',
+          type: SnackBarType.error,
         );
         return;
       }
@@ -115,8 +118,10 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
       // Validate all items have selected item
       for (var item in _items) {
         if (item.selectedItem == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Barcha maxsulotlarni tanlang')),
+          showAppSnackBar(
+            context,
+            'Barcha maxsulotlarni tanlang',
+            type: SnackBarType.error,
           );
           return;
         }

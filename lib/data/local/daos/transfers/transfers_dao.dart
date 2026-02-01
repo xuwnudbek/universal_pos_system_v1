@@ -1,15 +1,51 @@
 import 'package:drift/drift.dart';
 import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
+import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
+import 'package:universal_pos_system_v1/data/models/items_full.dart';
+import 'package:universal_pos_system_v1/data/models/transfer_full.dart';
 
 import '../../app_database.dart';
 import '../../tables/transfers_table.dart';
 import '../../tables/items_table.dart';
+import '../../tables/item_categories_table.dart';
+import '../../tables/units_table.dart';
 
 part 'transfers_dao.g.dart';
 
-@DriftAccessor(tables: [Transfers, Items])
+@DriftAccessor(tables: [Transfers, Items, ItemCategories, Units])
 class TransfersDao extends DatabaseAccessor<AppDatabase> with _$TransfersDaoMixin {
   TransfersDao(super.db);
+
+  // Get All Transfers with Item Details
+  Future<List<TransferFull>> getAllWithItems() async {
+    final query = select(transfers).join([
+      leftOuterJoin(items, items.id.equalsExp(transfers.itemId)),
+      leftOuterJoin(itemCategories, itemCategories.id.equalsExp(items.categoryId)),
+      leftOuterJoin(units, units.id.equalsExp(items.unitId)),
+    ])..orderBy([OrderingTerm.desc(transfers.createdAt)]);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      final transfer = row.readTable(transfers);
+      final item = row.readTable(items);
+      final category = row.readTableOrNull(itemCategories);
+      final unit = row.readTable(units);
+
+      return TransferFull(
+        transfer: transfer,
+        item: ItemFull.from(
+          item: item,
+          category: category != null
+              ? ItemCategoryFull.from(
+                  category: category,
+                )
+              : null,
+          unit: unit,
+        ),
+      );
+    }).toList();
+  }
 
   // Get All Transfers
   Future<List<Transfer>> getAll() => (select(transfers)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();

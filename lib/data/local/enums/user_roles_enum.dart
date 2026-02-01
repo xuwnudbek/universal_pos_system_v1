@@ -1,0 +1,4 @@
+enum UserRolesEnum {
+  admin,
+  cashier,
+}

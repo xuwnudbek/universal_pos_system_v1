@@ -142,6 +142,7 @@ class ItemsProvider extends ChangeNotifier {
         barcode: result.barcode,
         categoryId: result.categoryId,
         unitId: result.unitId,
+        salePrice: result.salePrice,
       );
 
       await getAllItems();
@@ -159,6 +160,7 @@ class ItemsProvider extends ChangeNotifier {
         barcode: result.barcode,
         categoryId: result.categoryId,
         unitId: result.unitId,
+        salePrice: result.salePrice,
       );
 
       await getAllItems();

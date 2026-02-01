@@ -1,14 +1,15 @@
 import 'package:universal_pos_system_v1/data/local/daos/procurements/procurement_items_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/stocks/stocks_dao.dart';
+import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
 import 'package:universal_pos_system_v1/data/models/procurement_item_full.dart';
-import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
 
 class ProcurementItemsRepository {
   final ProcurementItemsDao procurementItemsDao;
-  final ItemsRepository itemsRepository;
+  final StocksDao stocksDao;
 
   const ProcurementItemsRepository(
     this.procurementItemsDao,
-    this.itemsRepository,
+    this.stocksDao,
   );
 
   Future<List<ProcurementItemFull>> getByProcurementId(int procurementId) async {
@@ -21,7 +22,29 @@ class ProcurementItemsRepository {
     required int itemId,
     required double quantity,
     required double purchasePrice,
-  }) => procurementItemsDao.insertProcurementItem(procurementId, itemId, quantity, purchasePrice);
+  }) async {
+    var res = await procurementItemsDao.insertProcurementItem(procurementId, itemId, quantity, purchasePrice);
+    var maybeStock = await stocksDao.getByItem(itemId);
+
+    if (maybeStock != null) {
+      // Update existing stock
+      await stocksDao.updateStock(
+        maybeStock.id,
+        itemId,
+        maybeStock.location,
+        maybeStock.quantity + quantity,
+      );
+    } else {
+      // Create new stock entry
+      await stocksDao.insertStock(
+        itemId,
+        LocationsEnum.warehouse,
+        quantity,
+      );
+    }
+
+    return res;
+  }
 
   Future<void> update({
     required int id,

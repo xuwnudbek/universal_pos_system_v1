@@ -28,7 +28,17 @@ class StocksRepository {
     required double quantity,
   }) => stocksDao.updateStock(id, itemId, location, quantity);
 
-  Future<void> updateQuantity(int id, double quantity) => stocksDao.updateQuantity(id, quantity);
+  Future<void> updateQuantity(
+    int itemId,
+    LocationsEnum fromLocation,
+    LocationsEnum toLocation,
+    double quantity,
+  ) => stocksDao.updateQuantity(
+    itemId,
+    fromLocation,
+    toLocation,
+    quantity,
+  );
 
   Future delete(int id) => stocksDao.deleteStock(id);
 }

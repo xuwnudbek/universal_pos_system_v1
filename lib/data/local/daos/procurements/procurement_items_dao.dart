@@ -14,23 +14,19 @@ class ProcurementItemsDao extends DatabaseAccessor<AppDatabase> with _$Procureme
   // Get Procurement Items By Procurement Id with Item[Unit] via JOIN
   Future<List<ProcurementItemFull>> getByProcurementId(int procurementId) async {
     final query =
-        select(procurementItems).join(
-            [
-              innerJoin(
-                db.items,
-                db.items.id.equalsExp(procurementItems.itemId),
-              ),
-              innerJoin(
-                db.units,
-                db.units.id.equalsExp(db.items.unitId),
-              ),
-            ],
-          )
+        select(procurementItems).join([
+            innerJoin(
+              db.items,
+              db.items.id.equalsExp(procurementItems.itemId),
+            ),
+            innerJoin(
+              db.units,
+              db.units.id.equalsExp(db.items.unitId),
+            ),
+          ])
           ..where(procurementItems.procurementId.equals(procurementId))
           ..orderBy(
-            [
-              OrderingTerm.asc(db.items.name),
-            ],
+            [OrderingTerm.asc(db.items.name)],
           );
 
     final results = await query.get();

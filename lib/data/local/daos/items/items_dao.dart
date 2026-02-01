@@ -16,10 +16,15 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     return (select(items)..where((c) => c.id.equals(id))).getSingle();
   }
 
+  Future<List<Item>> getByIds(List<int> ids) {
+    return (select(items)..where((c) => c.id.isIn(ids))).get();
+  }
+
   Future<int> insertItem(
     String name,
     String barcode,
     int unitId,
+    double salePrice,
     int? categoryId,
   ) {
     return into(items).insert(
@@ -27,6 +32,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
         name: name,
         barcode: barcode,
         unitId: unitId,
+        salePrice: salePrice,
         categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
       ),
     );
@@ -37,6 +43,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     String name,
     String barcode,
     int unitId,
+    double salePrice,
     int? categoryId,
   ) {
     final query = update(items)..where((c) => c.id.equals(id));
@@ -46,6 +53,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
         name: Value(name),
         barcode: Value(barcode),
         unitId: Value(unitId),
+        salePrice: Value(salePrice),
         categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
       ),
     );

@@ -5,6 +5,9 @@ import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/models/item_form_result.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
+import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
+import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
+import 'package:universal_pos_system_v1/utils/formatters/sum_input_formatter.dart';
 import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 
@@ -29,6 +32,7 @@ class _AddItemModalState extends State<AddItemModal> {
 
   final _nameCtrl = TextEditingController();
   final _barcodeCtrl = TextEditingController();
+  final _salePriceCtrl = TextEditingController();
 
   ItemCategoryFull? _selectedCategory;
   Unit? _selectedUnit;
@@ -40,15 +44,13 @@ class _AddItemModalState extends State<AddItemModal> {
     if (item != null) {
       _nameCtrl.text = item.name;
       _barcodeCtrl.text = item.barcode;
-
+      _salePriceCtrl.text = item.salePrice.intOrDouble.str.toSumString();
       // Find the matching category from widget.categories by ID
       _selectedCategory = widget.categories.where((c) => c.id == item.category?.id).firstOrNull;
       _selectedUnit = widget.units.where((u) => u.id == item.unit.id).firstOrNull;
     } else {
       // Auto-generate barcode for new items
       _barcodeCtrl.text = _generateBarcode();
-      // _selectedCategory = widget.categories.firstOrNull;
-      // _selectedUnit = widget.units.firstOrNull;
     }
 
     super.initState();
@@ -71,6 +73,7 @@ class _AddItemModalState extends State<AddItemModal> {
       barcode: _barcodeCtrl.text.trim(),
       categoryId: _selectedCategory!.id,
       unitId: _selectedUnit!.id,
+      salePrice: double.tryParse(_salePriceCtrl.text.replaceAll(' ', '')) ?? 0,
     );
 
     Navigator.of(context).pop(result);
@@ -114,14 +117,9 @@ class _AddItemModalState extends State<AddItemModal> {
               Row(
                 spacing: AppSpacing.md,
                 children: [
-                  Expanded(child: _field(_nameCtrl, 'Mahsulot nomi')),
-                  Expanded(child: _field(_barcodeCtrl, 'Barcode', readOnly: true)),
-                ],
-              ),
-              Row(
-                spacing: AppSpacing.md,
-                children: [
+                  Expanded(flex: 3, child: _field(_nameCtrl, 'Mahsulot nomi')),
                   Expanded(
+                    flex: 2,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: DropdownButtonFormField<ItemCategoryFull>(
@@ -135,9 +133,20 @@ class _AddItemModalState extends State<AddItemModal> {
                         onChanged: (v) => setState(() => _selectedCategory = v!),
                         menuMaxHeight: 300,
                         borderRadius: BorderRadius.circular(AppRadius.md),
-                        decoration: InputDecoration(labelText: 'Kategoriya'),
+                        decoration: InputDecoration(
+                          labelText: 'Kategoriya',
+                        ),
                       ),
                     ),
+                  ),
+                  Expanded(flex: 2, child: _field(_barcodeCtrl, 'Barcode')),
+                ],
+              ),
+              Row(
+                spacing: AppSpacing.md,
+                children: [
+                  Expanded(
+                    child: _field(_salePriceCtrl, 'Sotish narxi', isNumber: true, inputFormatters: [SumInputFormatter()]),
                   ),
                   Expanded(
                     child: Padding(

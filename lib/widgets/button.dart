@@ -33,7 +33,7 @@ class _ButtonState extends State<Button> {
           backgroundColor: widget.primaryColor ?? theme.primaryColor,
           foregroundColor: theme.colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
           ),
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
         ),

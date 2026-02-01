@@ -22,6 +22,7 @@ class _HoverWidgetState extends State<HoverWidget> {
     final colorScheme = theme.colorScheme;
 
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: DecoratedBox(
@@ -30,9 +31,10 @@ class _HoverWidgetState extends State<HoverWidget> {
           borderRadius: BorderRadius.circular(16.0),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withValues(alpha: .1),
-              blurRadius: _isHovered ? 8.0 : 0.0,
-              spreadRadius: _isHovered ? 2.0 : 0.0,
+              color: Colors.black26,
+              blurRadius: _isHovered ? 4.0 : 0.0,
+              spreadRadius: _isHovered ? 1.0 : 0.0,
+              offset: Offset(0, _isHovered ? 2.0 : 0.0),
             ),
           ],
           border: Border.all(

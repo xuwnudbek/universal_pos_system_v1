@@ -9,18 +9,18 @@ class ProcurementsProvider extends ChangeNotifier {
   final ProcurementsRepository procurementsRepository;
   final ProcurementItemsRepository procurementItemsRepository;
 
+  bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
+
+  List<ProcurementFull> _procurements = [];
+  List<ProcurementFull> get procurements => _procurements;
+
   ProcurementsProvider(
     this.procurementsRepository,
     this.procurementItemsRepository,
   ) {
     _initialize();
   }
-
-  bool _isInitialized = false;
-  bool get isInitialized => _isInitialized;
-
-  List<ProcurementFull> _procurements = [];
-  List<ProcurementFull> get procurements => _procurements;
 
   Future<void> _initialize() async {
     try {

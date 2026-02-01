@@ -63,36 +63,31 @@ class _AppSidebarState extends State<AppSidebar> {
                           padding: EdgeInsets.symmetric(
                             horizontal: provider.isExpanded ? 8.0 : 0.0,
                           ),
-                          children: provider.sidebarItems
-                              .map(
-                                (item) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 4.0),
-                                  child: SidebarItemWidget(
-                                    item: item,
-                                    isExpanded: provider.isExpanded,
-                                    isSelected: provider.selectedItem == item,
-                                    onTap: (item) {
-                                      provider.selectItem(item);
-                                    },
-                                  ),
+                          children: [
+                            ...provider.sidebarItems.map(
+                              (item) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: SidebarItemWidget(
+                                  item: item,
+                                  isExpanded: provider.isExpanded,
+                                  isSelected: provider.selectedItem == item,
+                                  onTap: (item) {
+                                    provider.selectItem(item);
+                                  },
                                 ),
-                              )
-                              .toList(),
-                        ),
-                        Spacer(),
-                        Divider(),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                          child: SidebarItemWidget(
-                            item: SidebarItem(
-                              title: 'Logout',
-                              routeName: AppRoute.logout.name,
-                              iconData: LucideIcons.logOut,
+                              ),
                             ),
-                            isExpanded: provider.isExpanded,
-                            isSelected: false,
-                            onTap: null,
-                          ),
+                            SidebarItemWidget(
+                              item: SidebarItem(
+                                title: 'Logout',
+                                routeName: AppRoute.logout.name,
+                                iconData: LucideIcons.logOut,
+                              ),
+                              isExpanded: provider.isExpanded,
+                              isSelected: false,
+                              onTap: null,
+                            ),
+                          ],
                         ),
                       ],
                     ),
