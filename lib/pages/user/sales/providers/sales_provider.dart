@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
@@ -18,10 +21,15 @@ class SalesProvider extends ChangeNotifier {
 
   // Sales History
   List<SaleFull> _sales = [];
-  List<SaleFull> get sales => _sales;
+  List<SaleFull> get complatedSales => _sales.where((s) => s.status == SaleStatusEnum.completed).toList();
+  List<SaleFull> get savedSales => _sales.where((s) => s.status == SaleStatusEnum.saved).toList();
 
   final searchController = TextEditingController();
   String get searchText => searchController.text;
+
+  // Categories & Selected Category
+  List<ItemCategoryFull> _itemCategories = [];
+  List<ItemCategoryFull> get itemCategories => _itemCategories;
 
   // Selected Category
   ItemCategoryFull? _selectedCategory;
@@ -40,10 +48,6 @@ class SalesProvider extends ChangeNotifier {
 
     return _items.where((i) => i.category?.id == selectedCategory?.id).toList();
   }
-
-  // Categories & Selected Category
-  List<ItemCategoryFull> _itemCategories = [];
-  List<ItemCategoryFull> get itemCategories => _itemCategories;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -64,8 +68,18 @@ class SalesProvider extends ChangeNotifier {
   Future<void> loadInitialData() async {
     await loadItems();
     await loadItemCategories();
+    await loadSales();
 
     isInitialized = true;
+  }
+
+  Future<void> loadSales() async {
+    try {
+      _sales = await salesRepository.getAll();
+      notifyListeners();
+    } catch (e) {
+      log('Error loading sales: $e');
+    }
   }
 
   Future<void> loadItems() async {
@@ -91,7 +105,7 @@ class SalesProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      rethrow;
+      log('Error creating/loading temp sale: $e');
     }
   }
 
@@ -157,6 +171,93 @@ class SalesProvider extends ChangeNotifier {
     // Reload the temp sale to reflect changes
     _tempSale = await salesRepository.getBySaleId(_tempSale!.id);
     notifyListeners();
+  }
+
+  // Save Temp Sale to Sales History
+  Future<void> saveTempSale(int userId) async {
+    if (_tempSale == null || _tempSale!.items.isEmpty) {
+      throw Exception('No items in sale to save');
+    }
+
+    try {
+      // Change status from draft to saved
+      await salesRepository.updateStatus(
+        id: _tempSale!.id,
+        status: SaleStatusEnum.saved,
+      );
+
+      // Reload saved sales
+      await loadSales();
+
+      // Clear current temp sale
+      _tempSale = null;
+
+      // Create new temp sale
+      await createTempSale(userId);
+
+      notifyListeners();
+    } catch (e) {
+      log('Error saving temp sale: $e');
+      rethrow;
+    }
+  }
+
+  // Delete Temp Sale
+  Future<void> deleteTempSale() async {
+    if (_tempSale == null) return;
+
+    try {
+      // Delete the temp sale
+      await salesRepository.delete(_tempSale!.id);
+
+      // Clear current temp sale
+      _tempSale = null;
+
+      notifyListeners();
+    } catch (e) {
+      log('Error deleting temp sale: $e');
+    }
+  }
+
+  // Switch to a saved sale (make it the temp sale)
+  Future<void> switchToSale(int saleId, int userId) async {
+    try {
+      // If there's a current tempSale, delete it if it has no items
+      if (_tempSale != null) {
+        if (_tempSale!.items.isEmpty) {
+          await salesRepository.delete(_tempSale!.id);
+        } else {
+          // If it has items, keep it as saved
+          await salesRepository.updateStatus(
+            id: _tempSale!.id,
+            status: SaleStatusEnum.saved,
+          );
+        }
+      }
+
+      // Load the selected sale
+      final selectedSale = await salesRepository.getById(saleId);
+      if (selectedSale == null) {
+        throw Exception('Sale not found');
+      }
+
+      // Change its status to draft
+      await salesRepository.updateStatus(
+        id: saleId,
+        status: SaleStatusEnum.draft,
+      );
+
+      // Set it as temp sale
+      _tempSale = await salesRepository.getById(saleId);
+
+      // Reload saved sales
+      await loadSales();
+
+      notifyListeners();
+    } catch (e) {
+      log('Error switching to sale: $e');
+      rethrow;
+    }
   }
 
   @override

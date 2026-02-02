@@ -74,11 +74,42 @@ class SalesRepository {
     );
   }
 
+  // Get sales by enum status
+  Future<List<SaleFull>> getByStatus(SaleStatusEnum status) async {
+    final sales = await salesDao.getByStatus(status);
+    final saleItems = await saleItemsDao.getBySaleIds(sales.map((s) => s.id).toList());
+    final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
+    final payments = await salePaymentsDao.getBySaleIds(sales.map((s) => s.id).toList());
+
+    final enrichedSales = sales.map((sale) {
+      final itemsForSale = saleItems.where((si) => si.saleId == sale.id).toList();
+      final paymentsForSale = payments.where((sp) => sp.saleId == sale.id).toList();
+
+      final enrichedSaleItems = itemsForSale.map((si) {
+        final item = items.firstWhere((i) => i.id == si.itemId);
+        return SaleItemFull.from(
+          saleItem: si,
+          item: item,
+        );
+      }).toList();
+
+      return SaleFull.from(
+        sale: sale,
+        items: enrichedSaleItems,
+        payments: paymentsForSale,
+      );
+    }).toList();
+
+    return enrichedSales;
+  }
+
+  Future<SaleFull?> getById(int id) => getBySaleId(id);
+
   Future<SaleFull?> getDraftByUserId(int userId) async {
     final sale = await salesDao.getDraftByUserId(userId);
 
     if (sale == null) {
-      throw Exception('No draft sale found for user with ID $userId');
+      return null;
     }
 
     final saleItems = await saleItemsDao.getBySaleId(sale.id);
@@ -107,15 +138,9 @@ class SalesRepository {
   }) async {
     int saleId = await salesDao.insertSale(userId, status);
 
-    final sale = await salesDao.getById(saleId);
+    final sale = await getById(saleId);
 
-    // final saleFull = SaleFull.from(
-    //   user: null,
-    //   sale: sale!,
-    //   items: [],
-    // );
-
-    return Future.value();
+    return Future.value(sale!);
   }
 
   Future<void> updateStatus({

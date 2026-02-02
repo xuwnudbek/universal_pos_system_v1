@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
-import 'package:universal_pos_system_v1/data/models/items_full.dart';
-import 'package:universal_pos_system_v1/data/models/sale_full.dart';
-import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
-import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
-import 'package:universal_pos_system_v1/pages/auth/provider/auth_provider.dart';
+import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
 
-import '/data/local/app_database.dart';
+import '/data/models/item_category_full.dart';
+import '/data/models/items_full.dart';
+import '/data/models/sale_full.dart';
+import '/data/repositories/items/item_categories_repository.dart';
+import '/data/repositories/items/items_repository.dart';
+import '/pages/auth/provider/auth_provider.dart';
+
 import '/data/repositories/sales/sale_items_repository.dart';
 import '/data/repositories/sales/sales_repository.dart';
 import '/pages/user/sales/providers/sales_provider.dart';
 import '/pages/user/sales/widgets/item_card.dart';
+import '/pages/user/sales/widgets/saved_sales_dialog.dart';
+import '/pages/user/sales/widgets/sales_history_dialog.dart';
 import '/utils/constants/app_constants.dart';
 import '/utils/extensions/num_extension.dart';
 import '/utils/router/app_router.dart';
@@ -30,15 +33,12 @@ class SalesPage extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) =>
-              SalesProvider(
-                  context.read<SalesRepository>(),
-                  context.read<SaleItemsRepository>(),
-                  context.read<ItemsRepository>(),
-                  context.read<ItemCategoriesRepository>(),
-                )
-                ..createTempSale(context.read<AuthProvider>().currentUser!.id)
-                ..loadInitialData(),
+          create: (context) => SalesProvider(
+            context.read<SalesRepository>(),
+            context.read<SaleItemsRepository>(),
+            context.read<ItemsRepository>(),
+            context.read<ItemCategoriesRepository>(),
+          )..createTempSale(context.read<AuthProvider>().currentUser!.id),
         ),
       ],
       builder: (context, asyncSnapshot) {
@@ -62,6 +62,7 @@ class SalesPage extends StatelessWidget {
                       Container(
                         height: 60,
                         decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
                           border: Border(
                             bottom: BorderSide(
                               color: theme.dividerTheme.color ?? Colors.grey,
@@ -75,33 +76,39 @@ class SalesPage extends StatelessWidget {
                           children: [
                             Text("Chek", style: theme.textTheme.titleMedium),
                             Spacer(),
-                            Selector<SalesProvider, List<SaleFull>>(
-                              selector: (context, provider) => provider.sales,
-                              builder: (context, carts, _) {
-                                int count = carts.length;
+                            Consumer<SalesProvider>(
+                              builder: (context, provider, _) {
+                                int count = provider.savedSales.length;
 
-                                return Badge(
-                                  label: count > 0 ? Text(count.toString()) : null,
-                                  isLabelVisible: count > 0,
-                                  child: IconButton2(
-                                    onPressed: () {},
-                                    type: IconButton2Type.warning,
-                                    icon: LucideIcons.save,
-                                  ),
+                                return Builder(
+                                  builder: (context) {
+                                    return Badge(
+                                      label: count > 0 ? Text(count.toString()) : null,
+                                      isLabelVisible: count > 0,
+                                      child: IconButton2(
+                                        onPressed: () {
+                                          showSavedSalesDialog(context, provider.savedSales);
+                                        },
+                                        type: IconButton2Type.warning,
+                                        icon: LucideIcons.save,
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),
-                            Selector<SalesProvider, List<SaleFull>>(
-                              selector: (context, provider) => provider.sales,
-                              builder: (context, sales, _) {
-                                int count = sales.length;
+                            Consumer<SalesProvider>(
+                              builder: (context, provider, _) {
+                                int count = provider.complatedSales.length;
 
                                 return Badge(
                                   label: count > 0 ? Text(count.toString()) : null,
                                   isLabelVisible: count > 0,
                                   child: IconButton2(
-                                    onPressed: () {
-                                      // Show sales history
+                                    onPressed: () async {
+                                      if (context.mounted) {
+                                        showSalesHistoryDialog(context, provider.complatedSales);
+                                      }
                                     },
                                     type: IconButton2Type.info,
                                     icon: LucideIcons.history,
@@ -112,7 +119,7 @@ class SalesPage extends StatelessWidget {
 
                             IconButton2(
                               onPressed: () {
-                                // context.read<CartsProvider>().clearSavedCarts();
+                                context.read<SalesProvider>().deleteTempSale();
                               },
                               type: IconButton2Type.danger,
                               icon: LucideIcons.trash2,
@@ -162,7 +169,7 @@ class SalesPage extends StatelessWidget {
                                     children: [
                                       IconButton2(
                                         onPressed: () {
-                                          // context.read<SalesProvider>().decreaseCartItem(cartItem.item);
+                                          context.read<SalesProvider>().removeItemFromTempSale(saleItem.item.id);
                                         },
                                         type: IconButton2Type.warning,
                                         icon: LucideIcons.minus,
@@ -178,7 +185,7 @@ class SalesPage extends StatelessWidget {
                                       ),
                                       IconButton2(
                                         onPressed: () {
-                                          // context.read<SalesProvider>().increaseCartItem(saleItem.item);
+                                          context.read<SalesProvider>().addItemToTempSale(saleItem.item.id);
                                         },
                                         type: IconButton2Type.success,
                                         icon: LucideIcons.plus,
@@ -191,10 +198,20 @@ class SalesPage extends StatelessWidget {
                           },
                         ),
                       ),
-                      Divider(),
                       // Total
-                      Padding(
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        constraints: BoxConstraints(minHeight: 80),
                         padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          border: Border(
+                            top: BorderSide(
+                              color: theme.dividerTheme.color ?? Colors.grey,
+                              width: theme.dividerTheme.thickness ?? 1,
+                            ),
+                          ),
+                        ),
                         child: Column(
                           children: [
                             Row(
@@ -207,26 +224,25 @@ class SalesPage extends StatelessWidget {
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                // Selector<SalesProvider, double>(
-                                //   selector: (context, provider) => provider.sale.totalPrice,
-                                //   builder: (context, totalPrice, _) {
-                                //     return Text(
-                                //       totalPrice.toSum,
-                                //       style: textTheme.titleLarge?.copyWith(
-                                //         color: theme.colorScheme.onSurface,
-                                //         fontWeight: FontWeight.w500,
-                                //       ),
-                                //     );
-                                //   },
-                                // ),
+                                Consumer<SalesProvider>(
+                                  builder: (context, salesProvider, _) {
+                                    return Text(
+                                      (salesProvider.tempSale?.totalPrice ?? 0).intOrDouble.str.toSumString("UZS"),
+                                      style: textTheme.titleLarge?.copyWith(
+                                        color: theme.colorScheme.onSurface,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                             SizedBox(height: 16),
 
-                            /* Selector<SalesProvider, Cart>(
-                              selector: (context, provider) => provider.cart,
-                              builder: (context, cart, _) {
-                                bool enabled = !cart.isEmpty;
+                            Selector<SalesProvider, SaleFull?>(
+                              selector: (context, provider) => provider.tempSale,
+                              builder: (context, tempSale, _) {
+                                bool enabled = tempSale != null && tempSale.items.isNotEmpty;
 
                                 return Row(
                                   children: [
@@ -235,9 +251,8 @@ class SalesPage extends StatelessWidget {
                                       icon: LucideIcons.save,
                                       onPressed: enabled
                                           ? () {
-                                              final cart = context.read<SalesProvider>().cart;
-                                              context.read<SalesProvider>().addToSavedCarts(cart);
-                                              context.read<SalesProvider>().clearCart();
+                                              final userId = context.read<AuthProvider>().currentUser!.id;
+                                              context.read<SalesProvider>().saveTempSale(userId);
                                             }
                                           : null,
                                     ),
@@ -246,17 +261,7 @@ class SalesPage extends StatelessWidget {
                                       child: SizedBox(
                                         height: 36,
                                         child: ElevatedButton(
-                                          onPressed: enabled
-                                              ? () {
-                                                  final cart = context.read<SalesProvider>().cart;
-                                                  context.read<SalesProvider>().addToSaleHistory(
-                                                    cart,
-                                                    0,
-                                                    PaymentTypes.cash,
-                                                  );
-                                                  context.read<SalesProvider>().clearCart();
-                                                }
-                                              : null,
+                                          onPressed: enabled ? () {} : null,
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
@@ -271,7 +276,7 @@ class SalesPage extends StatelessWidget {
                                   ],
                                 );
                               },
-                            ), */
+                            ),
                           ],
                         ),
                       ),
@@ -400,10 +405,10 @@ class SalesPage extends StatelessWidget {
 
                             return GridView.builder(
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 7,
+                                crossAxisCount: 6,
                                 crossAxisSpacing: 8.0,
                                 mainAxisSpacing: 8.0,
-                                mainAxisExtent: 150,
+                                mainAxisExtent: 170,
                               ),
                               itemCount: items.length,
                               itemBuilder: (_, index) {

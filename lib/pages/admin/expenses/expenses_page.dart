@@ -94,6 +94,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
 
                           final result = await showDialog<ExpenseFormResult>(
                             context: context,
+                        barrierDismissible: false,
                             builder: (context) => AddExpenseModal(
                               categories: provider.categories,
                             ),
@@ -520,6 +521,7 @@ class ExpensesDataSource extends DataTableSource {
                   final provider = context.read<ExpensesProvider>();
                   final result = await showDialog<ExpenseFormResult>(
                     context: context,
+                        barrierDismissible: false,
                     builder: (context) => AddExpenseModal(
                       categories: provider.categories,
                       expense: expense,
@@ -564,6 +566,7 @@ class ExpensesDataSource extends DataTableSource {
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
+                        barrierDismissible: false,
                     builder: (context) => AlertDialog(
                       title: Text('O\'chirish'),
                       content: Text('Ushbu xarajatni o\'chirishni xohlaysizmi?'),

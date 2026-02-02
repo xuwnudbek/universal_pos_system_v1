@@ -65,6 +65,7 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
 
                       final result = await showDialog<ProcurementFormResult>(
                         context: context,
+                        barrierDismissible: false,
                         builder: (context) => AddProcurementsModal(items: items),
                       );
 

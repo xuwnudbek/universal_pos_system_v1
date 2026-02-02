@@ -135,6 +135,7 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                         onTap: () async {
                           final selectedItem = await showDialog<WarehouseItem>(
                             context: context,
+                            barrierDismissible: false,
                             builder: (context) => SearchableWarehouseItemDialog(
                               warehouseItems: widget.warehouseItems,
                               initialItem: _selectedWarehouseItem,

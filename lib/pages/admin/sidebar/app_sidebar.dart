@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/models/sidebar_item.dart';
 import 'package:universal_pos_system_v1/pages/admin/sidebar/widgets/sidebar_item_widget.dart';
+import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
 import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 
 import './provider/app_sidebar_provider.dart';
@@ -85,7 +86,10 @@ class _AppSidebarState extends State<AppSidebar> {
                               ),
                               isExpanded: provider.isExpanded,
                               isSelected: false,
-                              onTap: null,
+                              onTap: (item) async {
+                                await LocalStorage.logout();
+                                appRouter.goNamed(AppRoute.auth.name);
+                              },
                             ),
                           ],
                         ),

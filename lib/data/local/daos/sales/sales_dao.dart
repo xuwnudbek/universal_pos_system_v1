@@ -34,6 +34,12 @@ class SalesDao extends DatabaseAccessor<AppDatabase> with _$SalesDaoMixin {
         .getSingleOrNull();
   }
 
+  // Get Sales By Status
+  Future<List<Sale>> getByStatus(SaleStatusEnum status) {
+    final query = select(sales)..where((s) => s.status.equalsValue(status) & s.userId.equals(userId));
+    return query.get();
+  }
+
   // Insert Sale
   Future<int> insertSale(int userId, SaleStatusEnum? status) {
     return into(sales).insert(

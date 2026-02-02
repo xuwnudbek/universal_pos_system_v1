@@ -4236,7 +4236,7 @@ class $SaleItemsTable extends SaleItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sales (id)',
+      'REFERENCES sales (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _itemIdMeta = const VerificationMeta('itemId');
@@ -5324,6 +5324,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('procurement_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'sales',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('sale_items', kind: UpdateKind.delete)],
     ),
   ]);
 }

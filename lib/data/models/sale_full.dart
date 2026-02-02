@@ -10,6 +10,10 @@ class SaleFull {
   final List<SaleItemFull> items;
   final DateTime createdAt;
 
+  double get totalPrice {
+    return items.fold(0.0, (sum, item) => sum + item.quantity * item.item.salePrice);
+  }
+
   SaleFull({
     required this.id,
     this.user,

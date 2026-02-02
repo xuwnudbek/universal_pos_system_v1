@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:universal_pos_system_v1/data/local/enums/user_roles_enum.dart';
 import 'package:universal_pos_system_v1/data/repositories/users/users_repository.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
+import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 
 class AuthProvider extends ChangeNotifier {
   final UsersRepository usersRepo;
@@ -16,7 +18,31 @@ class AuthProvider extends ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
 
-  AuthProvider(this.usersRepo);
+  AuthProvider(this.usersRepo) {
+    init();
+  }
+
+  Future<void> init() async {
+    await _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final userId = LocalStorage.getInt('userId');
+    if (userId != null) {
+      _currentUser = await usersRepo.getById(userId);
+      notifyListeners();
+
+      if (_currentUser?.role == UserRolesEnum.admin) {
+        appRouter.goNamed(AppRoute.items.name);
+        return;
+      } else if (_currentUser?.role == UserRolesEnum.cashier) {
+        appRouter.goNamed(AppRoute.sales.name);
+        return;
+      }
+
+      appRouter.goNamed(AppRoute.auth.name);
+    }
+  }
 
   Future<bool> login(String username, String password) async {
     _isLoading = true;

@@ -37,8 +37,6 @@ void main() {
 
       await LocalStorage.init();
 
-      await LocalStorage.logout();
-
       runApp(const MyApp());
     },
     (error, stackTrace) {

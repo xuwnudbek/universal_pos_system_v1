@@ -61,6 +61,7 @@ class ProcurementCard extends StatelessWidget {
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
+                        barrierDismissible: false,
                       builder: (context) => DeleteProcurementModal(procurement: procurement),
                     );
 

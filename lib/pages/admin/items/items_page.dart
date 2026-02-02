@@ -82,6 +82,7 @@ class _ItemsPageState extends State<ItemsPage> {
 
                           final result = await showDialog<ItemFormResult>(
                             context: context,
+                            barrierDismissible: false,
                             builder: (context) => AddItemModal(
                               categories: itemsProvider.categories,
                               units: itemsProvider.units,
@@ -149,7 +150,6 @@ class _ItemsPageState extends State<ItemsPage> {
                                     selected: selectedCategory == null,
                                     onSelected: (selected) {
                                       context.read<ItemsProvider>().onSelectCategory(null);
-                                      _paginatorController.goToPageWithRow(0);
                                     },
                                   ),
 
@@ -168,7 +168,6 @@ class _ItemsPageState extends State<ItemsPage> {
                                           onSelected: (selected) {
                                             if (!mounted) return;
 
-                                            _paginatorController.goToPageWithRow(0);
                                             context.read<ItemsProvider>().onSelectCategory(category);
                                           },
                                         );
@@ -277,7 +276,6 @@ class _ItemsPageState extends State<ItemsPage> {
                                       size: ColumnSize.M,
                                       onSort: (columnIndex, ascending) {
                                         itemsProvider.sortByColumn(columnIndex, ascending);
-                                        _paginatorController.goToPageWithRow(0);
                                       },
                                     ),
                                     DataColumn2(
@@ -419,6 +417,7 @@ class ItemsDataSource extends DataTableSource {
 
                   var result = await showDialog<ItemFormResult>(
                     context: context,
+                    barrierDismissible: false,
                     builder: (context) => AddItemModal(
                       categories: itemsProvider.categories,
                       units: itemsProvider.units,
@@ -439,6 +438,7 @@ class ItemsDataSource extends DataTableSource {
 
                   final shouldDelete = await showDialog<bool>(
                     context: context,
+                    barrierDismissible: false,
                     builder: (context) => DeleteItemModal(item: item),
                   );
 

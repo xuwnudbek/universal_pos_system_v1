@@ -58,6 +58,7 @@ class CategoriesPage extends StatelessWidget {
 
                       ItemCategoryNameAndColor? data = await showDialog<ItemCategoryNameAndColor>(
                         context: context,
+                        barrierDismissible: false,
                         builder: (context) => AddCategoryModal(
                           colors: provider.colors,
                         ),
@@ -127,6 +128,7 @@ class CategoriesPage extends StatelessWidget {
                             onDelete: () async {
                               bool? isDeleted = await showDialog<bool>(
                                 context: context,
+                                barrierDismissible: false,
                                 builder: (context) => DeleteCategoryModal(category: category),
                               );
 
@@ -137,6 +139,7 @@ class CategoriesPage extends StatelessWidget {
                             onEdit: () async {
                               ItemCategoryNameAndColor? data = await showDialog<ItemCategoryNameAndColor>(
                                 context: context,
+                                barrierDismissible: false,
                                 builder: (context) => AddCategoryModal(
                                   category: category,
                                   colors: categoriesProvider.colors,

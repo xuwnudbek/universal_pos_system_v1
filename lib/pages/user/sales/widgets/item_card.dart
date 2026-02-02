@@ -44,7 +44,6 @@ class ItemCard extends StatelessWidget {
             spacing: AppSpacing.md,
             children: [
               Expanded(
-                flex: 3,
                 child: Container(
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withValues(alpha: .1),
@@ -60,21 +59,26 @@ class ItemCard extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: 40,
+                height: 60,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: EdgeInsets.only(
+                    left: AppSpacing.md,
+                    right: AppSpacing.md,
+                    bottom: AppSpacing.sm,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        item.name,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Text(
+                          item.name,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: AppSpacing.xs),
                       Text(

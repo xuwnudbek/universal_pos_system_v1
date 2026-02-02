@@ -79,6 +79,7 @@ class _WarehousePageState extends State<WarehousePage> {
 
                           final result = await showDialog<TransferFormResult>(
                             context: context,
+                        barrierDismissible: false,
                             builder: (context) => WarehouseTransferModal(
                               warehouseItems: provider.warehouseItems,
                             ),

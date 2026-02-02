@@ -443,6 +443,7 @@ class _AddProcurementsModalState extends State<AddProcurementsModal> {
               onTap: () async {
                 final selectedItem = await showDialog<ItemFull>(
                   context: context,
+                        barrierDismissible: false,
                   builder: (context) => SearchableItemDialog(
                     items: widget.items,
                     initialItem: item.selectedItem,
