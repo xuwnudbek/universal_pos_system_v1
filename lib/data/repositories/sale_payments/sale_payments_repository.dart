@@ -29,20 +29,28 @@ class SalePaymentsRepository {
   }
 
   // Get sale payments by sale ID
-  Future<List<SalePaymentFull>> getBySaleId(int saleId) async {
-    final payments = await salePaymentsDao.getBySaleId(saleId);
-    final paymentTypes = await paymentTypesDao.getAll();
+  Future<List<SalePaymentFull>> getBySaleId(int saleId) {
+    return salePaymentsDao.getBySaleId(saleId);
+  }
 
-    return payments.map((payment) {
-      final paymentType = paymentTypes.firstWhere(
-        (pt) => pt.id == payment.paymentTypeId,
-      );
+  // Get sale payment by id
+  Future<SalePaymentFull?> getById(int salePaymentId) async {
+    final payment = await salePaymentsDao.getById(salePaymentId);
 
-      return SalePaymentFull.from(
-        salePayment: payment,
-        paymentType: paymentType,
-      );
-    }).toList();
+    if (payment == null) {
+      throw Exception('Sale Payment not found for ID: $salePaymentId');
+    }
+
+    final paymentType = await paymentTypesDao.getById(payment.paymentTypeId);
+
+    if (paymentType == null) {
+      throw Exception('Payment type not found for ID: $salePaymentId');
+    }
+
+    return SalePaymentFull.from(
+      salePayment: payment,
+      paymentType: paymentType,
+    );
   }
 
   // Get total payment for a sale
@@ -83,4 +91,30 @@ class SalePaymentsRepository {
 
   // Delete all payments for a sale
   Future<void> deleteBySaleId(int saleId) => salePaymentsDao.deleteBySaleId(saleId);
+
+  // Get payment statistics
+  Future<List<Map<String, dynamic>>> getPaymentStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final statistics = await salePaymentsDao.getPaymentStatistics(
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    if (statistics.isEmpty) return [];
+
+    final paymentTypeIds = statistics.map((s) => s['paymentTypeId'] as int).toList();
+    final paymentTypes = await paymentTypesDao.getByIds(paymentTypeIds);
+
+    return statistics.map((stat) {
+      final paymentTypeId = stat['paymentTypeId'] as int;
+      final paymentType = paymentTypes.firstWhere((pt) => pt.id == paymentTypeId);
+
+      return {
+        'paymentType': paymentType,
+        'totalAmount': stat['totalAmount'] as double,
+      };
+    }).toList();
+  }
 }

@@ -1,22 +1,26 @@
 import 'package:universal_pos_system_v1/data/local/daos/items/items_dao.dart';
+import 'package:universal_pos_system_v1/data/local/daos/payment_types/payment_types_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/sale_items/sale_items_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/sale_payments/sale_payments_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/sales/sales_dao.dart';
 import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
 import 'package:universal_pos_system_v1/data/models/sale_item_full.dart';
+import 'package:universal_pos_system_v1/data/models/sale_payment_full.dart';
 
 class SalesRepository {
   final SalesDao salesDao;
   final SaleItemsDao saleItemsDao;
   final ItemsDao itemsDao;
   final SalePaymentsDao salePaymentsDao;
+  final PaymentTypesDao paymentTypesDao;
 
   const SalesRepository(
     this.salesDao,
     this.saleItemsDao,
     this.itemsDao,
     this.salePaymentsDao,
+    this.paymentTypesDao,
   );
 
   Future<List<SaleFull>> getAll() async {
@@ -24,10 +28,21 @@ class SalesRepository {
     final saleItems = await saleItemsDao.getBySaleIds(sales.map((s) => s.id).toList());
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
     final payments = await salePaymentsDao.getBySaleIds(sales.map((s) => s.id).toList());
+    final paymentTypes = await paymentTypesDao.getAll();
 
     final enrichedSales = sales.map((sale) {
       final itemsForSale = saleItems.where((si) => si.saleId == sale.id).toList();
-      final paymentsForSale = payments.where((sp) => sp.saleId == sale.id).toList();
+      final paymentsForSale = payments
+          .where(
+            (sp) => sp.saleId == sale.id,
+          )
+          .map(
+            (sp) => SalePaymentFull.from(
+              salePayment: sp,
+              paymentType: paymentTypes.firstWhere((pt) => pt.id == sp.paymentTypeId),
+            ),
+          )
+          .toList();
 
       final enrichedSaleItems = itemsForSale.map((si) {
         final item = items.firstWhere((i) => i.id == si.itemId);
@@ -54,7 +69,7 @@ class SalesRepository {
       throw Exception('No sale found with ID $id');
     }
 
-    final paymentsForSale = await salePaymentsDao.getBySaleId(id);
+    final paymentsForSales = await salePaymentsDao.getBySaleId(id);
 
     final saleItems = await saleItemsDao.getBySaleId(sale.id);
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
@@ -70,7 +85,7 @@ class SalesRepository {
     return SaleFull.from(
       sale: sale,
       items: enrichedSaleItems,
-      payments: paymentsForSale,
+      payments: paymentsForSales,
     );
   }
 
@@ -80,10 +95,19 @@ class SalesRepository {
     final saleItems = await saleItemsDao.getBySaleIds(sales.map((s) => s.id).toList());
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
     final payments = await salePaymentsDao.getBySaleIds(sales.map((s) => s.id).toList());
+    final paymentTypes = await paymentTypesDao.getAll();
 
     final enrichedSales = sales.map((sale) {
       final itemsForSale = saleItems.where((si) => si.saleId == sale.id).toList();
-      final paymentsForSale = payments.where((sp) => sp.saleId == sale.id).toList();
+      final paymentsForSale = payments
+          .where((sp) => sp.saleId == sale.id)
+          .map(
+            (sp) => SalePaymentFull.from(
+              salePayment: sp,
+              paymentType: paymentTypes.firstWhere((pt) => pt.id == sp.paymentTypeId),
+            ),
+          )
+          .toList();
 
       final enrichedSaleItems = itemsForSale.map((si) {
         final item = items.firstWhere((i) => i.id == si.itemId);
@@ -114,9 +138,11 @@ class SalesRepository {
 
     final saleItems = await saleItemsDao.getBySaleId(sale.id);
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
+
+    final salePayments = await salePaymentsDao.getBySaleId(sale.id);
+
     final enrichedSaleItems = saleItems.map((si) {
       final item = items.firstWhere((i) => i.id == si.itemId);
-
       return SaleItemFull.from(
         saleItem: si,
         item: item,
@@ -125,7 +151,7 @@ class SalesRepository {
 
     final saleFull = SaleFull.from(
       sale: sale,
-      payments: [],
+      payments: salePayments,
       items: enrichedSaleItems,
     );
 

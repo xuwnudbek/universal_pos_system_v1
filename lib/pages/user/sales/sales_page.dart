@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
+import 'package:universal_pos_system_v1/utils/functions/show_snackbar.dart';
 
 import '/data/models/item_category_full.dart';
 import '/data/models/items_full.dart';
 import '/data/models/sale_full.dart';
 import '/data/repositories/items/item_categories_repository.dart';
 import '/data/repositories/items/items_repository.dart';
-import '/pages/auth/provider/auth_provider.dart';
 
 import '/data/repositories/sales/sale_items_repository.dart';
 import '/data/repositories/sales/sales_repository.dart';
 import '/pages/user/sales/providers/sales_provider.dart';
 import '/pages/user/sales/widgets/item_card.dart';
+import '/pages/user/sales/widgets/payment_dialog.dart';
 import '/pages/user/sales/widgets/saved_sales_dialog.dart';
 import '/pages/user/sales/widgets/sales_history_dialog.dart';
 import '/utils/constants/app_constants.dart';
@@ -38,7 +41,9 @@ class SalesPage extends StatelessWidget {
             context.read<SaleItemsRepository>(),
             context.read<ItemsRepository>(),
             context.read<ItemCategoriesRepository>(),
-          )..createTempSale(context.read<AuthProvider>().currentUser!.id),
+            context.read<SalePaymentsRepository>(),
+            context.read<PaymentTypesRepository>(),
+          )..createTempSale(),
         ),
       ],
       builder: (context, asyncSnapshot) {
@@ -117,12 +122,22 @@ class SalesPage extends StatelessWidget {
                               },
                             ),
 
-                            IconButton2(
-                              onPressed: () {
-                                context.read<SalesProvider>().deleteTempSale();
+                            Selector<SalesProvider, SaleFull?>(
+                              selector: (context, provider) => provider.tempSale,
+                              builder: (context, tempSale, child) {
+                                if (tempSale == null || tempSale.items.isEmpty) {
+                                  return SizedBox.shrink();
+                                }
+
+                                return child!;
                               },
-                              type: IconButton2Type.danger,
-                              icon: LucideIcons.trash2,
+                              child: IconButton2(
+                                onPressed: () {
+                                  context.read<SalesProvider>().deleteTempSale();
+                                },
+                                type: IconButton2Type.danger,
+                                icon: LucideIcons.trash2,
+                              ),
                             ),
                           ],
                         ),
@@ -137,7 +152,7 @@ class SalesPage extends StatelessWidget {
                                 child: Text(
                                   'Savatcha bo\'sh',
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                    color: theme.colorScheme.onSurface.withAlpha(100),
                                   ),
                                 ),
                               );
@@ -152,15 +167,18 @@ class SalesPage extends StatelessWidget {
 
                                 return ListTile(
                                   tileColor: theme.colorScheme.onSurface.withValues(alpha: .05),
+                                  dense: true,
                                   title: Text(
                                     saleItem.item.name,
-                                    style: theme.textTheme.titleMedium,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   subtitle: Text(
                                     saleItem.item.salePrice.toSum,
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: theme.colorScheme.onSurface,
-                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   trailing: Row(
@@ -179,7 +197,7 @@ class SalesPage extends StatelessWidget {
                                         child: Center(
                                           child: Text(
                                             saleItem.quantity.toString(),
-                                            style: theme.textTheme.bodyMedium,
+                                            style: theme.textTheme.titleSmall,
                                           ),
                                         ),
                                       ),
@@ -199,9 +217,7 @@ class SalesPage extends StatelessWidget {
                         ),
                       ),
                       // Total
-                      AnimatedContainer(
-                        duration: Duration(milliseconds: 300),
-                        constraints: BoxConstraints(minHeight: 80),
+                      Container(
                         padding: EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
@@ -213,6 +229,8 @@ class SalesPage extends StatelessWidget {
                           ),
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: AppSpacing.lg,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,54 +244,90 @@ class SalesPage extends StatelessWidget {
                                 ),
                                 Consumer<SalesProvider>(
                                   builder: (context, salesProvider, _) {
-                                    return Text(
-                                      (salesProvider.tempSale?.totalPrice ?? 0).intOrDouble.str.toSumString("UZS"),
-                                      style: textTheme.titleLarge?.copyWith(
-                                        color: theme.colorScheme.onSurface,
-                                        fontWeight: FontWeight.w500,
+                                    return Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: (salesProvider.tempSale?.totalPrice ?? 0).intOrDouble.str.toSumString(),
+                                            style: textTheme.titleLarge?.copyWith(
+                                              color: theme.colorScheme.onSurface,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: " UZS",
+                                            style: textTheme.titleMedium?.copyWith(
+                                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     );
                                   },
                                 ),
                               ],
                             ),
-                            SizedBox(height: 16),
 
                             Selector<SalesProvider, SaleFull?>(
                               selector: (context, provider) => provider.tempSale,
-                              builder: (context, tempSale, _) {
+                              builder: (context, tempSale, child) {
                                 bool enabled = tempSale != null && tempSale.items.isNotEmpty;
 
-                                return Row(
-                                  children: [
-                                    IconButton2(
-                                      type: IconButton2Type.primary,
-                                      icon: LucideIcons.save,
-                                      onPressed: enabled
-                                          ? () {
-                                              final userId = context.read<AuthProvider>().currentUser!.id;
-                                              context.read<SalesProvider>().saveTempSale(userId);
-                                            }
-                                          : null,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Expanded(
-                                      child: SizedBox(
-                                        height: 36,
-                                        child: ElevatedButton(
-                                          onPressed: enabled ? () {} : null,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Icon(LucideIcons.creditCard),
-                                              SizedBox(width: 8),
-                                              Text("To'lov"),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                return AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  height: enabled ? 36 : 0,
+                                  child: enabled
+                                      ? Row(
+                                          children: [
+                                            IconButton2(
+                                              type: IconButton2Type.primary,
+                                              icon: LucideIcons.save,
+                                              onPressed: () {
+                                                context.read<SalesProvider>().saveTempSale();
+                                              },
+                                            ),
+                                            SizedBox(width: 8),
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 36,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    if (enabled) {
+                                                      showDialog(
+                                                        context: context,
+                                                        barrierDismissible: false,
+                                                        builder: (dialogContext) => ChangeNotifierProvider.value(
+                                                          value: context.read<SalesProvider>(),
+                                                          child: PaymentDialog(),
+                                                        ),
+                                                      ).then((success) {
+                                                        if (success == 101 && context.mounted) {
+                                                          context.read<SalesProvider>().createTempSale();
+
+                                                          showAppSnackBar(
+                                                            context,
+                                                            "To'lov muvaffaqiyatli amalga oshirildi",
+                                                            type: SnackBarType.success,
+                                                          );
+                                                        }
+                                                      });
+                                                    }
+                                                  },
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Icon(LucideIcons.creditCard),
+                                                      SizedBox(width: 8),
+                                                      Text("To'lov"),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : SizedBox.shrink(),
                                 );
                               },
                             ),

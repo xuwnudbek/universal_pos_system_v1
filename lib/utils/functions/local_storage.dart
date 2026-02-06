@@ -1,6 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+import 'package:universal_pos_system_v1/data/local/app_database.dart';
+
 class LocalStorage {
   static SharedPreferences? _prefs;
 
@@ -112,29 +114,22 @@ class LocalStorage {
   static const String _keyFullName = 'full_name';
   static const String _keyUserRole = 'user_role';
   static const String _keyIsAuthenticated = 'is_authenticated';
-  static const String _keyAuthToken = 'auth_token';
   static const String _keyLastLogin = 'last_login';
 
   // Save user session
-  static Future<bool> saveUserSession({
-    required int userId,
-    required String username,
-    required String fullName,
-    required String role,
-    String? authToken,
-  }) async {
-    await setInt(_keyUserId, userId);
-    await setString(_keyUsername, username);
-    await setString(_keyFullName, fullName);
-    await setString(_keyUserRole, role);
-    await setBool(_keyIsAuthenticated, true);
-    await setString(_keyLastLogin, DateTime.now().toIso8601String());
+  static Future<bool> saveUserSession(User user) async {
+    try {
+      await setInt(_keyUserId, user.id);
+      await setString(_keyUsername, user.username);
+      await setString(_keyFullName, user.fullName);
+      await setString(_keyUserRole, user.role.name);
+      await setBool(_keyIsAuthenticated, true);
+      await setString(_keyLastLogin, DateTime.now().toIso8601String());
 
-    if (authToken != null) {
-      await setString(_keyAuthToken, authToken);
+      return true;
+    } catch (e) {
+      return false;
     }
-
-    return true;
   }
 
   // Get user ID
@@ -155,11 +150,6 @@ class LocalStorage {
   // Get user role
   static String? getUserRole() {
     return getString(_keyUserRole);
-  }
-
-  // Get auth token
-  static String? getAuthToken() {
-    return getString(_keyAuthToken);
   }
 
   // Get last login time
@@ -187,7 +177,6 @@ class LocalStorage {
       'username': getUsername(),
       'fullName': getFullName(),
       'role': getUserRole(),
-      'authToken': getAuthToken(),
       'lastLogin': getLastLogin()?.toIso8601String(),
     };
   }
@@ -198,7 +187,6 @@ class LocalStorage {
     await remove(_keyUsername);
     await remove(_keyFullName);
     await remove(_keyUserRole);
-    await remove(_keyAuthToken);
     await remove(_keyIsAuthenticated);
     await remove(_keyLastLogin);
     return true;
@@ -206,27 +194,7 @@ class LocalStorage {
 
   // ========== App Settings Methods ==========
 
-  static const String _keyThemeMode = 'theme_mode';
-  static const String _keyLanguage = 'language';
   static const String _keyFirstLaunch = 'first_launch';
-
-  // Theme mode
-  static Future<bool> setThemeMode(String mode) async {
-    return await setString(_keyThemeMode, mode);
-  }
-
-  static String? getThemeMode() {
-    return getString(_keyThemeMode);
-  }
-
-  // Language
-  static Future<bool> setLanguage(String language) async {
-    return await setString(_keyLanguage, language);
-  }
-
-  static String? getLanguage() {
-    return getString(_keyLanguage);
-  }
 
   // First launch
   static Future<bool> setFirstLaunch(bool value) async {
@@ -235,43 +203,5 @@ class LocalStorage {
 
   static bool isFirstLaunch() {
     return getBool(_keyFirstLaunch) ?? true;
-  }
-
-  // ========== Cache Management ==========
-
-  // Save with expiration time
-  static Future<bool> setWithExpiry(String key, String value, Duration expiry) async {
-    final expiryTime = DateTime.now().add(expiry).millisecondsSinceEpoch;
-    await setString('${key}_expiry', expiryTime.toString());
-    return await setString(key, value);
-  }
-
-  // Get with expiration check
-  static String? getWithExpiry(String key) {
-    final expiryString = getString('${key}_expiry');
-    if (expiryString == null) return null;
-
-    final expiryTime = int.tryParse(expiryString);
-    if (expiryTime == null) return null;
-
-    if (DateTime.now().millisecondsSinceEpoch > expiryTime) {
-      // Expired, remove the data
-      remove(key);
-      remove('${key}_expiry');
-      return null;
-    }
-
-    return getString(key);
-  }
-
-  // Clear expired cache
-  static Future<void> clearExpiredCache() async {
-    final keys = getAllKeys();
-    for (final key in keys) {
-      if (key.endsWith('_expiry')) {
-        final dataKey = key.replaceAll('_expiry', '');
-        getWithExpiry(dataKey); // This will remove expired data
-      }
-    }
   }
 }

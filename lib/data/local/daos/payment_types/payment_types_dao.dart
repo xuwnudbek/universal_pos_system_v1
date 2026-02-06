@@ -19,6 +19,12 @@ class PaymentTypesDao extends DatabaseAccessor<AppDatabase> with _$PaymentTypesD
   // Get Payment Type By Id
   Future<PaymentType?> getById(int id) => (select(paymentTypes)..where((p) => p.id.equals(id))).getSingleOrNull();
 
+  // Get Payment Types By Ids
+  Future<List<PaymentType>> getByIds(List<int> ids) {
+    final query = select(paymentTypes)..where((p) => p.id.isIn(ids));
+    return query.get();
+  }
+
   // Insert Payment Type
   Future<int> insertPaymentType(PaymentTypesEnum name, bool isActive) {
     return into(paymentTypes).insert(

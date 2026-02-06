@@ -33,10 +33,10 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       if (_currentUser?.role == UserRolesEnum.admin) {
-        appRouter.goNamed(AppRoute.items.name);
+        appRouter.goNamed(AppRoute.admin.name);
         return;
       } else if (_currentUser?.role == UserRolesEnum.cashier) {
-        appRouter.goNamed(AppRoute.sales.name);
+        appRouter.goNamed(AppRoute.user.name);
         return;
       }
 
@@ -59,8 +59,7 @@ class AuthProvider extends ChangeNotifier {
 
       if (user != null) {
         _currentUser = user;
-        await LocalStorage.setObject('currentUser', user.toJson());
-        await LocalStorage.setInt('userId', user.id);
+        await LocalStorage.saveUserSession(user);
         return true;
       } else {
         _errorMessage = 'Noto\'g\'ri username yoki parol';
@@ -77,8 +76,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     _currentUser = null;
-    await LocalStorage.remove('currentUser');
-    await LocalStorage.remove('userId');
+    await LocalStorage.logout();
     notifyListeners();
   }
 

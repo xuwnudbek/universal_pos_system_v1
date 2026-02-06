@@ -1,4 +1,8 @@
+import 'dart:developer';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
 import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 
 class SplashPage extends StatefulWidget {
@@ -16,9 +20,27 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   void _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 0), () {});
+    // If production, set duration to 3 seconds or more
+    int durationInSeconds = kDebugMode ? 0 : 3;
+    await Future.delayed(Duration(seconds: durationInSeconds));
+
     if (mounted) {
-      appRouter.goNamed(AppRoute.home.name);
+      final route = _checkAuthentication();
+      log("Navigating to ${route.name} page");
+      appRouter.goNamed(route.name);
+    }
+  }
+
+  AppRoute _checkAuthentication() {
+    String? role = LocalStorage.getUserRole();
+
+    switch (role) {
+      case "admin":
+        return AppRoute.admin;
+      case "cashier":
+        return AppRoute.user;
+      default:
+        return AppRoute.auth;
     }
   }
 

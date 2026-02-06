@@ -11,7 +11,7 @@ import 'package:universal_pos_system_v1/models/warehouse/warehouse_item.dart';
 enum WarehouseTab { stock, history }
 
 class WarehouseProvider extends ChangeNotifier {
-  final ItemsRepository itemsRepository;
+  final ItemsRepository itemsRepo;
   final StocksRepository stocksRepository;
   final TransfersRepository transfersRepository;
 
@@ -64,7 +64,7 @@ class WarehouseProvider extends ChangeNotifier {
   }
 
   WarehouseProvider(
-    this.itemsRepository,
+    this.itemsRepo,
     this.stocksRepository,
     this.transfersRepository,
   ) {
@@ -73,7 +73,7 @@ class WarehouseProvider extends ChangeNotifier {
 
   Future<void> _initialize() async {
     try {
-      _allItems = await itemsRepository.getAll();
+      _allItems = await itemsRepo.getAll();
       _stocks = await stocksRepository.getAll();
       _transfers = await transfersRepository.getAllWithItems();
 
@@ -112,7 +112,7 @@ class WarehouseProvider extends ChangeNotifier {
 
   Future<void> refresh() async {
     try {
-      _allItems = await itemsRepository.getAll();
+      _allItems = await itemsRepo.getAll();
       _stocks = await stocksRepository.getAll();
       _transfers = await transfersRepository.getAllWithItems();
       _buildWarehouseItems();

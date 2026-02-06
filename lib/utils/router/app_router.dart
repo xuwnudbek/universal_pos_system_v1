@@ -9,12 +9,13 @@ import 'package:universal_pos_system_v1/pages/admin/reports/reports_page.dart';
 import 'package:universal_pos_system_v1/pages/admin/warehouse/warehouse_page.dart';
 import 'package:universal_pos_system_v1/pages/auth/auth_page.dart';
 import 'package:universal_pos_system_v1/pages/splash/splash_page.dart';
-import 'package:universal_pos_system_v1/pages/user/sales/sales_page.dart';
+import 'package:universal_pos_system_v1/pages/user/user_page.dart';
 
 enum AppRoute {
+  admin,
+  user,
   auth,
   splash,
-  home,
   sales,
   items,
   categories,
@@ -30,12 +31,14 @@ enum AppRoute {
 
   String get name {
     switch (this) {
+      case AppRoute.admin:
+        return 'admin';
+      case AppRoute.user:
+        return 'user';
       case AppRoute.auth:
         return 'auth';
       case AppRoute.splash:
         return 'splash';
-      case AppRoute.home:
-        return 'home';
       case AppRoute.items:
         return 'items';
       case AppRoute.sales:
@@ -63,12 +66,14 @@ enum AppRoute {
 
   String get path {
     switch (this) {
+      case AppRoute.admin:
+        return '/admin';
+      case AppRoute.user:
+        return '/user';
       case AppRoute.auth:
         return '/auth';
       case AppRoute.splash:
         return '/splash';
-      case AppRoute.home:
-        return '/';
       case AppRoute.items:
         return '/items';
       case AppRoute.sales:
@@ -96,52 +101,46 @@ enum AppRoute {
 }
 
 final appRouter = GoRouter(
-  observers: [
-    // Add observers if needed
-  ],
-  initialLocation: AppRoute.auth.path,
+  initialLocation: AppRoute.splash.path,
   routes: [
+    // Splash route
     GoRoute(
       path: AppRoute.splash.path,
       name: AppRoute.splash.name,
       builder: (_, _) => const SplashPage(),
     ),
 
+    // Authentication route
     GoRoute(
       path: AppRoute.auth.path,
       name: AppRoute.auth.name,
       builder: (_, _) => const AuthPage(),
     ),
 
+    // Logout route
     GoRoute(
       path: AppRoute.logout.path,
       name: AppRoute.logout.name,
       builder: (_, _) => const SplashPage(),
     ),
 
+    // User route with nested routes
+    GoRoute(
+      path: AppRoute.user.path,
+      name: AppRoute.user.name,
+      builder: (_, _) => UserPage(),
+    ),
+
+    // Admin route with nested routes
     ShellRoute(
       builder: (context, state, child) {
-        return AdminPage(
-          state: state,
-          child: child,
-        );
+        return AdminPage(child: child);
       },
       routes: [
         GoRoute(
-          path: AppRoute.home.path,
-          name: AppRoute.home.name,
-          redirect: (context, state) => AppRoute.sales.path,
-          builder: (context, state) {
-            return SizedBox.shrink();
-          },
-        ),
-        GoRoute(
-          path: AppRoute.sales.path,
-          name: AppRoute.sales.name,
-          builder: (context, state) {
-            // return SizedBox.shrink();
-            return SalesPage();
-          },
+          path: AppRoute.admin.path,
+          name: AppRoute.admin.name,
+          redirect: (_, _) => AppRoute.reports.path,
         ),
         GoRoute(
           path: AppRoute.items.path,

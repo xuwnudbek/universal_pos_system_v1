@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
 
 import './data/local/app_database.dart';
 import './data/local/daos/colors/category_colors_dao.dart';
@@ -37,7 +38,15 @@ void main() {
 
       await LocalStorage.init();
 
-      runApp(const MyApp());
+      final db = AppDatabase();
+      await BaseSeeder(db).seedBaseData();
+
+      runApp(
+        Provider.value(
+          value: db,
+          child: const MyApp(),
+        ),
+      );
     },
     (error, stackTrace) {
       log("Error caught: $error");
@@ -54,14 +63,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AppDatabase>(
-          create: (_) => AppDatabase(),
-          dispose: (_, db) => db.close(),
-        ),
-        ProxyProvider<AppDatabase, BaseSeeder>(
-          update: (_, db, _) => BaseSeeder(db),
-        ),
-
         // Daos
         ProxyProvider<AppDatabase, UsersDao>(
           update: (_, db, _) => UsersDao(db),
@@ -87,6 +88,9 @@ class MyApp extends StatelessWidget {
         ProxyProvider<AppDatabase, SalePaymentsDao>(
           update: (_, db, _) => SalePaymentsDao(db),
         ),
+        ProxyProvider<AppDatabase, PaymentTypesDao>(
+          update: (_, db, _) => PaymentTypesDao(db),
+        ),
 
         // Repositories
         ProxyProvider<UsersDao, UsersRepository>(
@@ -104,8 +108,9 @@ class MyApp extends StatelessWidget {
         ProxyProvider<UnitsDao, UnitsRepository>(
           update: (_, dao, _) => UnitsRepository(dao),
         ),
-        ProxyProvider4<SalesDao, SaleItemsDao, ItemsDao, SalePaymentsDao, SalesRepository>(
-          update: (_, dao0, dao1, dao2, dao3, _) => SalesRepository(dao0, dao1, dao2, dao3),
+
+        ProxyProvider5<SalesDao, SaleItemsDao, ItemsDao, SalePaymentsDao, PaymentTypesDao, SalesRepository>(
+          update: (_, dao0, dao1, dao2, dao3, dao4, _) => SalesRepository(dao0, dao1, dao2, dao3, dao4),
         ),
         ProxyProvider2<SaleItemsDao, ItemsDao, SaleItemsRepository>(
           update: (_, dao0, dao1, _) => SaleItemsRepository(dao0, dao1),
@@ -113,6 +118,10 @@ class MyApp extends StatelessWidget {
         ProxyProvider2<SalePaymentsDao, PaymentTypesDao, SalePaymentsRepository>(
           update: (_, dao0, dao1, _) => SalePaymentsRepository(dao0, dao1),
         ),
+        ProxyProvider<PaymentTypesDao, PaymentTypesRepository>(
+          update: (_, dao, _) => PaymentTypesRepository(dao),
+        ),
+
         // Providers
         ChangeNotifierProvider<AuthProvider>(
           create: (context) => AuthProvider(
@@ -121,10 +130,10 @@ class MyApp extends StatelessWidget {
         ),
       ],
       builder: (context, _) => MaterialApp.router(
+        color: Colors.blue,
         debugShowCheckedModeBanner: false,
         title: 'Universal POS System',
         theme: AppTheme.lightTheme,
-        // darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
         locale: Locale('uz', 'UZ'),
         localizationsDelegates: [

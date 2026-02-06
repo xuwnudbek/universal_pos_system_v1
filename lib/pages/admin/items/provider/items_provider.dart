@@ -8,7 +8,7 @@ import 'package:universal_pos_system_v1/data/repositories/units/units_repository
 import 'package:universal_pos_system_v1/models/item_form_result.dart';
 
 class ItemsProvider extends ChangeNotifier {
-  final ItemsRepository _itemsRepository;
+  final ItemsRepository _itemsRepo;
   final ItemCategoriesRepository _categoriesRepository;
   final UnitsRepository _unitsRepository;
 
@@ -86,7 +86,7 @@ class ItemsProvider extends ChangeNotifier {
   }
 
   ItemsProvider(
-    this._itemsRepository,
+    this._itemsRepo,
     this._categoriesRepository,
     this._unitsRepository,
   ) {
@@ -107,7 +107,7 @@ class ItemsProvider extends ChangeNotifier {
 
   Future<void> getAllItems() async {
     try {
-      _items = await _itemsRepository.getAll();
+      _items = await _itemsRepo.getAll();
       notifyListeners();
     } catch (e) {
       debugPrint('Error getting items: $e');
@@ -137,7 +137,7 @@ class ItemsProvider extends ChangeNotifier {
 
   Future<void> addItem(ItemFormResult result) async {
     try {
-      await _itemsRepository.create(
+      await _itemsRepo.create(
         name: result.name,
         barcode: result.barcode,
         categoryId: result.categoryId,
@@ -154,7 +154,7 @@ class ItemsProvider extends ChangeNotifier {
 
   Future<void> updateItem(int id, ItemFormResult result) async {
     try {
-      await _itemsRepository.update(
+      await _itemsRepo.update(
         id: id,
         name: result.name,
         barcode: result.barcode,
@@ -172,7 +172,7 @@ class ItemsProvider extends ChangeNotifier {
 
   Future<void> deleteItem(int id) async {
     try {
-      await _itemsRepository.delete(id);
+      await _itemsRepo.delete(id);
       await getAllItems();
     } catch (e) {
       debugPrint('Error deleting item: $e');

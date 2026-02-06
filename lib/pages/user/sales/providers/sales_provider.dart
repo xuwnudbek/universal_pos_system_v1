@@ -1,28 +1,41 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sale_items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sales_repository.dart';
+import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
 
 class SalesProvider extends ChangeNotifier {
-  final SalesRepository salesRepository;
-  final SaleItemsRepository saleItemsRepository;
-  final ItemsRepository itemsRepository;
-  final ItemCategoriesRepository itemCategoriesRepository;
+  final SalesRepository salesRepo;
+  final SaleItemsRepository saleItemsRepo;
+  final ItemsRepository itemsRepo;
+  final ItemCategoriesRepository itemCategoriesRepo;
+  final SalePaymentsRepository salePaymentsRepo;
+  final PaymentTypesRepository paymentTypesRepo;
 
   SaleFull? _tempSale;
   SaleFull? get tempSale => _tempSale;
+  set tempSale(SaleFull? sale) {
+    _tempSale = sale;
+    notifyListeners();
+  }
 
   // Sales History
   List<SaleFull> _sales = [];
   List<SaleFull> get complatedSales => _sales.where((s) => s.status == SaleStatusEnum.completed).toList();
   List<SaleFull> get savedSales => _sales.where((s) => s.status == SaleStatusEnum.saved).toList();
+
+  List<PaymentType> _paymentTypes = [];
+  List<PaymentType> get paymentTypes => _paymentTypes;
 
   final searchController = TextEditingController();
   String get searchText => searchController.text;
@@ -57,10 +70,12 @@ class SalesProvider extends ChangeNotifier {
   }
 
   SalesProvider(
-    this.salesRepository,
-    this.saleItemsRepository,
-    this.itemsRepository,
-    this.itemCategoriesRepository,
+    this.salesRepo,
+    this.saleItemsRepo,
+    this.itemsRepo,
+    this.itemCategoriesRepo,
+    this.salePaymentsRepo,
+    this.paymentTypesRepo,
   ) {
     loadInitialData();
   }
@@ -69,13 +84,23 @@ class SalesProvider extends ChangeNotifier {
     await loadItems();
     await loadItemCategories();
     await loadSales();
+    await loadPaymentTypes();
 
     isInitialized = true;
   }
 
+  Future<void> loadPaymentTypes() async {
+    try {
+      _paymentTypes = await paymentTypesRepo.getAll();
+      notifyListeners();
+    } catch (e) {
+      log('Error loading payment types: $e');
+    }
+  }
+
   Future<void> loadSales() async {
     try {
-      _sales = await salesRepository.getAll();
+      _sales = await salesRepo.getAll();
       notifyListeners();
     } catch (e) {
       log('Error loading sales: $e');
@@ -83,24 +108,31 @@ class SalesProvider extends ChangeNotifier {
   }
 
   Future<void> loadItems() async {
-    _items = await itemsRepository.getAll();
+    _items = await itemsRepo.getAll();
     notifyListeners();
   }
 
   Future<void> loadItemCategories() async {
-    _itemCategories = await itemCategoriesRepository.getAll();
+    _itemCategories = await itemCategoriesRepo.getAll();
     notifyListeners();
   }
 
   // Temporary Sale Management
-  Future<void> createTempSale(int userId) async {
+  Future<void> createTempSale() async {
+    final userId = LocalStorage.getUserId();
+
+    if (userId == null) {
+      log('No user ID found in local storage');
+      return;
+    }
+
     try {
-      var maybeDraftSale = await salesRepository.getDraftByUserId(userId);
+      var maybeDraftSale = await salesRepo.getDraftByUserId(userId);
 
       if (maybeDraftSale != null) {
-        _tempSale = maybeDraftSale;
+        tempSale = maybeDraftSale;
       } else {
-        _tempSale ??= await salesRepository.create(userId: userId);
+        tempSale ??= await salesRepo.create(userId: userId);
       }
 
       notifyListeners();
@@ -110,43 +142,43 @@ class SalesProvider extends ChangeNotifier {
   }
 
   Future<void> addItemToTempSale(int itemId) async {
-    if (_tempSale == null) {
+    if (tempSale == null) {
       throw Exception('No temporary sale found. Please create a temp sale first.');
     }
 
     // Check if item already exists in the sale
-    final existingItemIndex = _tempSale!.items.indexWhere(
+    final existingItemIndex = tempSale!.items.indexWhere(
       (saleItem) => saleItem.item.id == itemId,
     );
 
     if (existingItemIndex != -1) {
       // Item exists - increase quantity by 1
-      final existingSaleItem = _tempSale!.items[existingItemIndex];
-      await saleItemsRepository.updateQuantity(
+      final existingSaleItem = tempSale!.items[existingItemIndex];
+      await saleItemsRepo.updateQuantity(
         id: existingSaleItem.id,
         quantity: existingSaleItem.quantity + 1,
       );
     } else {
       // Item doesn't exist - create new sale item with quantity 1
-      await saleItemsRepository.create(
-        saleId: _tempSale!.id,
+      await saleItemsRepo.create(
+        saleId: tempSale!.id,
         itemId: itemId,
         quantity: 1,
       );
     }
 
     // Reload the temp sale to reflect changes
-    _tempSale = await salesRepository.getBySaleId(_tempSale!.id);
+    tempSale = await salesRepo.getBySaleId(tempSale!.id);
     notifyListeners();
   }
 
   Future<void> removeItemFromTempSale(int itemId) async {
-    if (_tempSale == null) {
+    if (tempSale == null) {
       throw Exception('No temporary sale found. Please create a temp sale first.');
     }
 
     // Find the item in the sale
-    final existingItemIndex = _tempSale!.items.indexWhere(
+    final existingItemIndex = tempSale!.items.indexWhere(
       (saleItem) => saleItem.item.id == itemId,
     );
 
@@ -155,34 +187,34 @@ class SalesProvider extends ChangeNotifier {
       return;
     }
 
-    final existingSaleItem = _tempSale!.items[existingItemIndex];
+    final existingSaleItem = tempSale!.items[existingItemIndex];
 
     if (existingSaleItem.quantity > 1) {
       // Decrease quantity by 1
-      await saleItemsRepository.updateQuantity(
+      await saleItemsRepo.updateQuantity(
         id: existingSaleItem.id,
         quantity: existingSaleItem.quantity - 1,
       );
     } else {
       // Quantity is 1, delete the sale item
-      await saleItemsRepository.delete(existingSaleItem.id);
+      await saleItemsRepo.delete(existingSaleItem.id);
     }
 
     // Reload the temp sale to reflect changes
-    _tempSale = await salesRepository.getBySaleId(_tempSale!.id);
+    tempSale = await salesRepo.getBySaleId(tempSale!.id);
     notifyListeners();
   }
 
   // Save Temp Sale to Sales History
-  Future<void> saveTempSale(int userId) async {
-    if (_tempSale == null || _tempSale!.items.isEmpty) {
+  Future<void> saveTempSale() async {
+    if (tempSale == null || tempSale!.items.isEmpty) {
       throw Exception('No items in sale to save');
     }
 
     try {
       // Change status from draft to saved
-      await salesRepository.updateStatus(
-        id: _tempSale!.id,
+      await salesRepo.updateStatus(
+        id: tempSale!.id,
         status: SaleStatusEnum.saved,
       );
 
@@ -190,10 +222,10 @@ class SalesProvider extends ChangeNotifier {
       await loadSales();
 
       // Clear current temp sale
-      _tempSale = null;
+      tempSale = null;
 
       // Create new temp sale
-      await createTempSale(userId);
+      await createTempSale();
 
       notifyListeners();
     } catch (e) {
@@ -202,16 +234,45 @@ class SalesProvider extends ChangeNotifier {
     }
   }
 
+  // Complete Temp Sale (mark as completed)
+  Future<void> completeTempSale() async {
+    if (tempSale == null || tempSale!.items.isEmpty) {
+      throw Exception('No items in sale to complete');
+    }
+
+    try {
+      // Change status from draft to completed
+      await salesRepo.updateStatus(
+        id: tempSale!.id,
+        status: SaleStatusEnum.completed,
+      );
+
+      // Reload saved sales
+      await loadSales();
+
+      // Clear current temp sale
+      tempSale = null;
+
+      // Create new temp sale
+      await createTempSale();
+
+      notifyListeners();
+    } catch (e) {
+      log('Error completing temp sale: $e');
+      rethrow;
+    }
+  }
+
   // Delete Temp Sale
   Future<void> deleteTempSale() async {
-    if (_tempSale == null) return;
+    if (tempSale == null) return;
 
     try {
       // Delete the temp sale
-      await salesRepository.delete(_tempSale!.id);
+      await salesRepo.delete(tempSale!.id);
 
       // Clear current temp sale
-      _tempSale = null;
+      tempSale = null;
 
       notifyListeners();
     } catch (e) {
@@ -220,35 +281,35 @@ class SalesProvider extends ChangeNotifier {
   }
 
   // Switch to a saved sale (make it the temp sale)
-  Future<void> switchToSale(int saleId, int userId) async {
+  Future<void> switchToSale(int saleId) async {
     try {
       // If there's a current tempSale, delete it if it has no items
-      if (_tempSale != null) {
-        if (_tempSale!.items.isEmpty) {
-          await salesRepository.delete(_tempSale!.id);
+      if (tempSale != null) {
+        if (tempSale!.items.isEmpty) {
+          await salesRepo.delete(tempSale!.id);
         } else {
           // If it has items, keep it as saved
-          await salesRepository.updateStatus(
-            id: _tempSale!.id,
+          await salesRepo.updateStatus(
+            id: tempSale!.id,
             status: SaleStatusEnum.saved,
           );
         }
       }
 
       // Load the selected sale
-      final selectedSale = await salesRepository.getById(saleId);
+      final selectedSale = await salesRepo.getById(saleId);
       if (selectedSale == null) {
         throw Exception('Sale not found');
       }
 
       // Change its status to draft
-      await salesRepository.updateStatus(
+      await salesRepo.updateStatus(
         id: saleId,
         status: SaleStatusEnum.draft,
       );
 
       // Set it as temp sale
-      _tempSale = await salesRepository.getById(saleId);
+      tempSale = await salesRepo.getById(saleId);
 
       // Reload saved sales
       await loadSales();
@@ -258,6 +319,44 @@ class SalesProvider extends ChangeNotifier {
       log('Error switching to sale: $e');
       rethrow;
     }
+  }
+
+  // Pay for Sale
+  Future<int?> payForSale({
+    required int saleId,
+    required int paymentTypeId,
+    required double amount,
+  }) async {
+    final double totalAmount = tempSale?.totalPrice ?? 0;
+    final double totalPaymentsAmount = tempSale?.payments.fold(0, (sum, p) => (sum ?? 0) + p.amount) ?? 0;
+
+    if (amount > totalAmount - totalPaymentsAmount) {
+      return 100;
+    }
+
+    int paymentId = await salePaymentsRepo.create(
+      saleId: saleId,
+      paymentTypeId: paymentTypeId,
+      amount: amount,
+    );
+
+    final newSalePayment = await salePaymentsRepo.getById(paymentId);
+
+    // Add payment to tempSale
+    if (newSalePayment != null && tempSale != null) {
+      tempSale = tempSale!.copyWith(
+        payments: [...tempSale!.payments, newSalePayment],
+      );
+
+      if (totalPaymentsAmount + amount >= totalAmount) {
+        await completeTempSale();
+        return 101;
+      }
+
+      notifyListeners();
+    }
+
+    return null;
   }
 
   @override

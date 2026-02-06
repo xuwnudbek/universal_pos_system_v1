@@ -39,4 +39,32 @@ class SaleItemsRepository {
   Future delete(int id) => saleItemsDao.deleteSaleItem(id);
 
   Future deleteBySaleId(int saleId) => saleItemsDao.deleteBySaleId(saleId);
+
+  Future<List<Map<String, dynamic>>> getTopSellingProducts({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 10,
+  }) async {
+    final topProducts = await saleItemsDao.getTopSellingProducts(
+      startDate: startDate,
+      endDate: endDate,
+      limit: limit,
+    );
+
+    if (topProducts.isEmpty) return [];
+
+    final itemIds = topProducts.map((p) => p['itemId'] as int).toList();
+    final items = await itemsDao.getByIds(itemIds);
+
+    return topProducts.map((product) {
+      final itemId = product['itemId'] as int;
+      final item = items.firstWhere((i) => i.id == itemId);
+
+      return {
+        'item': item,
+        'quantity': product['totalQuantity'] as int,
+        'amount': (product['totalQuantity'] as int) * item.salePrice,
+      };
+    }).toList();
+  }
 }

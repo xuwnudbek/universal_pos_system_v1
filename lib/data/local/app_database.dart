@@ -59,6 +59,8 @@ class AppDatabase extends _$AppDatabase {
     onCreate: (m) async {
       await m.createAll();
     },
+    // onUpgrade: (m, from, to) {
+    // },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
@@ -70,14 +72,9 @@ LazyDatabase _openConnection() {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'app.sqlite'));
 
-    // if (kDebugMode) {
-    //   await deleteDatabaseFile(file);
-    // }
-
     return NativeDatabase(file);
   });
 }
 
-Future<void> deleteDatabaseFile(File file) async {
-  await file.delete();
-}
+Future<void> deleteDatabaseFile(File file) => file.delete();
+

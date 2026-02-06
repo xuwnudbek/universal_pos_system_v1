@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/pages/admin/reports/provider/reports_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
-import 'package:universal_pos_system_v1/utils/theme/app_colors.dart';
 
 class DebtsTab extends StatelessWidget {
   const DebtsTab({super.key});
@@ -11,137 +13,106 @@ class DebtsTab extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    final debts = [
-      {'name': 'Alisher Valiyev', 'phone': '+998 90 123 45 67', 'amount': 850000.0, 'date': '25.01.2026'},
-      {'name': 'Nodira Karimova', 'phone': '+998 91 234 56 78', 'amount': 1200000.0, 'date': '23.01.2026'},
-      {'name': 'Jamshid Toshmatov', 'phone': '+998 93 345 67 89', 'amount': 650000.0, 'date': '22.01.2026'},
-      {'name': 'Zilola Rahimova', 'phone': '+998 94 456 78 90', 'amount': 800000.0, 'date': '20.01.2026'},
-    ];
+    return Consumer<ReportsProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.md),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: theme.dividerTheme.color ?? Colors.grey,
-            width: AppBorderWidth.thin,
-          ),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: EdgeInsets.all(AppSpacing.md),
+        final debtAmount = provider.debtAmount;
+
+        return Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Center(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 500),
+              padding: EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.md),
+                border: Border.all(
+                  color: theme.dividerTheme.color ?? Colors.grey,
+                  width: AppBorderWidth.thin,
                 ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                color: Colors.orange.withAlpha(10),
               ),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Mijoz',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  Container(
+                    padding: EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withAlpha(50),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: Icon(
+                      LucideIcons.coins,
+                      size: 64,
+                      color: Colors.orange,
                     ),
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Telefon',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  SizedBox(height: AppSpacing.xl),
+                  Text(
+                    'Umumiy qarz summasi',
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface.withAlpha(180),
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      'Sana',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
+                  SizedBox(height: AppSpacing.md),
+                  Text(
+                    debtAmount.toSum,
+                    style: textTheme.displayMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
                     ),
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Qarz summasi',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.right,
+                  SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'UZS',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.orange.withAlpha(180),
                     ),
                   ),
+                  if (debtAmount == 0) ...[
+                    SizedBox(height: AppSpacing.lg),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withAlpha(30),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.checkCircle,
+                            color: Colors.green,
+                            size: 20,
+                          ),
+                          SizedBox(width: AppSpacing.sm),
+                          Text(
+                            'Qarz yo\'q',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: Colors.green,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            // Content
-            Expanded(
-              child: ListView.separated(
-                itemCount: debts.length,
-                separatorBuilder: (context, index) => Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final debt = debts[index];
-                  return Container(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                debt['name'] as String,
-                                style: textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            debt['phone'] as String,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withAlpha(180),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            debt['date'] as String,
-                            style: textTheme.bodySmall,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            (debt['amount'] as double).toSum,
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange,
-                            ),
-                            textAlign: TextAlign.right,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

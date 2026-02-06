@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/pages/admin/reports/provider/reports_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/utils/theme/app_colors.dart';
+import 'package:universal_pos_system_v1/widgets/loaders/app_loader.dart';
 
 class ProductsTab extends StatelessWidget {
   const ProductsTab({super.key});
@@ -11,114 +14,141 @@ class ProductsTab extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    // Mock data
-    final products = [
-      {'name': 'Coca Cola 1.5L', 'quantity': 450, 'amount': 11250000.0},
-      {'name': 'Pepsi 0.5L', 'quantity': 380, 'amount': 3800000.0},
-      {'name': 'Fanta 1L', 'quantity': 320, 'amount': 4800000.0},
-      {'name': 'Sprite 1.5L', 'quantity': 280, 'amount': 7000000.0},
-      {'name': 'Non', 'quantity': 250, 'amount': 1250000.0},
-    ];
+    return Consumer<ReportsProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return AppLoader();
+        }
 
-    return Padding(
-      padding: EdgeInsets.all(AppSpacing.md),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: theme.dividerTheme.color ?? Colors.grey,
-            width: AppBorderWidth.thin,
-          ),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: Column(
-          children: [
-            // Header
-            Container(
-              padding: EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.lg),
+        final products = provider.topSellingProducts;
+
+        if (products.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.inventory_2_outlined,
+                  size: 64,
+                  color: theme.colorScheme.onSurface.withAlpha(100),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      'Eng ko\'p sotilgan maxsulotlar',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                SizedBox(height: AppSpacing.md),
+                Text(
+                  'Hech qanday ma\'lumot topilmadi',
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface.withAlpha(150),
                   ),
-                  Expanded(
-                    child: Text(
-                      'Soni',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Summa',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // Content
-            Expanded(
-              child: ListView.separated(
-                itemCount: products.length,
-                separatorBuilder: (context, index) => Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return Container(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            product['name'] as String,
-                            style: textTheme.bodyMedium,
+          );
+        }
+
+        return Padding(
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: theme.dividerTheme.color ?? Colors.grey,
+                width: AppBorderWidth.thin,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(AppRadius.lg),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Eng ko\'p sotilgan maxsulotlar',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Expanded(
-                          child: Text(
-                            '${product['quantity']} ta',
-                            style: textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Soni',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            (product['amount'] as double).toSum,
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.green,
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Summa',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: products.length,
+                    separatorBuilder: (context, index) => Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      final item = product['item'];
+                      final quantity = product['quantity'] as int;
+                      final amount = product['amount'] as double;
+
+                      return Container(
+                        padding: EdgeInsets.all(AppSpacing.md),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                item.name,
+                                style: textTheme.bodyMedium,
+                              ),
                             ),
-                            textAlign: TextAlign.right,
-                          ),
+                            Expanded(
+                              child: Text(
+                                '$quantity ta',
+                                style: textTheme.bodyMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                amount.toSum,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

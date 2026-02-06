@@ -4,10 +4,11 @@ import 'package:universal_pos_system_v1/data/models/sale_item_full.dart';
 import '../../app_database.dart';
 import '../../tables/items_table.dart';
 import '../../tables/sale_items_table.dart';
+import '../../tables/sales_table.dart';
 
 part 'sale_items_dao.g.dart';
 
-@DriftAccessor(tables: [SaleItems, Items])
+@DriftAccessor(tables: [SaleItems, Items, Sales])
 class SaleItemsDao extends DatabaseAccessor<AppDatabase> with _$SaleItemsDaoMixin {
   SaleItemsDao(super.db);
 
@@ -53,5 +54,48 @@ class SaleItemsDao extends DatabaseAccessor<AppDatabase> with _$SaleItemsDaoMixi
   // Delete Sale Items By Sale Id
   Future deleteBySaleId(int saleId) {
     return (delete(saleItems)..where((s) => s.saleId.equals(saleId))).go();
+  }
+
+  // Get Top Selling Products
+  Future<List<Map<String, dynamic>>> getTopSellingProducts({
+    DateTime? startDate,
+    DateTime? endDate,
+    int limit = 10,
+  }) async {
+    final query = selectOnly(saleItems)
+      ..addColumns([
+        saleItems.itemId,
+        saleItems.quantity.sum(),
+      ])
+      ..groupBy([saleItems.itemId])
+      ..orderBy([
+        OrderingTerm(expression: saleItems.quantity.sum(), mode: OrderingMode.desc),
+      ])
+      ..limit(limit);
+
+    // Join with sales table for date filtering
+    query.join([
+      innerJoin(
+        sales,
+        sales.id.equalsExp(saleItems.saleId),
+      ),
+    ]);
+
+    // Apply date filters if provided
+    if (startDate != null) {
+      query.where(sales.createdAt.isBiggerOrEqualValue(startDate));
+    }
+    if (endDate != null) {
+      query.where(sales.createdAt.isSmallerOrEqualValue(endDate));
+    }
+
+    final results = await query.get();
+
+    return results.map((row) {
+      return {
+        'itemId': row.read(saleItems.itemId),
+        'totalQuantity': row.read(saleItems.quantity.sum()) ?? 0,
+      };
+    }).toList();
   }
 }

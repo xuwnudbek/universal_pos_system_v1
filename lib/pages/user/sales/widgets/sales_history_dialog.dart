@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
+import 'package:universal_pos_system_v1/utils/functions/get_payment_type_name.dart';
 
 void showSalesHistoryDialog(BuildContext context, List<SaleFull> allSales) {
+  final theme = Theme.of(context);
+  final textTheme = theme.textTheme;
+
   showDialog(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -12,8 +16,13 @@ void showSalesHistoryDialog(BuildContext context, List<SaleFull> allSales) {
         width: 600,
         height: 500,
         child: allSales.isEmpty
-            ? const Center(
-                child: Text('Sotuvlar tarixi bo\'sh'),
+            ? Center(
+                child: Text(
+                  'Sotuvlar tarixi bo\'sh',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withAlpha(100),
+                  ),
+                ),
               )
             : ListView.separated(
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -86,7 +95,9 @@ void showSalesHistoryDialog(BuildContext context, List<SaleFull> allSales) {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('To\'lov #${payment.id}'),
+                                      Text(
+                                        getPaymentName(payment.paymentTypeName),
+                                      ),
                                       Text(
                                         payment.amount.intOrDouble.str.toSumString("UZS"),
                                         style: const TextStyle(fontWeight: FontWeight.w500),

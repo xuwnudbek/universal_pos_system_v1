@@ -20,86 +20,81 @@ class _AppSidebarState extends State<AppSidebar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ChangeNotifierProvider(
-      create: (context) => AppSidebarProvider(),
-      builder: (context, asyncSnapshot) {
-        return Consumer<AppSidebarProvider>(
-          builder: (context, provider, _) {
-            return AnimatedContainer(
-              width: provider.sidebarWidth,
-              duration: const Duration(milliseconds: 100),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                border: Border(
-                  right: BorderSide(
-                    color: theme.dividerColor,
-                    width: 0.1,
-                  ),
+    return Consumer<AppSidebarProvider>(
+      builder: (context, provider, _) {
+        return AnimatedContainer(
+          width: provider.sidebarWidth,
+          duration: const Duration(milliseconds: 100),
+          decoration: BoxDecoration(
+            color: theme.scaffoldBackgroundColor,
+            border: Border(
+              right: BorderSide(
+                color: theme.dividerColor,
+                width: 0.1,
+              ),
+            ),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'POS Tizimi',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    Text(
+                      'Admin',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              Divider(),
+              Expanded(
+                child: Column(
+                  children: [
+                    ListView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: provider.isExpanded ? 8.0 : 0.0,
+                      ),
                       children: [
-                        Text(
-                          'POS Tizimi',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        Text(
-                          'Admin',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Divider(),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        ListView(
-                          shrinkWrap: true,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: provider.isExpanded ? 8.0 : 0.0,
-                          ),
-                          children: [
-                            ...provider.sidebarItems.map(
-                              (item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 4.0),
-                                child: SidebarItemWidget(
-                                  item: item,
-                                  isExpanded: provider.isExpanded,
-                                  isSelected: provider.selectedItem == item,
-                                  onTap: (item) {
-                                    provider.selectItem(item);
-                                  },
-                                ),
-                              ),
-                            ),
-                            SidebarItemWidget(
-                              item: SidebarItem(
-                                title: 'Logout',
-                                routeName: AppRoute.logout.name,
-                                iconData: LucideIcons.logOut,
-                              ),
+                        ...provider.sidebarItems.map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4.0),
+                            child: SidebarItemWidget(
+                              item: item,
                               isExpanded: provider.isExpanded,
-                              isSelected: false,
-                              onTap: (item) async {
-                                await LocalStorage.logout();
-                                appRouter.goNamed(AppRoute.auth.name);
+                              isSelected: provider.selectedItem == item,
+                              onTap: (item) {
+                                provider.selectItem(item);
                               },
                             ),
-                          ],
+                          ),
+                        ),
+                        SidebarItemWidget(
+                          item: SidebarItem(
+                            title: 'Logout',
+                            routeName: AppRoute.logout.name,
+                            iconData: LucideIcons.logOut,
+                          ),
+                          isExpanded: provider.isExpanded,
+                          isSelected: false,
+                          onTap: (item) async {
+                            await LocalStorage.logout();
+                            appRouter.goNamed(AppRoute.auth.name);
+                          },
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
-          },
+            ],
+          ),
         );
       },
     );

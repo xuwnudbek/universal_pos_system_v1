@@ -9,9 +9,9 @@ class AppSidebarProvider extends ChangeNotifier {
 
   final List<SidebarItem> sidebarItems = [
     SidebarItem(
-      title: 'Sotuv',
-      routeName: AppRoute.sales.name,
-      iconData: LucideIcons.shoppingCart,
+      title: 'Hisobotlar',
+      routeName: AppRoute.reports.name,
+      iconData: LucideIcons.fileText,
     ),
     SidebarItem(
       title: 'Maxsulotlar',
@@ -38,11 +38,7 @@ class AppSidebarProvider extends ChangeNotifier {
       routeName: AppRoute.expenses.name,
       iconData: LucideIcons.dollarSign,
     ),
-    SidebarItem(
-      title: 'Hisobotlar',
-      routeName: AppRoute.reports.name,
-      iconData: LucideIcons.fileText,
-    ),
+
     SidebarItem(
       title: 'Foydalanuvchilar',
       routeName: AppRoute.users.name,

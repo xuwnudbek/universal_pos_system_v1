@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:universal_pos_system_v1/data/models/sale_payment_full.dart';
 import '../../app_database.dart';
 import '../../tables/sale_payments_table.dart';
 import '../../tables/sales_table.dart';
@@ -17,9 +18,22 @@ class SalePaymentsDao extends DatabaseAccessor<AppDatabase> with _$SalePaymentsD
   Future<SalePayment?> getById(int id) => (select(salePayments)..where((sp) => sp.id.equals(id))).getSingleOrNull();
 
   // Get sale payments by sale ID
-  Future<List<SalePayment>> getBySaleId(int saleId) {
-    final query = select(salePayments)..where((sp) => sp.saleId.equals(saleId));
-    return query.get();
+  Future<List<SalePaymentFull>> getBySaleId(int saleId) async {
+    final query = select(salePayments).join([
+      innerJoin(paymentTypes, paymentTypes.id.equalsExp(salePayments.paymentTypeId)),
+    ])..where(salePayments.saleId.equals(saleId));
+
+    final results = await query.get();
+
+    return results.map((row) {
+      final salePayment = row.readTable(salePayments);
+      final paymentType = row.readTable(paymentTypes);
+
+      return SalePaymentFull.from(
+        salePayment: salePayment,
+        paymentType: paymentType,
+      );
+    }).toList();
   }
 
   // Get sale payments by multiple sale IDs
@@ -75,5 +89,43 @@ class SalePaymentsDao extends DatabaseAccessor<AppDatabase> with _$SalePaymentsD
   // Delete all payments for a sale
   Future deleteBySaleId(int saleId) {
     return (delete(salePayments)..where((sp) => sp.saleId.equals(saleId))).go();
+  }
+
+  // Get payment statistics by payment type
+  Future<List<Map<String, dynamic>>> getPaymentStatistics({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final query = selectOnly(salePayments)
+      ..addColumns([
+        salePayments.paymentTypeId,
+        salePayments.amount.sum(),
+      ])
+      ..groupBy([salePayments.paymentTypeId]);
+
+    // Join with sales table for date filtering
+    query.join([
+      innerJoin(
+        sales,
+        sales.id.equalsExp(salePayments.saleId),
+      ),
+    ]);
+
+    // Apply date filters if provided
+    if (startDate != null) {
+      query.where(sales.createdAt.isBiggerOrEqualValue(startDate));
+    }
+    if (endDate != null) {
+      query.where(sales.createdAt.isSmallerOrEqualValue(endDate));
+    }
+
+    final results = await query.get();
+
+    return results.map((row) {
+      return {
+        'paymentTypeId': row.read(salePayments.paymentTypeId),
+        'totalAmount': row.read(salePayments.amount.sum()) ?? 0.0,
+      };
+    }).toList();
   }
 }

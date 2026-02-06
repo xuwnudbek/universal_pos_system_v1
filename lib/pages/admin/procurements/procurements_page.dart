@@ -58,8 +58,8 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                   Spacer(),
                   Button(
                     onPressed: () async {
-                      final itemsRepository = context.read<ItemsRepository>();
-                      final items = await itemsRepository.getAll();
+                      final itemsRepo = context.read<ItemsRepository>();
+                      final items = await itemsRepo.getAll();
 
                       if (!context.mounted) return;
 

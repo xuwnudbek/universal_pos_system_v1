@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/utils/functions/check_authentication.dart';
 import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 import 'provider/auth_provider.dart';
 
@@ -32,7 +33,7 @@ class _AuthPageState extends State<AuthPage> {
       );
 
       if (success && mounted) {
-        appRouter.goNamed(AppRoute.sales.name);
+        appRouter.goNamed(checkAuthentication().name);
       }
     }
   }
@@ -46,7 +47,7 @@ class _AuthPageState extends State<AuthPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
             child: Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
+              builder: (context, authProvider, _) {
                 return Form(
                   key: _formKey,
                   child: Column(
@@ -108,7 +109,7 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password kiriting';
+                            return 'Parol kiriting';
                           }
                           return null;
                         },

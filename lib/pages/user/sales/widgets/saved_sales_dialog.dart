@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
-import 'package:universal_pos_system_v1/pages/auth/provider/auth_provider.dart';
 import 'package:universal_pos_system_v1/pages/user/sales/providers/sales_provider.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
@@ -37,8 +36,7 @@ void showSavedSalesDialog(BuildContext context, List<SaleFull> savedSales) {
                       ),
                     ),
                     onTap: () async {
-                      final userId = context.read<AuthProvider>().currentUser!.id;
-                      await context.read<SalesProvider>().switchToSale(sale.id, userId);
+                      await context.read<SalesProvider>().switchToSale(sale.id);
                       if (dialogContext.mounted) {
                         Navigator.of(dialogContext).pop();
                       }

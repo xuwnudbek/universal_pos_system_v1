@@ -9,19 +9,27 @@ import '../enums/payment_types_enum.dart';
 class BaseSeeder {
   final AppDatabase db;
 
-  BaseSeeder(this.db) {
-    seedBaseData();
-  }
+  BaseSeeder(this.db);
 
   Future<void> seedBaseData() {
-    return () async {
+    bool baseSeeded = false;
+
+    baseSeeded = LocalStorage.getBool('base_seeded') ?? false;
+
+    if (baseSeeded) {
+      return Future.value();
+    }
+
+    return this.db.transaction(() async {
       await _seedUsers();
       await _seedUnits();
       await _seedPaymentTypes();
       await _seedCategoryColors();
       await _seedItemCategories();
       await _seedExpenseCategories();
-    }();
+
+      await LocalStorage.setBool('base_seeded', true);
+    });
   }
 
   Future<void> _seedUsers() async {
@@ -93,16 +101,16 @@ class BaseSeeder {
 
     return db.batch((b) {
       b.insertAll(db.categoryColors, [
-        CategoryColorsCompanion.insert(hex: '#FF6B6B'),
-        CategoryColorsCompanion.insert(hex: '#F7B801'),
-        CategoryColorsCompanion.insert(hex: '#6BCB77'),
-        CategoryColorsCompanion.insert(hex: '#4D96FF'),
-        CategoryColorsCompanion.insert(hex: '#9D4EDD'),
-        CategoryColorsCompanion.insert(hex: '#FF922B'),
-        CategoryColorsCompanion.insert(hex: '#20C997'),
-        CategoryColorsCompanion.insert(hex: '#E64980'),
-        CategoryColorsCompanion.insert(hex: '#495057'),
-        CategoryColorsCompanion.insert(hex: '#ADB5BD'),
+        CategoryColorsCompanion.insert(hex: 'FF6B6B'),
+        CategoryColorsCompanion.insert(hex: 'F7B801'),
+        CategoryColorsCompanion.insert(hex: '6BCB77'),
+        CategoryColorsCompanion.insert(hex: '4D96FF'),
+        CategoryColorsCompanion.insert(hex: '9D4EDD'),
+        CategoryColorsCompanion.insert(hex: 'FF922B'),
+        CategoryColorsCompanion.insert(hex: '20C997'),
+        CategoryColorsCompanion.insert(hex: 'E64980'),
+        CategoryColorsCompanion.insert(hex: '495057'),
+        CategoryColorsCompanion.insert(hex: 'ADB5BD'),
       ]);
     });
   }

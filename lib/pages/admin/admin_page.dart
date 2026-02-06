@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/data/local/daos/procurements/procurement_items_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/procurements/procurements_dao.dart';
@@ -13,6 +12,7 @@ import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_reposito
 import 'package:universal_pos_system_v1/data/repositories/transfers/transfers_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/expenses/expenses_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/expenses/expense_categories_repository.dart';
+import 'package:universal_pos_system_v1/pages/admin/sidebar/provider/app_sidebar_provider.dart';
 import 'sidebar/app_sidebar.dart';
 
 import '../../data/local/app_database.dart';
@@ -20,12 +20,10 @@ import '../../data/local/app_database.dart';
 class AdminPage extends StatelessWidget {
   const AdminPage({
     super.key,
-    required this.state,
     required this.child,
   });
 
   final Widget child;
-  final GoRouterState state;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +68,9 @@ class AdminPage extends StatelessWidget {
         ProxyProvider<ExpensesDao, ExpensesRepository>(
           update: (_, dao, _) => ExpensesRepository(dao),
         ),
+
+        // Add other providers as needed
+        ChangeNotifierProvider(create: (_) => AppSidebarProvider()),
       ],
       child: Scaffold(
         body: Row(
