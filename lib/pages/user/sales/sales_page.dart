@@ -16,7 +16,7 @@ import '/data/repositories/sales/sale_items_repository.dart';
 import '/data/repositories/sales/sales_repository.dart';
 import '/pages/user/sales/providers/sales_provider.dart';
 import '/pages/user/sales/widgets/item_card.dart';
-import '/pages/user/sales/widgets/payment_dialog.dart';
+import 'widgets/payment_dialog.dart';
 import '/pages/user/sales/widgets/saved_sales_dialog.dart';
 import '/pages/user/sales/widgets/sales_history_dialog.dart';
 import '/utils/constants/app_constants.dart';

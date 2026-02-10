@@ -18,7 +18,9 @@ class PaymentDialog extends StatefulWidget {
 class _PaymentDialogState extends State<PaymentDialog> {
   // Selected payment type
   PaymentType? _selectedPaymentType;
+
   PaymentType? get selectedPaymentType => _selectedPaymentType;
+
   set selectedPaymentType(PaymentType? type) {
     setState(() {
       _selectedPaymentType = type;
@@ -28,7 +30,9 @@ class _PaymentDialogState extends State<PaymentDialog> {
   int _calculatorInput = 0;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
+
   set errorMessage(String? message) {
     setState(() {
       _errorMessage = message;
@@ -44,19 +48,22 @@ class _PaymentDialogState extends State<PaymentDialog> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final mq = MediaQuery.of(context);
 
     return Consumer<SalesProvider>(
       builder: (context, provider, _) {
         final totalAmount = provider.tempSale?.totalPrice ?? 0.0;
         final salePayments = provider.tempSale?.payments ?? [];
 
-        final totalPaymentsAmount = salePayments.fold<double>(0.0, (p, e) => p + e.amount);
+        final totalPaymentsAmount = salePayments.fold<double>(
+          0.0,
+          (p, e) => p + e.amount,
+        );
 
         return AlertDialog(
-          constraints: const BoxConstraints(
+          constraints: BoxConstraints(
             maxWidth: 700,
             minWidth: 700,
-            minHeight: 300,
           ),
           title: Stack(
             children: [
@@ -96,235 +103,281 @@ class _PaymentDialogState extends State<PaymentDialog> {
                 ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: AppSpacing.lg,
-            children: [
-              Row(
-                spacing: AppSpacing.lg,
-                children: [
-                  SizedBox(
-                    width: 200,
-                    child: Column(
-                      spacing: AppSpacing.sm,
-                      children: [
-                        _buildAmountCard(totalAmount, typeValue: 0),
-                        _buildAmountCard(totalPaymentsAmount, typeValue: 1),
-                        _buildAmountCard(totalAmount - totalPaymentsAmount, typeValue: 2),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      height: 218,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
+          content: AspectRatio(
+            aspectRatio: 0.5,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.lg,
+              children: [
+                Row(
+                  spacing: AppSpacing.lg,
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      child: Column(
+                        spacing: AppSpacing.sm,
+                        children: [
+                          _buildAmountCard(totalAmount, typeValue: 0),
+                          _buildAmountCard(totalPaymentsAmount, typeValue: 1),
+                          _buildAmountCard(
+                            totalAmount - totalPaymentsAmount,
+                            typeValue: 2,
+                          ),
+                        ],
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-                      child: salePayments.isEmpty
-                          ? Center(
-                              child: Text(
-                                'Hech qanday to\'lov amalga oshirilmagan.',
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            )
-                          : Column(
-                              mainAxisSize: MainAxisSize.max,
-                              children: salePayments.map((payment) {
-                                final index = salePayments.indexOf(payment) + 1;
-
-                                return _buildPaymentRow(
-                                  index: index,
-                                  paymentType: payment.paymentType,
-                                  amount: payment.amount.intOrDouble.str.toSumString(),
-                                );
-                              }).toList(),
-                            ),
                     ),
-                  ),
-                ],
-              ),
-
-              // Payment Types Buttons & Calculator
-              Row(
-                spacing: AppSpacing.lg,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      spacing: AppSpacing.sm,
-                      children: provider.paymentTypes.map(
-                        (paymentType) {
-                          final isSelected = selectedPaymentType == paymentType;
-
-                          return _buildPaymentTypeButton(
-                            title: getPaymentName(paymentType.name),
-                            iconData: paymentType.name.iconData,
-                            selected: isSelected,
-                            onTap: () {
-                              _onSelectPaymentType(paymentType);
-                            },
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ),
-                  Container(
-                    width: 328,
-                    // height: 400,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: Column(
-                      spacing: AppSpacing.md,
-                      children: [
-                        Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(
-                                _calculatorInput.intOrDouble.str.toSumString(),
-                                style: Theme.of(context).textTheme.headlineMedium,
-                              ),
-                            ],
-                          ),
+                    Expanded(
+                      child: Container(
+                        width: double.infinity,
+                        height: 218,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.md,
+                        ),
+                        child: salePayments.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'Hech qanday to\'lov amalga oshirilmagan.',
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              )
+                            : Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: salePayments.map((payment) {
+                                  final index =
+                                      salePayments.indexOf(payment) + 1;
 
-                        // Calculator buttons can be added here
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: AppSpacing.sm,
+                                  return _buildPaymentRow(
+                                    index: index,
+                                    paymentType: payment.paymentType,
+                                    amount: payment.amount.intOrDouble.str
+                                        .toSumString(),
+                                  );
+                                }).toList(),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Payment Types Buttons & Calculator
+                Row(
+                  spacing: AppSpacing.lg,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        spacing: AppSpacing.sm,
+                        children: provider.paymentTypes.map(
+                          (paymentType) {
+                            final isSelected =
+                                selectedPaymentType == paymentType;
+
+                            return _buildPaymentTypeButton(
+                              title: getPaymentName(paymentType.name),
+                              iconData: paymentType.name.iconData,
+                              selected: isSelected,
+                              onTap: () {
+                                _onSelectPaymentType(paymentType);
+                              },
+                            );
+                          },
+                        ).toList(),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        width: 328,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.all(AppSpacing.md),
+                        child: Column(
+                          spacing: AppSpacing.md,
                           children: [
-                            SizedBox(
-                              width: 226,
-                              height: 300,
-                              child: Wrap(
-                                alignment: WrapAlignment.start,
-                                spacing: AppSpacing.sm,
-                                runSpacing: AppSpacing.sm,
+                            Container(
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  ...List.generate(9, (index) {
-                                    final number = index + 1;
-                                    return _buildCalculatorButton(
-                                      number.toString(),
-                                      onPressed: () {
-                                        setState(() {
-                                          _calculatorInput = _calculatorInput * 10 + number;
-                                        });
-                                      },
-                                    );
-                                  }),
-                                  _buildCalculatorButton(
-                                    '0',
-                                    onPressed: () {
-                                      setState(() {
-                                        _calculatorInput = _calculatorInput * 10;
-                                      });
-                                    },
-                                  ),
-                                  _buildCalculatorButton(
-                                    '00',
-                                    onPressed: () {
-                                      setState(() {
-                                        _calculatorInput = _calculatorInput * 100;
-                                      });
-                                    },
-                                  ),
-                                  _buildCalculatorButton(
-                                    'T',
-                                    onPressed: () {
-                                      setState(() {
-                                        _calculatorInput = (totalAmount - totalPaymentsAmount).round();
-                                      });
-                                    },
+                                  Text(
+                                    _calculatorInput.intOrDouble.str
+                                        .toSumString(),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium,
                                   ),
                                 ],
                               ),
                             ),
-                            Column(
+
+                            // Calculator buttons can be added here
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               spacing: AppSpacing.sm,
                               children: [
-                                _buildCalculatorButton(
-                                  'C',
-                                  onPressed: () {
-                                    setState(() {
-                                      _calculatorInput = 0;
-                                    });
-                                  },
-                                ),
-                                // backspace button
-                                _buildCalculatorButton(
-                                  '',
-                                  onPressed: () {
-                                    setState(() {
-                                      _calculatorInput = _calculatorInput ~/ 10;
-                                    });
-                                  },
-                                  icon: LucideIcons.delete,
-                                ),
-                                _buildCalculatorButton(
-                                  '=',
-                                  onPressed: _calculatorInput != 0
-                                      ? () async {
-                                          if (selectedPaymentType != null) {
-                                            final tempSale = provider.tempSale;
-
-                                            var result = await provider.payForSale(
-                                              saleId: tempSale!.id,
-                                              paymentTypeId: selectedPaymentType!.id,
-                                              amount: _calculatorInput.toDouble(),
-                                            );
-
-                                            if (result == 100) {
-                                              errorMessage = 'To\'lov miqdori qoldiqdan katta bo\'lishi mumkin emas.';
-                                              Future.delayed(const Duration(seconds: 3), () {
-                                                errorMessage = null;
-                                              });
-
-                                              return;
-                                            }
-
+                                SizedBox(
+                                  width: 226,
+                                  height: 300,
+                                  child: Wrap(
+                                    alignment: WrapAlignment.start,
+                                    spacing: AppSpacing.sm,
+                                    runSpacing: AppSpacing.sm,
+                                    children: [
+                                      ...List.generate(9, (index) {
+                                        final number = index + 1;
+                                        return _buildCalculatorButton(
+                                          number.toString(),
+                                          onPressed: () {
                                             setState(() {
-                                              selectedPaymentType = null;
-                                              _calculatorInput = 0;
+                                              _calculatorInput =
+                                                  _calculatorInput * 10 +
+                                                  number;
                                             });
+                                          },
+                                        );
+                                      }),
+                                      _buildCalculatorButton(
+                                        '0',
+                                        onPressed: () {
+                                          setState(() {
+                                            _calculatorInput =
+                                                _calculatorInput * 10;
+                                          });
+                                        },
+                                      ),
+                                      _buildCalculatorButton(
+                                        '00',
+                                        onPressed: () {
+                                          setState(() {
+                                            _calculatorInput =
+                                                _calculatorInput * 100;
+                                          });
+                                        },
+                                      ),
+                                      _buildCalculatorButton(
+                                        'T',
+                                        onPressed: () {
+                                          setState(() {
+                                            _calculatorInput =
+                                                (totalAmount -
+                                                        totalPaymentsAmount)
+                                                    .round();
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  spacing: AppSpacing.sm,
+                                  children: [
+                                    _buildCalculatorButton(
+                                      'C',
+                                      onPressed: () {
+                                        setState(() {
+                                          _calculatorInput = 0;
+                                        });
+                                      },
+                                    ),
+                                    // backspace button
+                                    _buildCalculatorButton(
+                                      '',
+                                      onPressed: () {
+                                        setState(() {
+                                          _calculatorInput =
+                                              _calculatorInput ~/ 10;
+                                        });
+                                      },
+                                      icon: LucideIcons.delete,
+                                    ),
+                                    _buildCalculatorButton(
+                                      '=',
+                                      onPressed:
+                                          _calculatorInput != 0 &&
+                                              selectedPaymentType != null &&
+                                              _calculatorInput <=
+                                                  (totalAmount -
+                                                      totalPaymentsAmount)
+                                          ? () async {
+                                              if (selectedPaymentType != null) {
+                                                final tempSale =
+                                                    provider.tempSale;
 
-                                            if (result == 101) {
-                                              Navigator.of(context).pop(101);
+                                                var result = await provider
+                                                    .payForSale(
+                                                      saleId: tempSale!.id,
+                                                      paymentTypeId:
+                                                          selectedPaymentType!
+                                                              .id,
+                                                      amount: _calculatorInput
+                                                          .toDouble(),
+                                                    );
+
+                                                if (result == 100) {
+                                                  errorMessage =
+                                                      'To\'lov miqdori qoldiqdan katta bo\'lishi mumkin emas.';
+                                                  Future.delayed(
+                                                    const Duration(seconds: 3),
+                                                    () {
+                                                      errorMessage = null;
+                                                    },
+                                                  );
+
+                                                  return;
+                                                }
+
+                                                setState(() {
+                                                  selectedPaymentType = null;
+                                                  _calculatorInput = 0;
+                                                });
+
+                                                if (result == 101) {
+                                                  Navigator.of(
+                                                    context,
+                                                  ).pop(101);
+                                                }
+                                              } else {
+                                                errorMessage =
+                                                    'Iltimos, to\'lov turini tanlang.';
+
+                                                Future.delayed(
+                                                  const Duration(seconds: 3),
+                                                  () {
+                                                    errorMessage = null;
+                                                  },
+                                                );
+                                              }
                                             }
-                                          } else {
-                                            errorMessage = 'Iltimos, to\'lov turini tanlang.';
-
-                                            Future.delayed(const Duration(seconds: 3), () {
-                                              errorMessage = null;
-                                            });
-                                          }
-                                        }
-                                      : null,
-                                  icon: LucideIcons.check,
+                                          : null,
+                                      icon: LucideIcons.check,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -498,14 +551,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
           ),
         ),
       ),
-    );
-  }
-}
-
-extension on Icon {
-  Row operator *(int other) {
-    return Row(
-      children: List.generate(other, (index) => this),
     );
   }
 }

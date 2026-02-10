@@ -270,13 +270,9 @@ class _ItemsPageState extends State<ItemsPage> {
                                         'Kategoriya',
                                         style: textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.w600,
-                                          color: itemsProvider.sortColumnIndex == 2 ? theme.colorScheme.primary : null,
                                         ),
                                       ),
                                       size: ColumnSize.M,
-                                      onSort: (columnIndex, ascending) {
-                                        itemsProvider.sortByColumn(columnIndex, ascending);
-                                      },
                                     ),
                                     DataColumn2(
                                       headingRowAlignment: MainAxisAlignment.center,

@@ -27,9 +27,8 @@ import './data/repositories/units/units_repository.dart';
 import './data/repositories/users/users_repository.dart';
 import './pages/auth/provider/auth_provider.dart';
 import './utils/functions/local_storage.dart';
-import './utils/theme/app_theme.dart';
-
 import './utils/router/app_router.dart';
+import './utils/theme/app_theme.dart';
 
 void main() {
   runZonedGuarded(
@@ -37,7 +36,6 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
 
       await LocalStorage.init();
-
       final db = AppDatabase();
       await BaseSeeder(db).seedBaseData();
 
@@ -96,10 +94,21 @@ class MyApp extends StatelessWidget {
         ProxyProvider<UsersDao, UsersRepository>(
           update: (_, dao, _) => UsersRepository(dao),
         ),
-        ProxyProvider4<ItemsDao, ItemCategoriesDao, CategoryColorsDao, UnitsDao, ItemsRepository>(
-          update: (_, dao0, dao1, dao2, dao3, _) => ItemsRepository(dao0, dao1, dao2, dao3),
+        ProxyProvider4<
+          ItemsDao,
+          ItemCategoriesDao,
+          CategoryColorsDao,
+          UnitsDao,
+          ItemsRepository
+        >(
+          update: (_, dao0, dao1, dao2, dao3, _) =>
+              ItemsRepository(dao0, dao1, dao2, dao3),
         ),
-        ProxyProvider2<ItemCategoriesDao, CategoryColorsDao, ItemCategoriesRepository>(
+        ProxyProvider2<
+          ItemCategoriesDao,
+          CategoryColorsDao,
+          ItemCategoriesRepository
+        >(
           update: (_, dao0, dao1, _) => ItemCategoriesRepository(dao0, dao1),
         ),
         ProxyProvider<CategoryColorsDao, CategoryColorsRepository>(
@@ -109,13 +118,25 @@ class MyApp extends StatelessWidget {
           update: (_, dao, _) => UnitsRepository(dao),
         ),
 
-        ProxyProvider5<SalesDao, SaleItemsDao, ItemsDao, SalePaymentsDao, PaymentTypesDao, SalesRepository>(
-          update: (_, dao0, dao1, dao2, dao3, dao4, _) => SalesRepository(dao0, dao1, dao2, dao3, dao4),
+        ProxyProvider5<
+          SalesDao,
+          SaleItemsDao,
+          ItemsDao,
+          SalePaymentsDao,
+          PaymentTypesDao,
+          SalesRepository
+        >(
+          update: (_, dao0, dao1, dao2, dao3, dao4, _) =>
+              SalesRepository(dao0, dao1, dao2, dao3, dao4),
         ),
         ProxyProvider2<SaleItemsDao, ItemsDao, SaleItemsRepository>(
           update: (_, dao0, dao1, _) => SaleItemsRepository(dao0, dao1),
         ),
-        ProxyProvider2<SalePaymentsDao, PaymentTypesDao, SalePaymentsRepository>(
+        ProxyProvider2<
+          SalePaymentsDao,
+          PaymentTypesDao,
+          SalePaymentsRepository
+        >(
           update: (_, dao0, dao1, _) => SalePaymentsRepository(dao0, dao1),
         ),
         ProxyProvider<PaymentTypesDao, PaymentTypesRepository>(

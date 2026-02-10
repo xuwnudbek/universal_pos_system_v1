@@ -14,7 +14,7 @@ class DebtsTab extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return Consumer<ReportsProvider>(
-      builder: (context, provider, child) {
+      builder: (context, provider, _) {
         if (provider.isLoading) {
           return Center(
             child: CircularProgressIndicator(),
