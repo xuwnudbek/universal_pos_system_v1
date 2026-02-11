@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
@@ -133,7 +132,6 @@ class SalesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Temporary Sale Management
   Future<void> createTempSale() async {
     final userId = LocalStorage.getUserId();
 

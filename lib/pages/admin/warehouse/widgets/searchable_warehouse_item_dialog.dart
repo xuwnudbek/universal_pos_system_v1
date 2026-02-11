@@ -141,7 +141,7 @@ class _SearchableWarehouseItemDialogState extends State<SearchableWarehouseItemD
                           leading: Container(
                             padding: EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Color(hexToColor(warehouseItem.item.category?.color?.hex ?? '000000')).withOpacity(0.1),
+                              color: Color(hexToColor(warehouseItem.item.category?.color?.hex ?? '000000')).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(AppRadius.sm),
                             ),
                             child: Icon(

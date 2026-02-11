@@ -65,6 +65,7 @@ class SalesPage extends StatelessWidget {
                   width: mq.size.width * 0.2,
                   child: Column(
                     children: [
+                      // Sidebar title
                       Container(
                         height: 60,
                         decoration: BoxDecoration(
@@ -149,7 +150,7 @@ class SalesPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Add sidebar items here
+                      // Sidebar items here
                       Expanded(
                         child: Selector<SalesProvider, SaleFull?>(
                           selector: (context, provider) => provider.tempSale,
@@ -227,7 +228,7 @@ class SalesPage extends StatelessWidget {
                           },
                         ),
                       ),
-                      // Total
+                      // Total / Pay / Save
                       Container(
                         padding: EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
@@ -357,6 +358,7 @@ class SalesPage extends StatelessWidget {
                   padding: EdgeInsets.all(16.0),
                   child: Column(
                     children: [
+                      // Top Bar
                       Row(
                         children: [
                           IconButton2(
@@ -455,6 +457,7 @@ class SalesPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 8.0),
+                      // Items Grid
                       Expanded(
                         child: Selector<SalesProvider, List<ItemFull>>(
                           selector: (context, provider) => provider.items,

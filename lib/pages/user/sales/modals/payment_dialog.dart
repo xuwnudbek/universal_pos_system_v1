@@ -10,6 +10,7 @@ import 'package:universal_pos_system_v1/pages/user/sales/modals/add_debt_additio
 import 'package:universal_pos_system_v1/pages/user/sales/providers/sales_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
+import 'package:universal_pos_system_v1/utils/extensions/string_extension.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
 import 'package:universal_pos_system_v1/utils/functions/get_payment_type_name.dart';
 import 'package:universal_pos_system_v1/widgets/icon_button2.dart';
@@ -132,16 +133,12 @@ class _PaymentDialogState extends State<PaymentDialog> {
     });
   }
 
-  void _onKeyEvent(
-    KeyEvent event,
-    SalesProvider provider,
-  ) {
+  void _onKeyEvent(KeyEvent event, SalesProvider provider) {
     if (event is KeyDownEvent) {
       final key = event.logicalKey.keyLabel;
 
-      // faqat raqamlar
-      if (RegExp(r'^[0-9]$').hasMatch(key)) {
-        _onNumberKeyPressed(int.parse(key));
+      if (key.hasDigit()) {
+        _onNumberKeyPressed(key.getDigit());
         return;
       }
 
@@ -160,7 +157,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final mq = MediaQuery.of(context);
 
     return Consumer<SalesProvider>(
       builder: (context, provider, _) {
@@ -179,7 +175,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
             maxHeight: 800,
             minHeight: 700,
           ),
-          // @formatter:off
           title: Stack(
             children: [
               Row(
@@ -218,7 +213,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
                 ),
             ],
           ),
-          // @formatter:on
           content: KeyboardListener(
             autofocus: true,
             focusNode: _keyboardFocusNode,
@@ -268,8 +262,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                   ),
                                 ),
                               )
-                            : Column(
-                                mainAxisSize: MainAxisSize.max,
+                            : ListView(
                                 children: salePayments.map((payment) {
                                   final index = salePayments.indexOf(payment) + 1;
 
@@ -501,6 +494,11 @@ class _PaymentDialogState extends State<PaymentDialog> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   // @formatter:off

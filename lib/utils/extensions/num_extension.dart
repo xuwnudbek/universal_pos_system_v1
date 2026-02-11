@@ -7,7 +7,7 @@ extension NumExtension on num {
 
   ({num value, String str}) get intOrDouble {
     if (this % 1 == 0) {
-      return (value: this.toInt(), str: "${this.toInt()}");
+      return (value: toInt(), str: "${toInt()}");
     } else {
       return (value: toDouble(), str: (toDouble().toStringAsFixed(1)));
     }

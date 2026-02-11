@@ -21,7 +21,6 @@ class _AddDebtAdditionsState extends State<AddDebtAdditions> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _amountController = TextEditingController();
 
   void _onSubmit() {
     if (_formKey.currentState!.validate()) {
@@ -55,9 +54,6 @@ class _AddDebtAdditionsState extends State<AddDebtAdditions> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final mq = MediaQuery.of(context);
-
     return AlertDialog(
       constraints: BoxConstraints(
         maxWidth: 400,
@@ -98,7 +94,7 @@ class _AddDebtAdditionsState extends State<AddDebtAdditions> {
             _field(
               _descriptionController,
               "Qarz haqida",
-              hintText: "Qarz haqida qisqacha ma\'lumot",
+              hintText: "Qarz haqida qisqacha ma'lumot",
               maxLines: 3,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {

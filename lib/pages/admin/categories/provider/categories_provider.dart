@@ -45,7 +45,7 @@ class CategoriesProvider extends ChangeNotifier {
   Future<void> getAllCategoryColors() async {
     try {
       var res = await _categoryColorsRepo.getAll();
-      this._colors = res;
+      _colors = res;
 
       notifyListeners();
     } catch (e) {
@@ -56,7 +56,7 @@ class CategoriesProvider extends ChangeNotifier {
 
   Future<void> getAllCategories() async {
     try {
-      this._categories = await _itemCategoriesRepo.getAll();
+      _categories = await _itemCategoriesRepo.getAll();
 
       notifyListeners();
     } catch (e) {

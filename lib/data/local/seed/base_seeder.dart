@@ -20,7 +20,7 @@ class BaseSeeder {
       return Future.value();
     }
 
-    return this.db.transaction(() async {
+    return db.transaction(() async {
       await _seedUsers();
       await _seedUnits();
       await _seedPaymentTypes();

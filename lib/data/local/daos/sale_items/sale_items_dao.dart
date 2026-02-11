@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:universal_pos_system_v1/data/models/sale_item_full.dart';
 
 import '../../app_database.dart';
 import '../../tables/items_table.dart';

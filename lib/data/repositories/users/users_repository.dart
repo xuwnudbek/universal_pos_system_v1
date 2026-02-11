@@ -1,7 +1,6 @@
 import 'package:universal_pos_system_v1/data/local/daos/users/users_dao.dart';
 import 'package:universal_pos_system_v1/data/local/enums/user_roles_enum.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
-import 'dart:convert';
 
 import 'package:universal_pos_system_v1/utils/functions/bcrypt.dart';
 
