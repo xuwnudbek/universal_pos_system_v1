@@ -6,12 +6,14 @@ import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
+import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sale_items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sales_repository.dart';
+import 'package:universal_pos_system_v1/pages/user/sales/modals/add_debt_addition.dart';
 import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
 
 class SalesProvider extends ChangeNotifier {
@@ -21,9 +23,12 @@ class SalesProvider extends ChangeNotifier {
   final ItemCategoriesRepository itemCategoriesRepo;
   final SalePaymentsRepository salePaymentsRepo;
   final PaymentTypesRepository paymentTypesRepo;
+  final DebtsRepository debtsRepo;
 
   SaleFull? _tempSale;
+
   SaleFull? get tempSale => _tempSale;
+
   set tempSale(SaleFull? sale) {
     _tempSale = sale;
     notifyListeners();
@@ -31,22 +36,29 @@ class SalesProvider extends ChangeNotifier {
 
   // Sales History
   List<SaleFull> _sales = [];
+
   List<SaleFull> get complatedSales => _sales.where((s) => s.status == SaleStatusEnum.completed).toList();
+
   List<SaleFull> get savedSales => _sales.where((s) => s.status == SaleStatusEnum.saved).toList();
 
   List<PaymentType> _paymentTypes = [];
+
   List<PaymentType> get paymentTypes => _paymentTypes;
 
   final searchController = TextEditingController();
+
   String get searchText => searchController.text;
 
   // Categories & Selected Category
   List<ItemCategoryFull> _itemCategories = [];
+
   List<ItemCategoryFull> get itemCategories => _itemCategories;
 
   // Selected Category
   ItemCategoryFull? _selectedCategory;
+
   ItemCategoryFull? get selectedCategory => _selectedCategory;
+
   set selectedCategory(ItemCategoryFull? category) {
     _selectedCategory = category;
     notifyListeners();
@@ -54,6 +66,7 @@ class SalesProvider extends ChangeNotifier {
 
   // Items
   List<ItemFull> _items = [];
+
   List<ItemFull> get items {
     if (selectedCategory == null) {
       return _items;
@@ -63,7 +76,9 @@ class SalesProvider extends ChangeNotifier {
   }
 
   bool _isInitialized = false;
+
   bool get isInitialized => _isInitialized;
+
   set isInitialized(bool value) {
     _isInitialized = value;
     notifyListeners();
@@ -76,6 +91,7 @@ class SalesProvider extends ChangeNotifier {
     this.itemCategoriesRepo,
     this.salePaymentsRepo,
     this.paymentTypesRepo,
+    this.debtsRepo,
   ) {
     loadInitialData();
   }
@@ -326,6 +342,7 @@ class SalesProvider extends ChangeNotifier {
     required int saleId,
     required int paymentTypeId,
     required double amount,
+    DebtAdditions? debtAddition,
   }) async {
     final double totalAmount = tempSale?.totalPrice ?? 0;
     final double totalPaymentsAmount = tempSale?.payments.fold(0, (sum, p) => (sum ?? 0) + p.amount) ?? 0;
@@ -339,6 +356,18 @@ class SalesProvider extends ChangeNotifier {
       paymentTypeId: paymentTypeId,
       amount: amount,
     );
+
+    if (debtAddition != null) {
+      try {
+        await debtsRepo.create(
+          title: debtAddition.title,
+          description: debtAddition.description,
+          salePaymentId: paymentId,
+        );
+      } catch (e) {
+        log("Nma bolutti: ${e.toString()}");
+      }
+    }
 
     final newSalePayment = await salePaymentsRepo.getById(paymentId);
 

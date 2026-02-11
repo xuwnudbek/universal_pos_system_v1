@@ -5274,6 +5274,416 @@ class TransfersCompanion extends UpdateCompanion<Transfer> {
   }
 }
 
+class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DebtsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isPaidMeta = const VerificationMeta('isPaid');
+  @override
+  late final GeneratedColumn<bool> isPaid = GeneratedColumn<bool>(
+    'is_paid',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_paid" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _salePaymentIdMeta = const VerificationMeta(
+    'salePaymentId',
+  );
+  @override
+  late final GeneratedColumn<int> salePaymentId = GeneratedColumn<int>(
+    'sale_payment_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sale_payments (id)',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDate,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    description,
+    isPaid,
+    salePaymentId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'debts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Debt> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
+    }
+    if (data.containsKey('is_paid')) {
+      context.handle(
+        _isPaidMeta,
+        isPaid.isAcceptableOrUnknown(data['is_paid']!, _isPaidMeta),
+      );
+    }
+    if (data.containsKey('sale_payment_id')) {
+      context.handle(
+        _salePaymentIdMeta,
+        salePaymentId.isAcceptableOrUnknown(
+          data['sale_payment_id']!,
+          _salePaymentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Debt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Debt(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      isPaid: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_paid'],
+      )!,
+      salePaymentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sale_payment_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DebtsTable createAlias(String alias) {
+    return $DebtsTable(attachedDatabase, alias);
+  }
+}
+
+class Debt extends DataClass implements Insertable<Debt> {
+  final int id;
+  final String title;
+  final String description;
+  final bool isPaid;
+  final int? salePaymentId;
+  final DateTime createdAt;
+  const Debt({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.isPaid,
+    this.salePaymentId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    map['description'] = Variable<String>(description);
+    map['is_paid'] = Variable<bool>(isPaid);
+    if (!nullToAbsent || salePaymentId != null) {
+      map['sale_payment_id'] = Variable<int>(salePaymentId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  DebtsCompanion toCompanion(bool nullToAbsent) {
+    return DebtsCompanion(
+      id: Value(id),
+      title: Value(title),
+      description: Value(description),
+      isPaid: Value(isPaid),
+      salePaymentId: salePaymentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(salePaymentId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Debt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Debt(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      description: serializer.fromJson<String>(json['description']),
+      isPaid: serializer.fromJson<bool>(json['isPaid']),
+      salePaymentId: serializer.fromJson<int?>(json['salePaymentId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'description': serializer.toJson<String>(description),
+      'isPaid': serializer.toJson<bool>(isPaid),
+      'salePaymentId': serializer.toJson<int?>(salePaymentId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Debt copyWith({
+    int? id,
+    String? title,
+    String? description,
+    bool? isPaid,
+    Value<int?> salePaymentId = const Value.absent(),
+    DateTime? createdAt,
+  }) => Debt(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    isPaid: isPaid ?? this.isPaid,
+    salePaymentId: salePaymentId.present
+        ? salePaymentId.value
+        : this.salePaymentId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Debt copyWithCompanion(DebtsCompanion data) {
+    return Debt(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      isPaid: data.isPaid.present ? data.isPaid.value : this.isPaid,
+      salePaymentId: data.salePaymentId.present
+          ? data.salePaymentId.value
+          : this.salePaymentId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Debt(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('isPaid: $isPaid, ')
+          ..write('salePaymentId: $salePaymentId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, title, description, isPaid, salePaymentId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Debt &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.description == this.description &&
+          other.isPaid == this.isPaid &&
+          other.salePaymentId == this.salePaymentId &&
+          other.createdAt == this.createdAt);
+}
+
+class DebtsCompanion extends UpdateCompanion<Debt> {
+  final Value<int> id;
+  final Value<String> title;
+  final Value<String> description;
+  final Value<bool> isPaid;
+  final Value<int?> salePaymentId;
+  final Value<DateTime> createdAt;
+  const DebtsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.description = const Value.absent(),
+    this.isPaid = const Value.absent(),
+    this.salePaymentId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  DebtsCompanion.insert({
+    this.id = const Value.absent(),
+    required String title,
+    required String description,
+    this.isPaid = const Value.absent(),
+    this.salePaymentId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : title = Value(title),
+       description = Value(description);
+  static Insertable<Debt> custom({
+    Expression<int>? id,
+    Expression<String>? title,
+    Expression<String>? description,
+    Expression<bool>? isPaid,
+    Expression<int>? salePaymentId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (isPaid != null) 'is_paid': isPaid,
+      if (salePaymentId != null) 'sale_payment_id': salePaymentId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  DebtsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? title,
+    Value<String>? description,
+    Value<bool>? isPaid,
+    Value<int?>? salePaymentId,
+    Value<DateTime>? createdAt,
+  }) {
+    return DebtsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      isPaid: isPaid ?? this.isPaid,
+      salePaymentId: salePaymentId ?? this.salePaymentId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (isPaid.present) {
+      map['is_paid'] = Variable<bool>(isPaid.value);
+    }
+    if (salePaymentId.present) {
+      map['sale_payment_id'] = Variable<int>(salePaymentId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DebtsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('description: $description, ')
+          ..write('isPaid: $isPaid, ')
+          ..write('salePaymentId: $salePaymentId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5295,6 +5705,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SaleItemsTable saleItems = $SaleItemsTable(this);
   late final $StocksTable stocks = $StocksTable(this);
   late final $TransfersTable transfers = $TransfersTable(this);
+  late final $DebtsTable debts = $DebtsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5315,6 +5726,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     saleItems,
     stocks,
     transfers,
+    debts,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9411,6 +9823,25 @@ final class $$SalePaymentsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$DebtsTable, List<Debt>> _debtsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.debts,
+    aliasName: $_aliasNameGenerator(db.salePayments.id, db.debts.salePaymentId),
+  );
+
+  $$DebtsTableProcessedTableManager get debtsRefs {
+    final manager = $$DebtsTableTableManager(
+      $_db,
+      $_db.debts,
+    ).filter((f) => f.salePaymentId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_debtsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$SalePaymentsTableFilterComposer
@@ -9481,6 +9912,31 @@ class $$SalePaymentsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> debtsRefs(
+    Expression<bool> Function($$DebtsTableFilterComposer f) f,
+  ) {
+    final $$DebtsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.debts,
+      getReferencedColumn: (t) => t.salePaymentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DebtsTableFilterComposer(
+            $db: $db,
+            $table: $db.debts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -9618,6 +10074,31 @@ class $$SalePaymentsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> debtsRefs<T extends Object>(
+    Expression<T> Function($$DebtsTableAnnotationComposer a) f,
+  ) {
+    final $$DebtsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.debts,
+      getReferencedColumn: (t) => t.salePaymentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DebtsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.debts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$SalePaymentsTableTableManager
@@ -9633,7 +10114,11 @@ class $$SalePaymentsTableTableManager
           $$SalePaymentsTableUpdateCompanionBuilder,
           (SalePayment, $$SalePaymentsTableReferences),
           SalePayment,
-          PrefetchHooks Function({bool saleId, bool paymentTypeId})
+          PrefetchHooks Function({
+            bool saleId,
+            bool paymentTypeId,
+            bool debtsRefs,
+          })
         > {
   $$SalePaymentsTableTableManager(_$AppDatabase db, $SalePaymentsTable table)
     : super(
@@ -9682,60 +10167,87 @@ class $$SalePaymentsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({saleId = false, paymentTypeId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (saleId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.saleId,
-                                referencedTable: $$SalePaymentsTableReferences
-                                    ._saleIdTable(db),
-                                referencedColumn: $$SalePaymentsTableReferences
-                                    ._saleIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
-                    if (paymentTypeId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.paymentTypeId,
-                                referencedTable: $$SalePaymentsTableReferences
-                                    ._paymentTypeIdTable(db),
-                                referencedColumn: $$SalePaymentsTableReferences
-                                    ._paymentTypeIdTable(db)
-                                    .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({saleId = false, paymentTypeId = false, debtsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [if (debtsRefs) db.debts],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (saleId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.saleId,
+                                    referencedTable:
+                                        $$SalePaymentsTableReferences
+                                            ._saleIdTable(db),
+                                    referencedColumn:
+                                        $$SalePaymentsTableReferences
+                                            ._saleIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+                        if (paymentTypeId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.paymentTypeId,
+                                    referencedTable:
+                                        $$SalePaymentsTableReferences
+                                            ._paymentTypeIdTable(db),
+                                    referencedColumn:
+                                        $$SalePaymentsTableReferences
+                                            ._paymentTypeIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (debtsRefs)
+                        await $_getPrefetchedData<
+                          SalePayment,
+                          $SalePaymentsTable,
+                          Debt
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SalePaymentsTableReferences
+                              ._debtsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SalePaymentsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).debtsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.salePaymentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -9752,7 +10264,7 @@ typedef $$SalePaymentsTableProcessedTableManager =
       $$SalePaymentsTableUpdateCompanionBuilder,
       (SalePayment, $$SalePaymentsTableReferences),
       SalePayment,
-      PrefetchHooks Function({bool saleId, bool paymentTypeId})
+      PrefetchHooks Function({bool saleId, bool paymentTypeId, bool debtsRefs})
     >;
 typedef $$SaleItemsTableCreateCompanionBuilder =
     SaleItemsCompanion Function({
@@ -10783,6 +11295,337 @@ typedef $$TransfersTableProcessedTableManager =
       Transfer,
       PrefetchHooks Function({bool itemId})
     >;
+typedef $$DebtsTableCreateCompanionBuilder =
+    DebtsCompanion Function({
+      Value<int> id,
+      required String title,
+      required String description,
+      Value<bool> isPaid,
+      Value<int?> salePaymentId,
+      Value<DateTime> createdAt,
+    });
+typedef $$DebtsTableUpdateCompanionBuilder =
+    DebtsCompanion Function({
+      Value<int> id,
+      Value<String> title,
+      Value<String> description,
+      Value<bool> isPaid,
+      Value<int?> salePaymentId,
+      Value<DateTime> createdAt,
+    });
+
+final class $$DebtsTableReferences
+    extends BaseReferences<_$AppDatabase, $DebtsTable, Debt> {
+  $$DebtsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $SalePaymentsTable _salePaymentIdTable(_$AppDatabase db) =>
+      db.salePayments.createAlias(
+        $_aliasNameGenerator(db.debts.salePaymentId, db.salePayments.id),
+      );
+
+  $$SalePaymentsTableProcessedTableManager? get salePaymentId {
+    final $_column = $_itemColumn<int>('sale_payment_id');
+    if ($_column == null) return null;
+    final manager = $$SalePaymentsTableTableManager(
+      $_db,
+      $_db.salePayments,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_salePaymentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DebtsTableFilterComposer extends Composer<_$AppDatabase, $DebtsTable> {
+  $$DebtsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPaid => $composableBuilder(
+    column: $table.isPaid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SalePaymentsTableFilterComposer get salePaymentId {
+    final $$SalePaymentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.salePaymentId,
+      referencedTable: $db.salePayments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SalePaymentsTableFilterComposer(
+            $db: $db,
+            $table: $db.salePayments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DebtsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DebtsTable> {
+  $$DebtsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPaid => $composableBuilder(
+    column: $table.isPaid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SalePaymentsTableOrderingComposer get salePaymentId {
+    final $$SalePaymentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.salePaymentId,
+      referencedTable: $db.salePayments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SalePaymentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.salePayments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DebtsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DebtsTable> {
+  $$DebtsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isPaid =>
+      $composableBuilder(column: $table.isPaid, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$SalePaymentsTableAnnotationComposer get salePaymentId {
+    final $$SalePaymentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.salePaymentId,
+      referencedTable: $db.salePayments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SalePaymentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.salePayments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DebtsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DebtsTable,
+          Debt,
+          $$DebtsTableFilterComposer,
+          $$DebtsTableOrderingComposer,
+          $$DebtsTableAnnotationComposer,
+          $$DebtsTableCreateCompanionBuilder,
+          $$DebtsTableUpdateCompanionBuilder,
+          (Debt, $$DebtsTableReferences),
+          Debt,
+          PrefetchHooks Function({bool salePaymentId})
+        > {
+  $$DebtsTableTableManager(_$AppDatabase db, $DebtsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DebtsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DebtsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DebtsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<bool> isPaid = const Value.absent(),
+                Value<int?> salePaymentId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => DebtsCompanion(
+                id: id,
+                title: title,
+                description: description,
+                isPaid: isPaid,
+                salePaymentId: salePaymentId,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String title,
+                required String description,
+                Value<bool> isPaid = const Value.absent(),
+                Value<int?> salePaymentId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => DebtsCompanion.insert(
+                id: id,
+                title: title,
+                description: description,
+                isPaid: isPaid,
+                salePaymentId: salePaymentId,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) =>
+                    (e.readTable(table), $$DebtsTableReferences(db, table, e)),
+              )
+              .toList(),
+          prefetchHooksCallback: ({salePaymentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (salePaymentId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.salePaymentId,
+                                referencedTable: $$DebtsTableReferences
+                                    ._salePaymentIdTable(db),
+                                referencedColumn: $$DebtsTableReferences
+                                    ._salePaymentIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DebtsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DebtsTable,
+      Debt,
+      $$DebtsTableFilterComposer,
+      $$DebtsTableOrderingComposer,
+      $$DebtsTableAnnotationComposer,
+      $$DebtsTableCreateCompanionBuilder,
+      $$DebtsTableUpdateCompanionBuilder,
+      (Debt, $$DebtsTableReferences),
+      Debt,
+      PrefetchHooks Function({bool salePaymentId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -10817,4 +11660,6 @@ class $AppDatabaseManager {
       $$StocksTableTableManager(_db, _db.stocks);
   $$TransfersTableTableManager get transfers =>
       $$TransfersTableTableManager(_db, _db.transfers);
+  $$DebtsTableTableManager get debts =>
+      $$DebtsTableTableManager(_db, _db.debts);
 }

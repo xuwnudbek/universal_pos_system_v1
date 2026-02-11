@@ -4,6 +4,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/data/local/daos/debts/debts_dao.dart';
+import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
 
 import './data/local/app_database.dart';
@@ -56,7 +58,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  // @formatter:off
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -89,26 +91,18 @@ class MyApp extends StatelessWidget {
         ProxyProvider<AppDatabase, PaymentTypesDao>(
           update: (_, db, _) => PaymentTypesDao(db),
         ),
+        ProxyProvider<AppDatabase, DebtsDao>(
+          update: (_, db, _) => DebtsDao(db),
+        ),
 
         // Repositories
         ProxyProvider<UsersDao, UsersRepository>(
           update: (_, dao, _) => UsersRepository(dao),
         ),
-        ProxyProvider4<
-          ItemsDao,
-          ItemCategoriesDao,
-          CategoryColorsDao,
-          UnitsDao,
-          ItemsRepository
-        >(
-          update: (_, dao0, dao1, dao2, dao3, _) =>
-              ItemsRepository(dao0, dao1, dao2, dao3),
+        ProxyProvider4<ItemsDao, ItemCategoriesDao, CategoryColorsDao, UnitsDao, ItemsRepository>(
+          update: (_, dao0, dao1, dao2, dao3, _) => ItemsRepository(dao0, dao1, dao2, dao3),
         ),
-        ProxyProvider2<
-          ItemCategoriesDao,
-          CategoryColorsDao,
-          ItemCategoriesRepository
-        >(
+        ProxyProvider2<ItemCategoriesDao, CategoryColorsDao, ItemCategoriesRepository>(
           update: (_, dao0, dao1, _) => ItemCategoriesRepository(dao0, dao1),
         ),
         ProxyProvider<CategoryColorsDao, CategoryColorsRepository>(
@@ -117,30 +111,20 @@ class MyApp extends StatelessWidget {
         ProxyProvider<UnitsDao, UnitsRepository>(
           update: (_, dao, _) => UnitsRepository(dao),
         ),
-
-        ProxyProvider5<
-          SalesDao,
-          SaleItemsDao,
-          ItemsDao,
-          SalePaymentsDao,
-          PaymentTypesDao,
-          SalesRepository
-        >(
-          update: (_, dao0, dao1, dao2, dao3, dao4, _) =>
-              SalesRepository(dao0, dao1, dao2, dao3, dao4),
+        ProxyProvider5<SalesDao, SaleItemsDao, ItemsDao, SalePaymentsDao, PaymentTypesDao, SalesRepository>(
+          update: (_, dao0, dao1, dao2, dao3, dao4, _) => SalesRepository(dao0, dao1, dao2, dao3, dao4),
         ),
         ProxyProvider2<SaleItemsDao, ItemsDao, SaleItemsRepository>(
           update: (_, dao0, dao1, _) => SaleItemsRepository(dao0, dao1),
         ),
-        ProxyProvider2<
-          SalePaymentsDao,
-          PaymentTypesDao,
-          SalePaymentsRepository
-        >(
+        ProxyProvider2<SalePaymentsDao, PaymentTypesDao, SalePaymentsRepository>(
           update: (_, dao0, dao1, _) => SalePaymentsRepository(dao0, dao1),
         ),
         ProxyProvider<PaymentTypesDao, PaymentTypesRepository>(
           update: (_, dao, _) => PaymentTypesRepository(dao),
+        ),
+        ProxyProvider<DebtsDao, DebtsRepository>(
+          update: (_, dao, _) => DebtsRepository(dao),
         ),
 
         // Providers

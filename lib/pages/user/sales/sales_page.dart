@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
@@ -11,18 +12,17 @@ import '/data/models/items_full.dart';
 import '/data/models/sale_full.dart';
 import '/data/repositories/items/item_categories_repository.dart';
 import '/data/repositories/items/items_repository.dart';
-
 import '/data/repositories/sales/sale_items_repository.dart';
 import '/data/repositories/sales/sales_repository.dart';
+import '/pages/user/sales/modals/saved_sales_dialog.dart';
 import '/pages/user/sales/providers/sales_provider.dart';
 import '/pages/user/sales/widgets/item_card.dart';
-import 'widgets/payment_dialog.dart';
-import '/pages/user/sales/widgets/saved_sales_dialog.dart';
-import '/pages/user/sales/widgets/sales_history_dialog.dart';
 import '/utils/constants/app_constants.dart';
 import '/utils/extensions/num_extension.dart';
 import '/utils/router/app_router.dart';
 import '/widgets/icon_button2.dart';
+import 'modals/payment_dialog.dart';
+import 'modals/sales_history_dialog.dart';
 
 class SalesPage extends StatelessWidget {
   const SalesPage({super.key});
@@ -43,6 +43,7 @@ class SalesPage extends StatelessWidget {
             context.read<ItemCategoriesRepository>(),
             context.read<SalePaymentsRepository>(),
             context.read<PaymentTypesRepository>(),
+            context.read<DebtsRepository>(),
           )..createTempSale(),
         ),
       ],
@@ -92,7 +93,10 @@ class SalesPage extends StatelessWidget {
                                       isLabelVisible: count > 0,
                                       child: IconButton2(
                                         onPressed: () {
-                                          showSavedSalesDialog(context, provider.savedSales);
+                                          showSavedSalesDialog(
+                                            context,
+                                            provider.savedSales,
+                                          );
                                         },
                                         type: IconButton2Type.warning,
                                         icon: LucideIcons.save,
@@ -112,7 +116,10 @@ class SalesPage extends StatelessWidget {
                                   child: IconButton2(
                                     onPressed: () async {
                                       if (context.mounted) {
-                                        showSalesHistoryDialog(context, provider.complatedSales);
+                                        showSalesHistoryDialog(
+                                          context,
+                                          provider.complatedSales,
+                                        );
                                       }
                                     },
                                     type: IconButton2Type.info,
@@ -187,7 +194,9 @@ class SalesPage extends StatelessWidget {
                                     children: [
                                       IconButton2(
                                         onPressed: () {
-                                          context.read<SalesProvider>().removeItemFromTempSale(saleItem.item.id);
+                                          context.read<SalesProvider>().removeItemFromTempSale(
+                                            saleItem.item.id,
+                                          );
                                         },
                                         type: IconButton2Type.warning,
                                         icon: LucideIcons.minus,
@@ -203,7 +212,9 @@ class SalesPage extends StatelessWidget {
                                       ),
                                       IconButton2(
                                         onPressed: () {
-                                          context.read<SalesProvider>().addItemToTempSale(saleItem.item.id);
+                                          context.read<SalesProvider>().addItemToTempSale(
+                                            saleItem.item.id,
+                                          );
                                         },
                                         type: IconButton2Type.success,
                                         icon: LucideIcons.plus,
@@ -317,7 +328,9 @@ class SalesPage extends StatelessWidget {
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     children: [
-                                                      Icon(LucideIcons.creditCard),
+                                                      Icon(
+                                                        LucideIcons.creditCard,
+                                                      ),
                                                       SizedBox(width: 8),
                                                       Text("To'lov"),
                                                     ],
