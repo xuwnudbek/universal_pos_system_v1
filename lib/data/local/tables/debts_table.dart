@@ -11,7 +11,7 @@ class Debts extends Table {
 
   BoolColumn get isPaid => boolean().withDefault(const Constant(false))();
 
-  IntColumn get salePaymentId => integer().references(SalePayments, #id).nullable()();
+  IntColumn get salePaymentId => integer().references(SalePayments, #id, onDelete: KeyAction.cascade).nullable()();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDate)();
 }

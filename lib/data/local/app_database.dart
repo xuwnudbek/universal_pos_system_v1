@@ -18,7 +18,6 @@ import './tables/items_table.dart';
 import './tables/payment_types_table.dart';
 import './tables/procurement_items_table.dart';
 import './tables/procurements_table.dart';
-
 // Tables
 import './tables/sale_items_table.dart';
 import './tables/sale_payments_table.dart';
@@ -54,15 +53,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
     },
-    // onUpgrade: (m, from, to) {
-    // },
+    // onUpgrade: (migration, from, to) async {},
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },

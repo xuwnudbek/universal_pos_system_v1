@@ -111,8 +111,8 @@ class MyApp extends StatelessWidget {
         ProxyProvider<UnitsDao, UnitsRepository>(
           update: (_, dao, _) => UnitsRepository(dao),
         ),
-        ProxyProvider5<SalesDao, SaleItemsDao, ItemsDao, SalePaymentsDao, PaymentTypesDao, SalesRepository>(
-          update: (_, dao0, dao1, dao2, dao3, dao4, _) => SalesRepository(dao0, dao1, dao2, dao3, dao4),
+        ProxyProvider6<SalesDao, SaleItemsDao, ItemsDao, SalePaymentsDao, PaymentTypesDao, DebtsDao, SalesRepository>(
+          update: (_, dao0, dao1, dao2, dao3, dao4, dao5, _) => SalesRepository(dao0, dao1, dao2, dao3, dao4, dao5),
         ),
         ProxyProvider2<SaleItemsDao, ItemsDao, SaleItemsRepository>(
           update: (_, dao0, dao1, _) => SaleItemsRepository(dao0, dao1),

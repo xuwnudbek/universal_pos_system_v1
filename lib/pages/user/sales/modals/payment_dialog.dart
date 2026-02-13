@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -249,10 +247,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: AppSpacing.lg,
-                          vertical: AppSpacing.md,
-                        ),
                         child: salePayments.isEmpty
                             ? Center(
                                 child: Text(
@@ -263,6 +257,9 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                 ),
                               )
                             : ListView(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: AppSpacing.md,
+                                ),
                                 children: salePayments.map((payment) {
                                   final index = salePayments.indexOf(payment) + 1;
 
@@ -289,7 +286,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
                           ...provider.paymentTypes.map(
                             (paymentType) {
                               final isSelected = selectedPaymentType == paymentType;
-
                               final isDebt = paymentType.name == PaymentTypesEnum.debt;
 
                               return _buildPaymentTypeButton(
@@ -306,7 +302,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                     );
 
                                     if (result != null) {
-                                      inspect(result);
                                       _onSelectDebtAddition(result);
                                     } else {
                                       return;
@@ -501,7 +496,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
     super.dispose();
   }
 
-  // @formatter:off
   Widget _buildAmountCard(
     double amount, {
     int typeValue = 0, // 0 - total, 1 - paid, 2 - remaining
@@ -552,45 +546,79 @@ class _PaymentDialogState extends State<PaymentDialog> {
     required String amount,
   }) {
     final textTheme = Theme.of(context).textTheme;
-    return Row(
+
+    final rowContent = Row(
       children: [
-        // Index
-        Text(
-          "$index. ",
-          style: textTheme.titleMedium,
-        ),
+        Text("$index. ", style: textTheme.titleMedium),
         Text(
           getPaymentName(paymentType.name),
           style: textTheme.bodyMedium,
         ),
         SizedBox(width: AppSpacing.sm),
-        Flexible(
+        Expanded(
           child: Text(
-            "  -  " * 30,
+            "-" * 50,
             maxLines: 1,
             style: textTheme.bodySmall?.copyWith(
               color: Colors.grey[400],
             ),
-            textAlign: TextAlign.left,
-            overflow: TextOverflow.visible,
+            overflow: TextOverflow.clip,
           ),
         ),
         SizedBox(width: AppSpacing.sm),
         Text.rich(
           TextSpan(
             children: [
-              TextSpan(
-                text: amount,
-                style: textTheme.titleMedium,
-              ),
-              TextSpan(
-                text: ' UZS',
-                style: textTheme.bodyMedium,
-              ),
+              TextSpan(text: amount, style: textTheme.titleMedium),
+              TextSpan(text: ' UZS', style: textTheme.bodyMedium),
             ],
           ),
         ),
       ],
+    );
+
+    if (paymentType.name == PaymentTypesEnum.debt) {
+      return Theme(
+        data: ThemeData(
+          dividerColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          backgroundColor: Colors.grey[300],
+          dense: true,
+          showTrailingIcon: false,
+          tilePadding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          title: rowContent,
+          childrenPadding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          expandedCrossAxisAlignment: CrossAxisAlignment.start,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadiusGeometry.circular(8),
+          ),
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(""),
+                    Text(""),
+                    Text(""),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: rowContent,
     );
   }
 

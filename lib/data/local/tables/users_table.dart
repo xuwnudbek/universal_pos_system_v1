@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:universal_pos_system_v1/data/local/enums/user_roles_enum.dart';
+
+import '../enums/user_roles_enum.dart';
 
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();

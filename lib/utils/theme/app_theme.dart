@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
+
 import 'app_colors.dart';
 
 class AppTheme {
@@ -196,6 +197,9 @@ class AppTheme {
         ),
       ),
     ),
+
+    // Divider Theme
+    dividerColor: Colors.transparent,
   );
 
   // Dark Theme will be added later

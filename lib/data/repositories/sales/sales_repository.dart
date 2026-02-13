@@ -1,8 +1,11 @@
+import 'package:universal_pos_system_v1/data/local/app_database.dart';
+import 'package:universal_pos_system_v1/data/local/daos/debts/debts_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/items/items_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/payment_types/payment_types_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/sale_items/sale_items_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/sale_payments/sale_payments_dao.dart';
 import 'package:universal_pos_system_v1/data/local/daos/sales/sales_dao.dart';
+import 'package:universal_pos_system_v1/data/local/enums/payment_types_enum.dart';
 import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
 import 'package:universal_pos_system_v1/data/models/sale_item_full.dart';
@@ -14,6 +17,7 @@ class SalesRepository {
   final ItemsDao itemsDao;
   final SalePaymentsDao salePaymentsDao;
   final PaymentTypesDao paymentTypesDao;
+  final DebtsDao debtsDao;
 
   const SalesRepository(
     this.salesDao,
@@ -21,31 +25,39 @@ class SalesRepository {
     this.itemsDao,
     this.salePaymentsDao,
     this.paymentTypesDao,
+    this.debtsDao,
   );
 
   Future<List<SaleFull>> getAll() async {
     final sales = await salesDao.getAll();
     final saleItems = await saleItemsDao.getBySaleIds(sales.map((s) => s.id).toList());
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
-    final payments = await salePaymentsDao.getBySaleIds(sales.map((s) => s.id).toList());
+    final salePayments = await salePaymentsDao.getBySaleIds(sales.map((s) => s.id).toList());
     final paymentTypes = await paymentTypesDao.getAll();
+    final debts = await debtsDao.getAllDebts();
 
     final enrichedSales = sales.map((sale) {
       final itemsForSale = saleItems.where((si) => si.saleId == sale.id).toList();
-      final paymentsForSale = payments
-          .where(
-            (sp) => sp.saleId == sale.id,
-          )
-          .map(
-            (sp) => SalePaymentFull.from(
-              salePayment: sp,
-              paymentType: paymentTypes.firstWhere((pt) => pt.id == sp.paymentTypeId),
-            ),
-          )
-          .toList();
+
+      final salePaymentFull = salePayments.where((sp) => sp.saleId == sale.id).map((sp) {
+        final paymentType = paymentTypes.firstWhere((pt) => pt.id == sp.paymentTypeId);
+
+        Debt? debt;
+
+        if (paymentType.name == PaymentTypesEnum.debt) {
+          debt = debts.firstWhere((d) => d.salePaymentId == sp.id);
+        }
+
+        return SalePaymentFull.from(
+          salePayment: sp,
+          paymentType: paymentType,
+          debtAddition: debt,
+        );
+      }).toList();
 
       final enrichedSaleItems = itemsForSale.map((si) {
         final item = items.firstWhere((i) => i.id == si.itemId);
+
         return SaleItemFull.from(
           saleItem: si,
           item: item,
@@ -55,7 +67,7 @@ class SalesRepository {
       return SaleFull.from(
         sale: sale,
         items: enrichedSaleItems,
-        payments: paymentsForSale,
+        payments: salePaymentFull,
       );
     }).toList();
 
@@ -96,18 +108,23 @@ class SalesRepository {
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
     final payments = await salePaymentsDao.getBySaleIds(sales.map((s) => s.id).toList());
     final paymentTypes = await paymentTypesDao.getAll();
+    final debts = await debtsDao.getAllDebts();
 
     final enrichedSales = sales.map((sale) {
       final itemsForSale = saleItems.where((si) => si.saleId == sale.id).toList();
-      final paymentsForSale = payments
-          .where((sp) => sp.saleId == sale.id)
-          .map(
-            (sp) => SalePaymentFull.from(
-              salePayment: sp,
-              paymentType: paymentTypes.firstWhere((pt) => pt.id == sp.paymentTypeId),
-            ),
-          )
-          .toList();
+
+      final paymentsForSale = payments.where((sp) => sp.saleId == sale.id).map((sp) {
+        final paymentType = paymentTypes.firstWhere((pt) => pt.id == sp.paymentTypeId);
+        final debt = debts.firstWhere((d) => d.salePaymentId == sp.id);
+
+        final salePaymentFull = SalePaymentFull.from(
+          salePayment: sp,
+          paymentType: paymentType,
+          debtAddition: debt,
+        );
+
+        return salePaymentFull;
+      }).toList();
 
       final enrichedSaleItems = itemsForSale.map((si) {
         final item = items.firstWhere((i) => i.id == si.itemId);
@@ -132,10 +149,10 @@ class SalesRepository {
   Future<SaleFull?> getDraftByUserId(int userId) async {
     final sale = await salesDao.getDraftByUserId(userId);
 
-    if (sale == null) {
-      return null;
-    }
+    // If sale is null, return null
+    if (sale == null) return null;
 
+    // Else fetch the sale items & return SaleFull
     final saleItems = await saleItemsDao.getBySaleId(sale.id);
     final items = await itemsDao.getByIds(saleItems.map((si) => si.itemId).toList());
 
@@ -162,8 +179,7 @@ class SalesRepository {
     required int userId,
     SaleStatusEnum? status,
   }) async {
-    int saleId = await salesDao.insertSale(userId, status);
-
+    final saleId = await salesDao.insertSale(userId, status);
     final sale = await getById(saleId);
 
     return Future.value(sale!);

@@ -3575,7 +3575,7 @@ class $SalesTable extends Sales with TableInfo<$SalesTable, Sale> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES users (id)',
+      'REFERENCES users (id) ON DELETE CASCADE',
     ),
   );
   @override
@@ -3879,7 +3879,7 @@ class $SalePaymentsTable extends SalePayments
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sales (id)',
+      'REFERENCES sales (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _paymentTypeIdMeta = const VerificationMeta(
@@ -4248,7 +4248,7 @@ class $SaleItemsTable extends SaleItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES items (id) ON DELETE CASCADE',
+      'REFERENCES items (id) ON DELETE RESTRICT',
     ),
   );
   static const VerificationMeta _quantityMeta = const VerificationMeta(
@@ -5336,7 +5336,7 @@ class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES sale_payments (id)',
+      'REFERENCES sale_payments (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
@@ -5739,6 +5739,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
+        'users',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('sales', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'sales',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('sale_payments', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
         'sales',
         limitUpdateKind: UpdateKind.delete,
       ),
@@ -5746,10 +5760,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
-        'items',
+        'sale_payments',
         limitUpdateKind: UpdateKind.delete,
       ),
-      result: [TableUpdate('sale_items', kind: UpdateKind.delete)],
+      result: [TableUpdate('debts', kind: UpdateKind.delete)],
     ),
   ]);
 }

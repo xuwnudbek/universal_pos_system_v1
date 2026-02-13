@@ -1,6 +1,8 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
+import 'package:universal_pos_system_v1/data/local/enums/payment_types_enum.dart';
 import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
@@ -25,9 +27,7 @@ class SalesProvider extends ChangeNotifier {
   final DebtsRepository debtsRepo;
 
   SaleFull? _tempSale;
-
   SaleFull? get tempSale => _tempSale;
-
   set tempSale(SaleFull? sale) {
     _tempSale = sale;
     notifyListeners();
@@ -36,28 +36,39 @@ class SalesProvider extends ChangeNotifier {
   // Sales History
   List<SaleFull> _sales = [];
 
-  List<SaleFull> get complatedSales => _sales.where((s) => s.status == SaleStatusEnum.completed).toList();
+  List<SaleFull> get sales => _sales;
 
-  List<SaleFull> get savedSales => _sales.where((s) => s.status == SaleStatusEnum.saved).toList();
+  List<SaleFull> get complatedSales => _sales
+      .where(
+        (sale) => sale.status == SaleStatusEnum.completed,
+      )
+      .toList();
+
+  List<SaleFull> get debtSales => _sales
+      .where(
+        (sale) => sale.status == SaleStatusEnum.preCompleted,
+      )
+      .toList();
+
+  List<SaleFull> get savedSales => _sales
+      .where(
+        (s) => s.status == SaleStatusEnum.saved,
+      )
+      .toList();
 
   List<PaymentType> _paymentTypes = [];
-
   List<PaymentType> get paymentTypes => _paymentTypes;
 
   final searchController = TextEditingController();
-
   String get searchText => searchController.text;
 
   // Categories & Selected Category
   List<ItemCategoryFull> _itemCategories = [];
-
   List<ItemCategoryFull> get itemCategories => _itemCategories;
 
   // Selected Category
   ItemCategoryFull? _selectedCategory;
-
   ItemCategoryFull? get selectedCategory => _selectedCategory;
-
   set selectedCategory(ItemCategoryFull? category) {
     _selectedCategory = category;
     notifyListeners();
@@ -65,7 +76,6 @@ class SalesProvider extends ChangeNotifier {
 
   // Items
   List<ItemFull> _items = [];
-
   List<ItemFull> get items {
     if (selectedCategory == null) {
       return _items;
@@ -75,9 +85,7 @@ class SalesProvider extends ChangeNotifier {
   }
 
   bool _isInitialized = false;
-
   bool get isInitialized => _isInitialized;
-
   set isInitialized(bool value) {
     _isInitialized = value;
     notifyListeners();
@@ -95,7 +103,10 @@ class SalesProvider extends ChangeNotifier {
     loadInitialData();
   }
 
+  // Main Loading Function
   Future<void> loadInitialData() async {
+    isInitialized = false;
+
     await loadItems();
     await loadItemCategories();
     await loadSales();
@@ -104,6 +115,7 @@ class SalesProvider extends ChangeNotifier {
     isInitialized = true;
   }
 
+  // Load Payment Types
   Future<void> loadPaymentTypes() async {
     try {
       _paymentTypes = await paymentTypesRepo.getAll();
@@ -113,6 +125,7 @@ class SalesProvider extends ChangeNotifier {
     }
   }
 
+  // Load Sales
   Future<void> loadSales() async {
     try {
       _sales = await salesRepo.getAll();
@@ -122,16 +135,19 @@ class SalesProvider extends ChangeNotifier {
     }
   }
 
+  // Load Items
   Future<void> loadItems() async {
     _items = await itemsRepo.getAll();
     notifyListeners();
   }
 
+  // Load Item Categories
   Future<void> loadItemCategories() async {
     _itemCategories = await itemCategoriesRepo.getAll();
     notifyListeners();
   }
 
+  // Create Temporary Sale
   Future<void> createTempSale() async {
     final userId = LocalStorage.getUserId();
 
@@ -152,12 +168,14 @@ class SalesProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       log('Error creating/loading temp sale: $e');
+      rethrow;
     }
   }
 
+  // Add Item To Temporary Sale
   Future<void> addItemToTempSale(int itemId) async {
     if (tempSale == null) {
-      throw Exception('No temporary sale found. Please create a temp sale first.');
+      throw Exception('No temporary sale found.');
     }
 
     // Check if item already exists in the sale
@@ -186,6 +204,7 @@ class SalesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Remove Item From Temporary Sale
   Future<void> removeItemFromTempSale(int itemId) async {
     if (tempSale == null) {
       throw Exception('No temporary sale found. Please create a temp sale first.');
@@ -256,9 +275,16 @@ class SalesProvider extends ChangeNotifier {
 
     try {
       // Change status from draft to completed
+      final saleStatus =
+          tempSale!.payments.any(
+            (p) => p.paymentType.name == PaymentTypesEnum.debt,
+          )
+          ? SaleStatusEnum.preCompleted
+          : SaleStatusEnum.completed;
+
       await salesRepo.updateStatus(
         id: tempSale!.id,
-        status: SaleStatusEnum.completed,
+        status: saleStatus,
       );
 
       // Reload saved sales
@@ -272,8 +298,7 @@ class SalesProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      log('Error completing temp sale: $e');
-      rethrow;
+      throw Exception('Error completing temp sale: $e');
     }
   }
 
@@ -297,12 +322,10 @@ class SalesProvider extends ChangeNotifier {
   // Switch to a saved sale (make it the temp sale)
   Future<void> switchToSale(int saleId) async {
     try {
-      // If there's a current tempSale, delete it if it has no items
       if (tempSale != null) {
         if (tempSale!.items.isEmpty) {
           await salesRepo.delete(tempSale!.id);
         } else {
-          // If it has items, keep it as saved
           await salesRepo.updateStatus(
             id: tempSale!.id,
             status: SaleStatusEnum.saved,
@@ -386,6 +409,7 @@ class SalesProvider extends ChangeNotifier {
     return null;
   }
 
+  // Dispose
   @override
   void dispose() {
     searchController.dispose();

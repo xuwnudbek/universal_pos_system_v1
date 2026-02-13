@@ -1,13 +1,16 @@
 import 'package:drift/drift.dart';
+import 'package:universal_pos_system_v1/data/local/enums/payment_types_enum.dart';
 import 'package:universal_pos_system_v1/data/models/sale_payment_full.dart';
+
 import '../../app_database.dart';
+import '../../tables/debts_table.dart';
+import '../../tables/payment_types_table.dart';
 import '../../tables/sale_payments_table.dart';
 import '../../tables/sales_table.dart';
-import '../../tables/payment_types_table.dart';
 
 part 'sale_payments_dao.g.dart';
 
-@DriftAccessor(tables: [SalePayments, Sales, PaymentTypes])
+@DriftAccessor(tables: [SalePayments, Sales, PaymentTypes, Debts])
 class SalePaymentsDao extends DatabaseAccessor<AppDatabase> with _$SalePaymentsDaoMixin {
   SalePaymentsDao(super.db);
 
@@ -19,9 +22,12 @@ class SalePaymentsDao extends DatabaseAccessor<AppDatabase> with _$SalePaymentsD
 
   // Get sale payments by sale ID
   Future<List<SalePaymentFull>> getBySaleId(int saleId) async {
-    final query = select(salePayments).join([
-      innerJoin(paymentTypes, paymentTypes.id.equalsExp(salePayments.paymentTypeId)),
-    ])..where(salePayments.saleId.equals(saleId));
+    final query = select(salePayments).join(
+      [
+        innerJoin(paymentTypes, paymentTypes.id.equalsExp(salePayments.paymentTypeId)),
+        innerJoin(debts, debts.salePaymentId.equalsExp(salePayments.id)),
+      ],
+    )..where(salePayments.saleId.equals(saleId));
 
     final results = await query.get();
 
@@ -29,10 +35,17 @@ class SalePaymentsDao extends DatabaseAccessor<AppDatabase> with _$SalePaymentsD
       final salePayment = row.readTable(salePayments);
       final paymentType = row.readTable(paymentTypes);
 
-      return SalePaymentFull.from(
+      final salePaymentFull = SalePaymentFull.from(
         salePayment: salePayment,
         paymentType: paymentType,
       );
+
+      if (paymentType.name == PaymentTypesEnum.debt) {
+        final debt = row.readTable(debts);
+        salePaymentFull.debtAddition = debt;
+      }
+
+      return salePaymentFull;
     }).toList();
   }
 

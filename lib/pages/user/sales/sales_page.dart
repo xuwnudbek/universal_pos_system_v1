@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
+import 'package:universal_pos_system_v1/pages/user/sales/modals/debt_sales_dialog.dart';
+import 'package:universal_pos_system_v1/utils/extensions/mq_extension.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
 import 'package:universal_pos_system_v1/utils/functions/show_snackbar.dart';
 
@@ -27,11 +29,23 @@ import 'modals/sales_history_dialog.dart';
 class SalesPage extends StatelessWidget {
   const SalesPage({super.key});
 
+  int _gridCrossAxisCount(WindowSize size) {
+    switch (size) {
+      case WindowSize.lg:
+        return 7;
+      case WindowSize.md:
+        return 5;
+      case WindowSize.sm:
+        return 3;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final mq = MediaQuery.of(context);
+    final windowSize = mq.windowSize;
 
     return MultiProvider(
       providers: [
@@ -83,6 +97,7 @@ class SalesPage extends StatelessWidget {
                           children: [
                             Text("Chek", style: theme.textTheme.titleMedium),
                             Spacer(),
+                            // saved sales
                             Consumer<SalesProvider>(
                               builder: (context, provider, _) {
                                 int count = provider.savedSales.length;
@@ -107,6 +122,33 @@ class SalesPage extends StatelessWidget {
                                 );
                               },
                             ),
+                            // debt sales
+                            Consumer<SalesProvider>(
+                              builder: (context, provider, _) {
+                                int count = provider.debtSales.length;
+
+                                return Badge(
+                                  label: count > 0 ? Text(count.toString()) : null,
+                                  isLabelVisible: count > 0,
+                                  child: Tooltip(
+                                    message: "Qarzlar",
+                                    child: IconButton2(
+                                      onPressed: () async {
+                                        if (context.mounted) {
+                                          showDebtSalesDialog(
+                                            context,
+                                            provider.debtSales,
+                                          );
+                                        }
+                                      },
+                                      type: IconButton2Type.info,
+                                      icon: LucideIcons.wallet,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            // sale histories
                             Consumer<SalesProvider>(
                               builder: (context, provider, _) {
                                 int count = provider.complatedSales.length;
@@ -136,7 +178,6 @@ class SalesPage extends StatelessWidget {
                                 if (tempSale == null || tempSale.items.isEmpty) {
                                   return SizedBox.shrink();
                                 }
-
                                 return child!;
                               },
                               child: IconButton2(
@@ -380,7 +421,7 @@ class SalesPage extends StatelessWidget {
                                       horizontal: 12,
                                       vertical: 8,
                                     ),
-                                    hintText: 'Search sales...',
+                                    hintText: 'Xaridlarni qidirish...',
                                     prefixIcon: Icon(LucideIcons.search),
                                     isDense: true,
                                   ),
@@ -391,11 +432,12 @@ class SalesPage extends StatelessWidget {
                           SizedBox(width: 16),
                           IconButton2(
                             onPressed: () {
-                              appRouter.pushNamed(AppRoute.settings.name);
+                              context.read<SalesProvider>().loadInitialData();
                             },
-                            icon: LucideIcons.settings,
+                            icon: LucideIcons.refreshCcw,
                           ),
-                          SizedBox(width: 16),
+                          const Spacer(),
+
                           IconButton2(
                             onPressed: () {
                               appRouter.pushNamed(AppRoute.logout.name);
@@ -428,6 +470,7 @@ class SalesPage extends StatelessWidget {
                                   },
                                 ),
                                 SizedBox(width: 8.0),
+                                // Item Categories
                                 Expanded(
                                   child: ListView.separated(
                                     scrollDirection: Axis.horizontal,
@@ -467,7 +510,9 @@ class SalesPage extends StatelessWidget {
                                 child: Text(
                                   'Maxsulot topilmadi',
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                    color: theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
                                   ),
                                 ),
                               );
@@ -475,10 +520,10 @@ class SalesPage extends StatelessWidget {
 
                             return GridView.builder(
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 6,
-                                crossAxisSpacing: 8.0,
-                                mainAxisSpacing: 8.0,
-                                mainAxisExtent: 170,
+                                crossAxisCount: _gridCrossAxisCount(windowSize),
+                                crossAxisSpacing: 12.0,
+                                mainAxisSpacing: 12.0,
+                                mainAxisExtent: _gridCrossAxisCount(windowSize) * 30,
                               ),
                               itemCount: items.length,
                               itemBuilder: (_, index) {
@@ -487,7 +532,11 @@ class SalesPage extends StatelessWidget {
                                 return ItemCard(
                                   item: item,
                                   onTap: () {
-                                    context.read<SalesProvider>().addItemToTempSale(item.id);
+                                    try {
+                                      context.read<SalesProvider>().addItemToTempSale(item.id);
+                                    } catch (e) {
+                                      showAppSnackBar(context, e.toString());
+                                    }
                                   },
                                   onSecondaryTap: () {
                                     context.read<SalesProvider>().removeItemFromTempSale(item.id);
