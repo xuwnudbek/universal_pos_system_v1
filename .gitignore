@@ -46,3 +46,4 @@ app.*.map.json
 
 #redist
 /redist/
+/installer_output/
