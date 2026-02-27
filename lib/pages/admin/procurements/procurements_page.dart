@@ -121,7 +121,7 @@ class _ProcurementsPageState extends State<ProcurementsPage> {
                           crossAxisCount: 2,
                           crossAxisSpacing: AppSpacing.lg,
                           mainAxisSpacing: AppSpacing.lg,
-                          mainAxisExtent: 210,
+                          mainAxisExtent: 216,
                         ),
                         itemCount: procurements.length,
                         itemBuilder: (context, index) {

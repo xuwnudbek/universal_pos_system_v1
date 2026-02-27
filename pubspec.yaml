@@ -28,6 +28,10 @@ dependencies:
   data_table_2: ^2.7.2
   bcrypt: ^1.2.0
   shared_preferences: ^2.5.4
+  printing: ^5.14.2
+  file_picker: ^10.3.10
+  window_manager: ^0.5.1
+  logger: ^2.6.2
 
 dev_dependencies:
   drift_dev: ^2.30.1

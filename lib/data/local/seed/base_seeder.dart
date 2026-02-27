@@ -12,14 +12,6 @@ class BaseSeeder {
   BaseSeeder(this.db);
 
   Future<void> seedBaseData() {
-    bool baseSeeded = false;
-
-    baseSeeded = LocalStorage.getBool('base_seeded') ?? false;
-
-    if (baseSeeded) {
-      return Future.value();
-    }
-
     return db.transaction(() async {
       await _seedUsers();
       await _seedUnits();
@@ -27,8 +19,6 @@ class BaseSeeder {
       await _seedCategoryColors();
       await _seedItemCategories();
       await _seedExpenseCategories();
-
-      await LocalStorage.setBool('base_seeded', true);
     });
   }
 

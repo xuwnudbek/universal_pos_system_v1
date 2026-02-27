@@ -54,7 +54,8 @@ class ItemsRepository {
     required int unitId,
     required double salePrice,
     required int categoryId,
-  }) => itemsDao.insertItem(name, barcode, unitId, salePrice, categoryId);
+    String? imagePath,
+  }) => itemsDao.insertItem(name, barcode, unitId, salePrice, categoryId, imagePath);
 
   Future<void> update({
     required int id,
@@ -63,7 +64,8 @@ class ItemsRepository {
     required int unitId,
     required double salePrice,
     required int categoryId,
-  }) => itemsDao.updateItem(id, name, barcode, unitId, salePrice, categoryId);
+    String? imagePath,
+  }) => itemsDao.updateItem(id, name, barcode, unitId, salePrice, categoryId, imagePath);
 
   Future delete(int id) => itemsDao.deleteItem(id);
 }

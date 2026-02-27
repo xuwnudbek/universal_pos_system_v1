@@ -1,6 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 
 class LocalStorage {
@@ -169,16 +169,18 @@ class LocalStorage {
   }
 
   // Get complete user session
-  static Map<String, dynamic>? getUserSession() {
+  static User? getUserSession() {
     if (!isAuthenticated()) return null;
 
-    return {
-      'userId': getUserId(),
-      'username': getUsername(),
+    return User.fromJson({
+      'id': getUserId(),
       'fullName': getFullName(),
+      'username': getUsername(),
       'role': getUserRole(),
-      'lastLogin': getLastLogin()?.toIso8601String(),
-    };
+      'passwordHash': "password",
+      'isActive': true,
+      'createdAt': DateTime.now(),
+    });
   }
 
   // Logout (clear auth data)
@@ -189,6 +191,7 @@ class LocalStorage {
     await remove(_keyUserRole);
     await remove(_keyIsAuthenticated);
     await remove(_keyLastLogin);
+
     return true;
   }
 

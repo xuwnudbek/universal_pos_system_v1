@@ -38,6 +38,16 @@ class _ExpensesPageState extends State<ExpensesPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
       initialDateRange: provider.customDateRange,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            datePickerTheme: DatePickerThemeData(
+              rangeSelectionBackgroundColor: Colors.grey[200],
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null && context.mounted) {
@@ -233,45 +243,74 @@ class _ExpensesPageState extends State<ExpensesPage> {
             ),
 
             // Total Amount
-            Container(
-              padding: EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer.withAlpha(75),
-                border: Border(
-                  bottom: BorderSide(
-                    color: theme.dividerTheme.color ?? Colors.grey,
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer.withAlpha(50),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(
+                    color: theme.colorScheme.error.withAlpha(40),
                     width: AppBorderWidth.thin,
                   ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    LucideIcons.trendingDown,
-                    color: theme.colorScheme.error,
-                    size: 24,
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Jami xarajat: ',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.error.withAlpha(15),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
                     ),
-                  ),
-                  Selector<ExpensesProvider, double>(
-                    selector: (_, provider) => provider.totalAmount,
-                    builder: (context, total, _) {
-                      return Text(
-                        total.toSum,
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.error,
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.error.withAlpha(25),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Icon(
+                        LucideIcons.trendingDown,
+                        color: theme.colorScheme.error,
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Jami xarajat',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withAlpha(150),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                ],
+                        SizedBox(height: 2),
+                        Selector<ExpensesProvider, double>(
+                          selector: (_, provider) => provider.totalAmount,
+                          builder: (context, total, _) {
+                            return Text(
+                              total.toSum,
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.error,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 

@@ -40,5 +40,8 @@ class StocksRepository {
     quantity,
   );
 
+  // Reduce quantity from a specific location (for sales)
+  Future<void> reduceQuantity(int itemId, LocationsEnum location, double quantity) => stocksDao.reduceQuantity(itemId, location, quantity);
+
   Future delete(int id) => stocksDao.deleteStock(id);
 }

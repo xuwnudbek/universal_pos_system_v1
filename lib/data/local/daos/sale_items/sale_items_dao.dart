@@ -45,6 +45,17 @@ class SaleItemsDao extends DatabaseAccessor<AppDatabase> with _$SaleItemsDaoMixi
     );
   }
 
+  // Update Sale Item Price
+  Future<int> updatePrice(int id, double price) {
+    final query = update(saleItems)..where((s) => s.id.equals(id));
+
+    return query.write(
+      SaleItemsCompanion(
+        price: Value(price),
+      ),
+    );
+  }
+
   // Delete Sale Item
   Future deleteSaleItem(int id) {
     return (delete(saleItems)..where((s) => s.id.equals(id))).go();

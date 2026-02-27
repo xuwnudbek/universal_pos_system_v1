@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/models/sidebar_item.dart';
 import 'package:universal_pos_system_v1/pages/admin/sidebar/widgets/sidebar_item_widget.dart';
-import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
+import 'package:universal_pos_system_v1/pages/auth/provider/auth_provider.dart';
+import 'package:universal_pos_system_v1/utils/router/app_route.dart';
 
 import './provider/app_sidebar_provider.dart';
 
@@ -29,8 +31,8 @@ class _AppSidebarState extends State<AppSidebar> {
             color: theme.scaffoldBackgroundColor,
             border: Border(
               right: BorderSide(
-                color: theme.dividerColor,
-                width: 0.1,
+                color: Colors.grey[300]!,
+                width: 1,
               ),
             ),
           ),
@@ -70,22 +72,21 @@ class _AppSidebarState extends State<AppSidebar> {
                               isExpanded: provider.isExpanded,
                               isSelected: provider.selectedItem == item,
                               onTap: (item) {
-                                provider.selectItem(item);
+                                provider.selectItem(context, item);
                               },
                             ),
                           ),
                         ),
                         SidebarItemWidget(
                           item: SidebarItem(
-                            title: 'Logout',
+                            title: 'Chiqish',
                             routeName: AppRoute.logout.name,
                             iconData: LucideIcons.logOut,
                           ),
                           isExpanded: provider.isExpanded,
                           isSelected: false,
                           onTap: (item) async {
-                            await LocalStorage.logout();
-                            appRouter.goNamed(AppRoute.auth.name);
+                            context.read<AuthProvider>().logout();
                           },
                         ),
                       ],

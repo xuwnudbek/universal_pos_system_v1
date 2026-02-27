@@ -11,4 +11,6 @@ class SaleItems extends Table {
   IntColumn get itemId => integer().references(Items, #id, onDelete: KeyAction.restrict)();
 
   IntColumn get quantity => integer().withDefault(const Constant(1))();
+
+  RealColumn get price => real().nullable()();
 }

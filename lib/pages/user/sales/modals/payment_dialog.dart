@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/local/enums/payment_types_enum.dart';
-import 'package:universal_pos_system_v1/pages/user/sales/modals/add_debt_addition.dart';
+import 'package:universal_pos_system_v1/pages/user/sales/modals/add_debt_addition_dialog.dart';
 import 'package:universal_pos_system_v1/pages/user/sales/providers/sales_provider.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
@@ -58,8 +58,12 @@ class _PaymentDialogState extends State<PaymentDialog> {
   }
 
   void _onSelectPaymentType(PaymentType type) {
+    final provider = context.read<SalesProvider>();
+    final existingPayment = provider.tempSale?.payments.where((p) => p.paymentTypeId == type.id).firstOrNull;
+
     setState(() {
       selectedPaymentType = type;
+      _calculatorInput = existingPayment?.amount.round() ?? 0;
     });
   }
 
@@ -137,6 +141,17 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
       if (key.hasDigit()) {
         _onNumberKeyPressed(key.getDigit());
+        return;
+      }
+
+      // T key for total
+      if (event.logicalKey == LogicalKeyboardKey.keyT) {
+        setState(() {
+          // Total paid by OTHER payment types
+          final otherPaymentsAmount = (provider.tempSale?.payments ?? []).where((p) => selectedPaymentType == null || p.paymentTypeId != selectedPaymentType!.id).fold<double>(0, (sum, p) => sum + p.amount);
+
+          _calculatorInput = ((provider.tempSale?.totalPrice ?? 0) - otherPaymentsAmount).round();
+        });
         return;
       }
 
@@ -439,7 +454,10 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                       'T',
                                       onPressed: () {
                                         setState(() {
-                                          _calculatorInput = (totalAmount - totalPaymentsAmount).round();
+                                          // Total paid by OTHER payment types
+                                          final otherPaymentsAmount = (provider.tempSale?.payments ?? []).where((p) => selectedPaymentType == null || p.paymentTypeId != selectedPaymentType!.id).fold<double>(0, (sum, p) => sum + p.amount);
+
+                                          _calculatorInput = (totalAmount - otherPaymentsAmount).round();
                                         });
                                       },
                                     ),
@@ -467,7 +485,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                   ),
                                   _buildCalculatorButton(
                                     '=',
-                                    onPressed: _calculatorInput != 0 && selectedPaymentType != null && _calculatorInput <= (totalAmount - totalPaymentsAmount)
+                                    onPressed: _calculatorInput != 0 && selectedPaymentType != null
                                         ? () async {
                                             _onSubmitted(provider);
                                           }

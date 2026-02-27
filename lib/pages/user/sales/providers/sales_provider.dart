@@ -2,11 +2,13 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
+import 'package:universal_pos_system_v1/data/local/enums/locations_enum.dart';
 import 'package:universal_pos_system_v1/data/local/enums/payment_types_enum.dart';
 import 'package:universal_pos_system_v1/data/local/enums/sale_status_enum.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/data/models/sale_full.dart';
+import 'package:universal_pos_system_v1/data/models/sale_item_full.dart';
 import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/item_categories_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/items/items_repository.dart';
@@ -14,7 +16,8 @@ import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_
 import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sale_items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sales_repository.dart';
-import 'package:universal_pos_system_v1/pages/user/sales/modals/add_debt_addition.dart';
+import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
+import 'package:universal_pos_system_v1/pages/user/sales/modals/add_debt_addition_dialog.dart';
 import 'package:universal_pos_system_v1/utils/functions/local_storage.dart';
 
 class SalesProvider extends ChangeNotifier {
@@ -25,6 +28,7 @@ class SalesProvider extends ChangeNotifier {
   final SalePaymentsRepository salePaymentsRepo;
   final PaymentTypesRepository paymentTypesRepo;
   final DebtsRepository debtsRepo;
+  final StocksRepository stocksRepo;
 
   SaleFull? _tempSale;
   SaleFull? get tempSale => _tempSale;
@@ -77,17 +81,122 @@ class SalesProvider extends ChangeNotifier {
   // Items
   List<ItemFull> _items = [];
   List<ItemFull> get items {
-    if (selectedCategory == null) {
-      return _items;
+    var filtered = _items;
+
+    if (selectedCategory != null) {
+      filtered = filtered.where((i) => i.category?.id == selectedCategory?.id).toList();
     }
 
-    return _items.where((i) => i.category?.id == selectedCategory?.id).toList();
+    final query = searchController.text.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      filtered = filtered
+          .where(
+            (i) => i.name.toLowerCase().contains(query) || i.barcode.toLowerCase().contains(query),
+          )
+          .toList();
+    }
+
+    return filtered;
   }
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
   set isInitialized(bool value) {
     _isInitialized = value;
+    notifyListeners();
+  }
+
+  // Keyboard state
+  bool _isKeyboardVisible = false;
+  bool get isKeyboardVisible => _isKeyboardVisible;
+
+  int? _selectedSaleItemId;
+  int? get selectedSaleItemId => _selectedSaleItemId;
+
+  int _keyboardInput = 0;
+  int get keyboardInput => _keyboardInput;
+
+  void toggleKeyboard() {
+    _isKeyboardVisible = !_isKeyboardVisible;
+    if (!_isKeyboardVisible) {
+      _selectedSaleItemId = null;
+      _keyboardInput = 0;
+    }
+    notifyListeners();
+  }
+
+  void selectSaleItem(int saleItemId) {
+    if (_selectedSaleItemId == saleItemId) {
+      _selectedSaleItemId = null;
+      _keyboardInput = 0;
+      notifyListeners();
+      return;
+    }
+
+    _selectedSaleItemId = saleItemId;
+    final saleItem = tempSale?.items.where((i) => i.id == saleItemId).firstOrNull;
+    if (saleItem != null) {
+      _keyboardInput = saleItem.quantity;
+    }
+    notifyListeners();
+  }
+
+  void onKeyboardNumber(int number) {
+    _keyboardInput = _keyboardInput * 10 + number;
+    notifyListeners();
+  }
+
+  void onKeyboardDoubleZero() {
+    _keyboardInput = _keyboardInput * 100;
+    notifyListeners();
+  }
+
+  void onKeyboardBackspace() {
+    _keyboardInput = _keyboardInput ~/ 10;
+    notifyListeners();
+  }
+
+  void onKeyboardClear() {
+    _keyboardInput = 0;
+    notifyListeners();
+  }
+
+  Future<void> confirmKeyboardQuantity() async {
+    if (tempSale == null) return;
+    if (_selectedSaleItemId == null || _keyboardInput <= 0) return;
+
+    // Get the sale item to find the item
+    SaleItemFull? saleItem;
+    for (var item in tempSale!.items) {
+      if (item.id == _selectedSaleItemId) {
+        saleItem = item;
+        break;
+      }
+    }
+
+    if (saleItem == null) return; // Item not found
+
+    // Get available shop quantity
+    final itemIndex = _items.indexWhere((i) => i.id == saleItem!.item.id);
+    if (itemIndex == -1) return; // Item not in items list
+
+    final maxQuantity = _items[itemIndex].shopQuantity;
+
+    // Validate quantity doesn't exceed available stock
+    if (_keyboardInput > maxQuantity) {
+      log('Miqdor cheklovdan oshdi! Maksimal: $maxQuantity');
+      _keyboardInput = maxQuantity.toInt();
+      notifyListeners();
+      return;
+    }
+
+    await saleItemsRepo.updateQuantity(
+      id: _selectedSaleItemId!,
+      quantity: _keyboardInput,
+    );
+
+    // Reload temp sale
+    tempSale = await salesRepo.getBySaleId(tempSale!.id);
     notifyListeners();
   }
 
@@ -99,7 +208,9 @@ class SalesProvider extends ChangeNotifier {
     this.salePaymentsRepo,
     this.paymentTypesRepo,
     this.debtsRepo,
+    this.stocksRepo,
   ) {
+    searchController.addListener(notifyListeners);
     loadInitialData();
   }
 
@@ -137,7 +248,29 @@ class SalesProvider extends ChangeNotifier {
 
   // Load Items
   Future<void> loadItems() async {
-    _items = await itemsRepo.getAll();
+    final allItems = await itemsRepo.getAll();
+    final allStocks = await stocksRepo.getAll();
+
+    _items = allItems.map((item) {
+      double shopQty = 0;
+      double warehouseQty = 0;
+
+      for (var stock in allStocks) {
+        if (stock.item.id == item.id) {
+          if (stock.location == LocationsEnum.shop) {
+            shopQty = stock.quantity;
+          } else if (stock.location == LocationsEnum.warehouse) {
+            warehouseQty = stock.quantity;
+          }
+        }
+      }
+
+      return item.copyWith(
+        shopQuantity: shopQty,
+        warehouseQuantity: warehouseQty,
+      );
+    }).toList();
+
     notifyListeners();
   }
 
@@ -287,6 +420,18 @@ class SalesProvider extends ChangeNotifier {
         status: saleStatus,
       );
 
+      // Deduct stock from shop for all sold items
+      for (final saleItem in tempSale!.items) {
+        await stocksRepo.reduceQuantity(
+          saleItem.item.id,
+          LocationsEnum.shop,
+          saleItem.quantity.toDouble(),
+        );
+      }
+
+      // Reload items to update stock quantities
+      await loadItems();
+
       // Reload saved sales
       await loadSales();
 
@@ -366,39 +511,62 @@ class SalesProvider extends ChangeNotifier {
     DebtAdditions? debtAddition,
   }) async {
     final double totalAmount = tempSale?.totalPrice ?? 0;
-    final double totalPaymentsAmount = tempSale?.payments.fold(0, (sum, p) => (sum ?? 0) + p.amount) ?? 0;
 
-    if (amount > totalAmount - totalPaymentsAmount) {
+    // Check if payment for this type already exists
+    final existingPayment = tempSale?.payments.where((p) => p.paymentTypeId == paymentTypeId).firstOrNull;
+
+    // Calculate total of OTHER payment types
+    final double otherPaymentsAmount = (tempSale?.payments ?? []).where((p) => p.paymentTypeId != paymentTypeId).fold(0, (sum, p) => sum + p.amount);
+
+    if (amount > totalAmount - otherPaymentsAmount) {
       return 100;
     }
 
-    int paymentId = await salePaymentsRepo.create(
-      saleId: saleId,
-      paymentTypeId: paymentTypeId,
-      amount: amount,
-    );
+    int paymentId;
 
-    if (debtAddition != null) {
+    if (existingPayment != null) {
+      // Update existing payment
+      await salePaymentsRepo.update(
+        id: existingPayment.id,
+        saleId: saleId,
+        paymentTypeId: paymentTypeId,
+        amount: amount,
+      );
+      paymentId = existingPayment.id;
+    } else {
+      // Create new payment
+      paymentId = await salePaymentsRepo.create(
+        saleId: saleId,
+        paymentTypeId: paymentTypeId,
+        amount: amount,
+      );
+    }
+
+    if (debtAddition != null && existingPayment == null) {
       try {
         await debtsRepo.create(
           title: debtAddition.title,
           description: debtAddition.description,
+          phone: debtAddition.phone,
           salePaymentId: paymentId,
         );
       } catch (e) {
-        log("Nma bolutti: ${e.toString()}");
+        log("debtsRepo.create: ${e.toString()}");
+        rethrow;
       }
     }
 
     final newSalePayment = await salePaymentsRepo.getById(paymentId);
 
-    // Add payment to tempSale
+    // Update tempSale payments
     if (newSalePayment != null && tempSale != null) {
-      tempSale = tempSale!.copyWith(
-        payments: [...tempSale!.payments, newSalePayment],
-      );
+      final updatedPayments = existingPayment != null ? tempSale!.payments.map((p) => p.id == paymentId ? newSalePayment : p).toList() : [...tempSale!.payments, newSalePayment];
 
-      if (totalPaymentsAmount + amount >= totalAmount) {
+      tempSale = tempSale!.copyWith(payments: updatedPayments);
+
+      final totalPaid = updatedPayments.fold<double>(0, (sum, p) => sum + p.amount);
+
+      if (totalPaid >= totalAmount) {
         await completeTempSale();
         return 101;
       }

@@ -1,5 +1,12 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart';
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
@@ -8,7 +15,6 @@ import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
 import 'package:universal_pos_system_v1/utils/extensions/num_extension.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
 import 'package:universal_pos_system_v1/utils/formatters/sum_input_formatter.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 
 class AddItemModal extends StatefulWidget {
@@ -37,6 +43,9 @@ class _AddItemModalState extends State<AddItemModal> {
   ItemCategoryFull? _selectedCategory;
   Unit? _selectedUnit;
 
+  String? _imagePath;
+  File? _imageFile;
+
   @override
   void initState() {
     final item = widget.item;
@@ -48,6 +57,10 @@ class _AddItemModalState extends State<AddItemModal> {
       // Find the matching category from widget.categories by ID
       _selectedCategory = widget.categories.where((c) => c.id == item.category?.id).firstOrNull;
       _selectedUnit = widget.units.where((u) => u.id == item.unit.id).firstOrNull;
+      _imagePath = item.imagePath;
+      if (_imagePath != null && File(_imagePath!).existsSync()) {
+        _imageFile = File(_imagePath!);
+      }
     } else {
       // Auto-generate barcode for new items
       _barcodeCtrl.text = _generateBarcode();
@@ -59,6 +72,39 @@ class _AddItemModalState extends State<AddItemModal> {
   String _generateBarcode() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return timestamp.toString();
+  }
+
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final pickedFile = File(result.files.single.path!);
+      final appDir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory(p.join(appDir.path, 'upossystem', 'item_images'));
+
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+
+      final ext = p.extension(pickedFile.path);
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}$ext';
+      final savedFile = await pickedFile.copy(p.join(imagesDir.path, fileName));
+
+      setState(() {
+        _imagePath = savedFile.path;
+        _imageFile = savedFile;
+      });
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _imagePath = null;
+      _imageFile = null;
+    });
   }
 
   void _submit() {
@@ -74,6 +120,7 @@ class _AddItemModalState extends State<AddItemModal> {
       categoryId: _selectedCategory!.id,
       unitId: _selectedUnit!.id,
       salePrice: double.tryParse(_salePriceCtrl.text.replaceAll(' ', '')) ?? 0,
+      imagePath: _imagePath,
     );
 
     Navigator.of(context).pop(result);
@@ -114,6 +161,79 @@ class _AddItemModalState extends State<AddItemModal> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              // Image picker section
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(
+                            color: theme.colorScheme.outline,
+                            width: AppBorderWidth.thin,
+                          ),
+                        ),
+                        child: _imageFile != null
+                            ? Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(AppRadius.md),
+                                    child: Image.file(
+                                      _imageFile!,
+                                      width: 120,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: GestureDetector(
+                                      onTap: _removeImage,
+                                      child: Container(
+                                        padding: EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          LucideIcons.x,
+                                          size: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    LucideIcons.imagePlus,
+                                    size: 32,
+                                    color: theme.colorScheme.onSurface.withValues(alpha: .5),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Rasm tanlash',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface.withValues(alpha: .5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Row(
                 spacing: AppSpacing.md,
                 children: [
@@ -189,7 +309,7 @@ class _AddItemModalState extends State<AddItemModal> {
       ),
       actions: [
         TextButton(
-          onPressed: () => appRouter.pop(),
+          onPressed: () => context.pop(),
           child: const Text('Bekor qilish'),
         ),
         Button(

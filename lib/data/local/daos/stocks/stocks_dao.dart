@@ -171,4 +171,14 @@ class StocksDao extends DatabaseAccessor<AppDatabase> with _$StocksDaoMixin {
   Future deleteStock(int id) {
     return (delete(stocks)..where((s) => s.id.equals(id))).go();
   }
+
+  // Reduce Quantity from a specific location (for sales)
+  Future<void> reduceQuantity(int itemId, LocationsEnum location, double quantity) async {
+    final stock = await getByItemAndLocation(itemId, location);
+
+    if (stock != null) {
+      final newQuantity = stock.quantity - quantity;
+      await updateStock(stock.id, itemId, location, newQuantity >= 0 ? newQuantity : 0);
+    }
+  }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:universal_pos_system_v1/models/sidebar_item.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
+import 'package:universal_pos_system_v1/utils/router/app_route.dart';
 
 class AppSidebarProvider extends ChangeNotifier {
   bool isExpanded = true;
@@ -38,7 +39,6 @@ class AppSidebarProvider extends ChangeNotifier {
       routeName: AppRoute.expenses.name,
       iconData: LucideIcons.dollarSign,
     ),
-
     SidebarItem(
       title: 'Foydalanuvchilar',
       routeName: AppRoute.users.name,
@@ -58,9 +58,10 @@ class AppSidebarProvider extends ChangeNotifier {
 
   late SidebarItem _selectedItem;
   SidebarItem get selectedItem => _selectedItem;
-  void selectItem(SidebarItem item) {
+
+  void selectItem(BuildContext context, SidebarItem item) {
     _selectedItem = item;
-    appRouter.goNamed(item.routeName);
+    context.goNamed(item.routeName);
     notifyListeners();
   }
 

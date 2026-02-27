@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/payment_types/payment_types_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
+import 'package:universal_pos_system_v1/pages/auth/provider/auth_provider.dart';
 import 'package:universal_pos_system_v1/pages/user/sales/modals/debt_sales_dialog.dart';
 import 'package:universal_pos_system_v1/utils/extensions/mq_extension.dart';
 import 'package:universal_pos_system_v1/utils/extensions/sum_extension.dart';
@@ -16,12 +19,12 @@ import '/data/repositories/items/item_categories_repository.dart';
 import '/data/repositories/items/items_repository.dart';
 import '/data/repositories/sales/sale_items_repository.dart';
 import '/data/repositories/sales/sales_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/stocks/stocks_repository.dart';
 import '/pages/user/sales/modals/saved_sales_dialog.dart';
 import '/pages/user/sales/providers/sales_provider.dart';
 import '/pages/user/sales/widgets/item_card.dart';
 import '/utils/constants/app_constants.dart';
 import '/utils/extensions/num_extension.dart';
-import '/utils/router/app_router.dart';
 import '/widgets/icon_button2.dart';
 import 'modals/payment_dialog.dart';
 import 'modals/sales_history_dialog.dart';
@@ -58,6 +61,7 @@ class SalesPage extends StatelessWidget {
             context.read<SalePaymentsRepository>(),
             context.read<PaymentTypesRepository>(),
             context.read<DebtsRepository>(),
+            context.read<StocksRepository>(),
           )..createTempSale(),
         ),
       ],
@@ -156,17 +160,20 @@ class SalesPage extends StatelessWidget {
                                 return Badge(
                                   label: count > 0 ? Text(count.toString()) : null,
                                   isLabelVisible: count > 0,
-                                  child: IconButton2(
-                                    onPressed: () async {
-                                      if (context.mounted) {
-                                        showSalesHistoryDialog(
-                                          context,
-                                          provider.complatedSales,
-                                        );
-                                      }
-                                    },
-                                    type: IconButton2Type.info,
-                                    icon: LucideIcons.history,
+                                  child: Tooltip(
+                                    message: "Sotuv tarixi",
+                                    child: IconButton2(
+                                      onPressed: () async {
+                                        if (context.mounted) {
+                                          showSalesHistoryDialog(
+                                            context,
+                                            provider.complatedSales,
+                                          );
+                                        }
+                                      },
+                                      type: IconButton2Type.info,
+                                      icon: LucideIcons.history,
+                                    ),
                                   ),
                                 );
                               },
@@ -214,55 +221,91 @@ class SalesPage extends StatelessWidget {
                               itemBuilder: (_, index) {
                                 var saleItem = tempSale.items[index];
 
-                                return ListTile(
-                                  tileColor: theme.colorScheme.onSurface.withValues(alpha: .05),
-                                  dense: true,
-                                  title: Text(
-                                    saleItem.item.name,
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  subtitle: Text(
-                                    saleItem.item.salePrice.toSum,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    spacing: 8.0,
-                                    children: [
-                                      IconButton2(
-                                        onPressed: () {
-                                          context.read<SalesProvider>().removeItemFromTempSale(
-                                            saleItem.item.id,
-                                          );
-                                        },
-                                        type: IconButton2Type.warning,
-                                        icon: LucideIcons.minus,
+                                return Consumer<SalesProvider>(
+                                  builder: (context, provider, _) {
+                                    final isSelected = provider.isKeyboardVisible && provider.selectedSaleItemId == saleItem.id;
+
+                                    return ListTile(
+                                      tileColor: isSelected ? theme.colorScheme.primary.withValues(alpha: .15) : theme.colorScheme.onSurface.withValues(alpha: .05),
+                                      shape: isSelected
+                                          ? RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                              side: BorderSide(
+                                                color: theme.colorScheme.primary,
+                                                width: 1.5,
+                                              ),
+                                            )
+                                          : null,
+                                      dense: true,
+                                      onTap: provider.isKeyboardVisible ? () => provider.selectSaleItem(saleItem.id) : null,
+                                      leading: ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: saleItem.item.imagePath != null && File(saleItem.item.imagePath!).existsSync()
+                                            ? Image.file(
+                                                File(saleItem.item.imagePath!),
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Container(
+                                                width: 40,
+                                                height: 40,
+                                                color: theme.colorScheme.primary.withValues(alpha: .1),
+                                                child: Icon(
+                                                  LucideIcons.image,
+                                                  size: 20,
+                                                  color: theme.colorScheme.primary,
+                                                ),
+                                              ),
                                       ),
-                                      SizedBox(
-                                        width: 24,
-                                        child: Center(
-                                          child: Text(
-                                            saleItem.quantity.toString(),
-                                            style: theme.textTheme.titleSmall,
-                                          ),
+                                      title: Text(
+                                        saleItem.item.name,
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      subtitle: Text(
+                                        saleItem.item.salePrice.toSum,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          color: theme.colorScheme.onSurface,
                                         ),
                                       ),
-                                      IconButton2(
-                                        onPressed: () {
-                                          context.read<SalesProvider>().addItemToTempSale(
-                                            saleItem.item.id,
-                                          );
-                                        },
-                                        type: IconButton2Type.success,
-                                        icon: LucideIcons.plus,
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        spacing: 8.0,
+                                        children: [
+                                          IconButton2(
+                                            onPressed: () {
+                                              context.read<SalesProvider>().removeItemFromTempSale(
+                                                saleItem.item.id,
+                                              );
+                                            },
+                                            type: IconButton2Type.warning,
+                                            icon: LucideIcons.minus,
+                                          ),
+                                          SizedBox(
+                                            width: 24,
+                                            child: Center(
+                                              child: Text(
+                                                saleItem.quantity.toString(),
+                                                style: theme.textTheme.titleSmall,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton2(
+                                            onPressed: () {
+                                              context.read<SalesProvider>().addItemToTempSale(
+                                                saleItem.item.id,
+                                              );
+                                            },
+                                            type: IconButton2Type.success,
+                                            icon: LucideIcons.plus,
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    );
+                                  },
                                 );
                               },
                             );
@@ -320,6 +363,17 @@ class SalesPage extends StatelessWidget {
                                   },
                                 ),
                               ],
+                            ),
+
+                            // Keyboard
+                            Consumer<SalesProvider>(
+                              builder: (context, provider, _) {
+                                if (!provider.isKeyboardVisible) {
+                                  return SizedBox.shrink();
+                                }
+
+                                return _PriceKeyboard(provider: provider);
+                              },
                             ),
 
                             Selector<SalesProvider, SaleFull?>(
@@ -403,7 +457,9 @@ class SalesPage extends StatelessWidget {
                       Row(
                         children: [
                           IconButton2(
-                            onPressed: () {},
+                            onPressed: () {
+                              context.read<SalesProvider>().toggleKeyboard();
+                            },
                             type: IconButton2Type.primary,
                             icon: LucideIcons.keyboard,
                           ),
@@ -439,8 +495,8 @@ class SalesPage extends StatelessWidget {
                           const Spacer(),
 
                           IconButton2(
-                            onPressed: () {
-                              appRouter.pushNamed(AppRoute.logout.name);
+                            onPressed: () async {
+                              await context.read<AuthProvider>().logout();
                             },
                             type: IconButton2Type.danger,
                             icon: LucideIcons.logOut,
@@ -523,7 +579,7 @@ class SalesPage extends StatelessWidget {
                                 crossAxisCount: _gridCrossAxisCount(windowSize),
                                 crossAxisSpacing: 12.0,
                                 mainAxisSpacing: 12.0,
-                                mainAxisExtent: _gridCrossAxisCount(windowSize) * 30,
+                                mainAxisExtent: _gridCrossAxisCount(windowSize) * 30 + 20,
                               ),
                               itemCount: items.length,
                               itemBuilder: (_, index) {
@@ -555,6 +611,166 @@ class SalesPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _PriceKeyboard extends StatelessWidget {
+  final SalesProvider provider;
+
+  const _PriceKeyboard({required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final hasSelection = provider.selectedSaleItemId != null;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Display
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: hasSelection ? Colors.white : Colors.grey[200],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: hasSelection ? theme.colorScheme.primary : Colors.grey[300]!,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (!hasSelection)
+                Text(
+                  'Maxsulot tanlang',
+                  style: textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+              if (hasSelection) ...[
+                Text(
+                  'Miqdor',
+                  style: textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+                Text(
+                  provider.keyboardInput.toString(),
+                  style: textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        SizedBox(height: 8),
+        // Buttons grid
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final totalWidth = constraints.maxWidth;
+            final sideColWidth = 48.0;
+            final gap = 4.0;
+            final numAreaWidth = totalWidth - sideColWidth - gap;
+            final keyWidth = (numAreaWidth - gap * 2) / 3;
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: gap,
+              children: [
+                SizedBox(
+                  width: numAreaWidth,
+                  child: Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      ...List.generate(9, (i) {
+                        final n = i + 1;
+                        return _key(context, '$n', width: keyWidth, onTap: hasSelection ? () => provider.onKeyboardNumber(n) : null);
+                      }),
+                      _key(context, '0', width: keyWidth, onTap: hasSelection ? () => provider.onKeyboardNumber(0) : null),
+                      _key(context, '00', width: keyWidth, onTap: hasSelection ? () => provider.onKeyboardDoubleZero() : null),
+                      _key(
+                        context,
+                        '000',
+                        width: keyWidth,
+                        onTap: hasSelection
+                            ? () {
+                                provider.onKeyboardDoubleZero();
+                                provider.onKeyboardNumber(0);
+                              }
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: sideColWidth,
+                  child: Column(
+                    spacing: gap,
+                    children: [
+                      _key(context, 'C', width: sideColWidth, onTap: hasSelection ? () => provider.onKeyboardClear() : null, color: Colors.redAccent),
+                      _key(
+                        context,
+                        '',
+                        width: sideColWidth,
+                        icon: LucideIcons.delete,
+                        onTap: hasSelection ? () => provider.onKeyboardBackspace() : null,
+                        color: Colors.orangeAccent,
+                      ),
+                      _key(
+                        context,
+                        '',
+                        width: sideColWidth,
+                        height: 48 * 2 + gap,
+                        icon: LucideIcons.check,
+                        onTap: hasSelection && provider.keyboardInput > 0 ? () => provider.confirmKeyboardQuantity() : null,
+                        color: Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _key(
+    BuildContext context,
+    String label, {
+    IconData? icon,
+    VoidCallback? onTap,
+    Color? color,
+    double width = 48,
+    double height = 48,
+  }) {
+    final enabled = onTap != null;
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: !enabled ? Colors.grey[300] : color ?? Colors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: icon != null
+              ? Icon(icon, size: 20, color: enabled ? Colors.white : Colors.grey)
+              : Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: enabled ? (color != null ? Colors.white : Colors.black) : Colors.grey,
+                  ),
+                ),
+        ),
+      ),
     );
   }
 }

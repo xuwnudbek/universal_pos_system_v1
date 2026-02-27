@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:universal_pos_system_v1/utils/functions/check_authentication.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
+
 import 'provider/auth_provider.dart';
 
 class AuthPage extends StatefulWidget {
@@ -17,23 +18,19 @@ class _AuthPageState extends State<AuthPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      final authProvider = context.read<AuthProvider>();
-      final success = await authProvider.login(
+      var res = await context.read<AuthProvider>().login(
         _usernameController.text,
         _passwordController.text,
       );
 
-      if (success && mounted) {
-        appRouter.goNamed(checkAuthentication().name);
+      if (res == false) {
+        context.read<AuthProvider>().errorMessage = 'Username yoki parol noto\'g\'ri';
+
+        Future.delayed(const Duration(seconds: 2), () {
+          context.read<AuthProvider>().clearError();
+        });
       }
     }
   }
@@ -163,6 +160,22 @@ class _AuthPageState extends State<AuthPage> {
                                 style: TextStyle(fontSize: 16),
                               ),
                       ),
+                      const SizedBox(height: 12),
+                      // Exit App Button
+                      OutlinedButton.icon(
+                        onPressed: () => exit(0),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: const Icon(Icons.exit_to_app),
+                        label: const Text(
+                          'Dasturdan chiqish',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -172,5 +185,12 @@ class _AuthPageState extends State<AuthPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

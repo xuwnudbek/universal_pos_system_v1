@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_pos_system_v1/data/repositories/debts/debts_repository.dart';
+import 'package:universal_pos_system_v1/data/repositories/expenses/expenses_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sales/sale_items_repository.dart';
 import 'package:universal_pos_system_v1/data/repositories/sale_payments/sale_payments_repository.dart';
 import 'package:universal_pos_system_v1/pages/admin/reports/provider/reports_provider.dart';
@@ -48,6 +50,8 @@ class _ReportsPageState extends State<ReportsPage> {
           create: (_) => ReportsProvider(
             context.read<SaleItemsRepository>(),
             context.read<SalePaymentsRepository>(),
+            context.read<ExpensesRepository>(),
+            context.read<DebtsRepository>(),
           ),
         ),
       ],
@@ -173,7 +177,7 @@ class _ReportsPageState extends State<ReportsPage> {
                       Expanded(
                         child: SummaryCard(
                           title: 'Savdo',
-                          amount: 125500000,
+                          amount: provider.totalSalesAmount,
                           icon: LucideIcons.shoppingCart,
                           color: Colors.green,
                         ),
@@ -182,7 +186,7 @@ class _ReportsPageState extends State<ReportsPage> {
                       Expanded(
                         child: SummaryCard(
                           title: 'Qarz',
-                          amount: 3500000,
+                          amount: provider.debtAmount,
                           icon: LucideIcons.coins,
                           color: Colors.orange,
                         ),
@@ -191,7 +195,7 @@ class _ReportsPageState extends State<ReportsPage> {
                       Expanded(
                         child: SummaryCard(
                           title: 'Xarajatlar',
-                          amount: 15000000,
+                          amount: provider.totalExpenses,
                           icon: LucideIcons.trendingDown,
                           color: Colors.red,
                         ),

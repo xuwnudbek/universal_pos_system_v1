@@ -8,8 +8,12 @@ class ItemFull {
   final Unit unit;
   final double salePrice;
   final bool isActive;
+  final String? imagePath;
 
   final ItemCategoryFull? category;
+
+  final double shopQuantity;
+  final double warehouseQuantity;
 
   ItemFull({
     required this.id,
@@ -18,7 +22,10 @@ class ItemFull {
     required this.unit,
     required this.salePrice,
     required this.isActive,
+    this.imagePath,
     this.category,
+    this.shopQuantity = 0,
+    this.warehouseQuantity = 0,
   });
 
   factory ItemFull.from({
@@ -33,7 +40,26 @@ class ItemFull {
       isActive: item.isActive,
       unit: unit,
       salePrice: item.salePrice,
+      imagePath: item.imagePath,
       category: category,
+    );
+  }
+
+  ItemFull copyWith({
+    double? shopQuantity,
+    double? warehouseQuantity,
+  }) {
+    return ItemFull(
+      id: id,
+      name: name,
+      barcode: barcode,
+      unit: unit,
+      salePrice: salePrice,
+      isActive: isActive,
+      imagePath: imagePath,
+      category: category,
+      shopQuantity: shopQuantity ?? this.shopQuantity,
+      warehouseQuantity: warehouseQuantity ?? this.warehouseQuantity,
     );
   }
 }

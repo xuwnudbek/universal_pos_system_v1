@@ -4,6 +4,7 @@ class ItemFormResult {
   final int categoryId;
   final int unitId;
   final double salePrice;
+  final String? imagePath;
 
   ItemFormResult({
     required this.name,
@@ -11,5 +12,6 @@ class ItemFormResult {
     required this.categoryId,
     required this.unitId,
     required this.salePrice,
+    this.imagePath,
   });
 }

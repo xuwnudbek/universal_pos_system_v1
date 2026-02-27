@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:universal_pos_system_v1/data/models/items_full.dart';
 import 'package:universal_pos_system_v1/utils/constants/app_constants.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 
 class DeleteItemModal extends StatelessWidget {
@@ -139,7 +139,7 @@ class DeleteItemModal extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => appRouter.pop(),
+          onPressed: () => context.pop(),
           child: const Text('Bekor qilish'),
         ),
         Button(

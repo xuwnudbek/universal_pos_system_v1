@@ -36,6 +36,11 @@ class SaleItemsRepository {
     required int quantity,
   }) => saleItemsDao.updateQuantity(id, quantity);
 
+  Future<void> updatePrice({
+    required int id,
+    required double price,
+  }) => saleItemsDao.updatePrice(id, price);
+
   Future delete(int id) => saleItemsDao.deleteSaleItem(id);
 
   Future deleteBySaleId(int saleId) => saleItemsDao.deleteBySaleId(saleId);

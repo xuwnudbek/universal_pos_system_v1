@@ -26,6 +26,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     int unitId,
     double salePrice,
     int? categoryId,
+    String? imagePath,
   ) {
     return into(items).insert(
       ItemsCompanion.insert(
@@ -34,6 +35,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
         unitId: unitId,
         salePrice: salePrice,
         categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
+        imagePath: imagePath != null ? Value(imagePath) : const Value.absent(),
       ),
     );
   }
@@ -45,6 +47,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
     int unitId,
     double salePrice,
     int? categoryId,
+    String? imagePath,
   ) {
     final query = update(items)..where((c) => c.id.equals(id));
 
@@ -55,6 +58,7 @@ class ItemsDao extends DatabaseAccessor<AppDatabase> with _$ItemsDaoMixin {
         unitId: Value(unitId),
         salePrice: Value(salePrice),
         categoryId: categoryId != null ? Value(categoryId) : const Value.absent(),
+        imagePath: Value(imagePath),
       ),
     );
   }

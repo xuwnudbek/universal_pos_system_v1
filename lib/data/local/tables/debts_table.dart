@@ -9,6 +9,8 @@ class Debts extends Table {
 
   TextColumn get description => text()();
 
+  TextColumn get phone => text()();
+
   BoolColumn get isPaid => boolean().withDefault(const Constant(false))();
 
   IntColumn get salePaymentId => integer().references(SalePayments, #id, onDelete: KeyAction.cascade).nullable()();

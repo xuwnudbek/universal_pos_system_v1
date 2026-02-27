@@ -143,6 +143,7 @@ class ItemsProvider extends ChangeNotifier {
         categoryId: result.categoryId,
         unitId: result.unitId,
         salePrice: result.salePrice,
+        imagePath: result.imagePath,
       );
 
       await getAllItems();
@@ -161,6 +162,7 @@ class ItemsProvider extends ChangeNotifier {
         categoryId: result.categoryId,
         unitId: result.unitId,
         salePrice: result.salePrice,
+        imagePath: result.imagePath,
       );
 
       await getAllItems();

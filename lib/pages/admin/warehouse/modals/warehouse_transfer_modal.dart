@@ -145,6 +145,7 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                             setState(() {
                               _selectedWarehouseItem = selectedItem;
                               _updateAvailableQuantity();
+                              _quantityController.clear();
                             });
                           }
                         },
@@ -208,6 +209,7 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                                             _toLocation = _fromLocation == LocationsEnum.warehouse ? LocationsEnum.shop : LocationsEnum.warehouse;
                                           }
                                           _updateAvailableQuantity();
+                                          _quantityController.clear();
                                         });
                                       }
                                     },
@@ -257,6 +259,7 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                                     _fromLocation = _toLocation;
                                     _toLocation = temp;
                                     _updateAvailableQuantity();
+                                    _quantityController.clear();
                                   });
                                 },
                                 tooltip: 'Almashtirish',
@@ -358,11 +361,28 @@ class _WarehouseTransferModalState extends State<WarehouseTransferModal> {
                           decoration: InputDecoration(
                             hintText: 'Miqdorni kiriting',
                             prefixIcon: Icon(LucideIcons.hash, size: 18),
+                            suffixIcon: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _quantityController.text = _availableQuantity.intOrDouble.str;
+                                });
+                              },
+                              child: Text('MAX'),
+                            ),
                             helperText: 'Maksimal: ${_availableQuantity.intOrDouble.str} ${_selectedWarehouseItem!.item.unit.shortName}',
                             helperStyle: textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.primary,
                             ),
                           ),
+                          onChanged: (value) {
+                            final quantity = double.tryParse(value);
+                            if (quantity != null && quantity > _availableQuantity) {
+                              _quantityController.text = _availableQuantity.intOrDouble.str;
+                              _quantityController.selection = TextSelection.fromPosition(
+                                TextPosition(offset: _quantityController.text.length),
+                              );
+                            }
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Miqdorni kiriting';

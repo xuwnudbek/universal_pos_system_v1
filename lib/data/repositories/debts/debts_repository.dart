@@ -11,6 +11,13 @@ class DebtsRepository {
     return _dao.getAllDebts();
   }
 
+  Future<List<Debt>> getByDateRange(DateTime start, DateTime end) {
+    start = DateTime(start.year, start.month, start.day, 0, 0, 0);
+    end = DateTime(end.year, end.month, end.day, 23, 59, 59);
+
+    return _dao.getDebtsByDateRange(start, end);
+  }
+
   Future<Debt?> getById(int id) {
     return _dao.getDebtById(id);
   }
@@ -19,13 +26,13 @@ class DebtsRepository {
   Future<int> create({
     required String title,
     required String description,
-    bool isPaid = false,
+    required String phone,
     required int salePaymentId,
   }) {
     return _dao.insertDebt(
       title: title,
       description: description,
-      isPaid: isPaid,
+      phone: phone,
       salePaymentId: salePaymentId,
     );
   }
@@ -35,14 +42,19 @@ class DebtsRepository {
     required int id,
     required String title,
     required String description,
-    required bool isPaid,
+    required String phone,
     required int salePaymentId,
   }) {
-    return _dao.updateDebt(id, title, description, isPaid);
+    return _dao.updateDebt(id, title, description, phone);
   }
 
   // 🔹 Delete
   Future<int> delete(int id) {
     return _dao.deleteDebt(id);
+  }
+
+  // 🔹 Mark as Paid
+  Future<int> markAsPaid(int id) {
+    return _dao.markAsPaid(id);
   }
 }

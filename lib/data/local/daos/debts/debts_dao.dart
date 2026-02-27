@@ -16,13 +16,13 @@ class DebtsDao extends DatabaseAccessor<AppDatabase> with _$DebtsDaoMixin {
   Future<int> insertDebt({
     required String title,
     required String description,
-    required bool isPaid,
+    required String phone,
     required int salePaymentId,
   }) => into(debts).insert(
     DebtsCompanion.insert(
       title: title,
       description: description,
-      isPaid: Value(isPaid),
+      phone: phone,
       salePaymentId: Value(salePaymentId),
     ),
   );
@@ -31,7 +31,7 @@ class DebtsDao extends DatabaseAccessor<AppDatabase> with _$DebtsDaoMixin {
     int id,
     String title,
     String description,
-    bool isPaid,
+    String phone,
   ) {
     final query = update(debts)..where((tbl) => tbl.id.equals(id));
 
@@ -39,10 +39,26 @@ class DebtsDao extends DatabaseAccessor<AppDatabase> with _$DebtsDaoMixin {
       DebtsCompanion(
         title: Value(title),
         description: Value(description),
-        isPaid: Value(isPaid),
+        phone: Value(phone),
       ),
     );
   }
 
   Future<int> deleteDebt(int id) => (delete(debts)..where((debt) => debt.id.equals(id))).go();
+
+  Future<List<Debt>> getDebtsByDateRange(DateTime start, DateTime end) =>
+      (select(debts)
+            ..where((d) => d.createdAt.isBetweenValues(start, end))
+            ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
+          .get();
+
+  Future<int> markAsPaid(int id) {
+    final query = update(debts)..where((tbl) => tbl.id.equals(id));
+
+    return query.write(
+      DebtsCompanion(
+        isPaid: Value(true),
+      ),
+    );
+  }
 }

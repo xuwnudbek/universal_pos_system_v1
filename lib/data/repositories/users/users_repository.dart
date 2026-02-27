@@ -60,8 +60,9 @@ class UsersRepository {
     required String password,
     required UserRolesEnum role,
     required bool isActive,
+    bool isPasswordHashed = false,
   }) {
-    final passwordHash = hashPassword(password);
+    final passwordHash = isPasswordHashed ? password : hashPassword(password);
 
     return usersDao.updateUser(
       id,

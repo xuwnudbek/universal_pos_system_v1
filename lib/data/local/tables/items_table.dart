@@ -12,6 +12,8 @@ class Items extends Table {
   IntColumn get unitId => integer().references(Units, #id)();
   IntColumn get categoryId => integer().nullable()();
 
+  TextColumn get imagePath => text().nullable()();
+
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

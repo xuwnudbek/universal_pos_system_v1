@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
@@ -249,6 +251,15 @@ class _ItemsPageState extends State<ItemsPage> {
                                   columns: [
                                     DataColumn2(
                                       label: Text(
+                                        'Rasm',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      fixedWidth: 70,
+                                    ),
+                                    DataColumn2(
+                                      label: Text(
                                         'Maxsulot nomi',
                                         style: textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.w600,
@@ -341,6 +352,32 @@ class ItemsDataSource extends DataTableSource {
 
     return DataRow2(
       cells: [
+        // Image cell
+        DataCell(
+          item.imagePath != null && File(item.imagePath!).existsSync()
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: Image.file(
+                    File(item.imagePath!),
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.image_outlined,
+                    size: 20,
+                    color: theme.colorScheme.onSurface.withValues(alpha: .3),
+                  ),
+                ),
+        ),
         // Name cell with category color indicator
         DataCell(
           Row(

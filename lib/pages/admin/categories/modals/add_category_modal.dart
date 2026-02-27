@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:universal_pos_system_v1/data/local/app_database.dart' show CategoryColor;
 import 'package:universal_pos_system_v1/data/models/item_category_full.dart';
 import 'package:universal_pos_system_v1/pages/admin/categories/categories_page.dart';
-import 'package:universal_pos_system_v1/utils/router/app_router.dart';
 import 'package:universal_pos_system_v1/widgets/button.dart';
 
 class AddCategoryModal extends StatefulWidget {
@@ -149,7 +149,7 @@ class _AddCategoryModalState extends State<AddCategoryModal> {
           style: TextButton.styleFrom(
             foregroundColor: Colors.red,
           ),
-          onPressed: () => appRouter.pop(),
+          onPressed: () => context.pop(),
           child: const Text('Bekor qilish'),
         ),
         Button(
