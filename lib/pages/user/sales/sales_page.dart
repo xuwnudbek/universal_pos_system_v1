@@ -261,7 +261,8 @@ class SalesPage extends StatelessWidget {
                                       title: Text(
                                         saleItem.item.name,
                                         style: theme.textTheme.titleMedium?.copyWith(
-                                          color: theme.colorScheme.onSurface,
+                                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -298,6 +299,8 @@ class SalesPage extends StatelessWidget {
                                               context.read<SalesProvider>().addItemToTempSale(
                                                 saleItem.item.id,
                                               );
+                                              // Auto-select after quantity change
+                                              context.read<SalesProvider>().forceSelectSaleItem(saleItem.id);
                                             },
                                             type: IconButton2Type.success,
                                             icon: LucideIcons.plus,
@@ -590,6 +593,26 @@ class SalesPage extends StatelessWidget {
                                   onTap: () {
                                     try {
                                       context.read<SalesProvider>().addItemToTempSale(item.id);
+                                      // Auto-select the item in sidebar after adding
+                                      Future.delayed(Duration(milliseconds: 100), () {
+                                        if (context.mounted) {
+                                          final provider = context.read<SalesProvider>();
+                                          final tempSale = provider.tempSale;
+                                          if (tempSale != null) {
+                                            for (var saleItem in tempSale.items) {
+                                              if (saleItem.item.id == item.id) {
+                                                // Enable keyboard if not already enabled
+                                                if (!provider.isKeyboardVisible) {
+                                                  provider.toggleKeyboard();
+                                                }
+                                                // Force select the item (don't toggle)
+                                                provider.forceSelectSaleItem(saleItem.id);
+                                                break;
+                                              }
+                                            }
+                                          }
+                                        }
+                                      });
                                     } catch (e) {
                                       showAppSnackBar(context, e.toString());
                                     }
@@ -649,15 +672,54 @@ class _PriceKeyboard extends StatelessWidget {
                   style: textTheme.bodySmall?.copyWith(color: Colors.grey),
                 ),
               if (hasSelection) ...[
-                Text(
-                  'Miqdor',
-                  style: textTheme.bodySmall?.copyWith(color: Colors.grey),
-                ),
-                Text(
-                  provider.keyboardInput.toString(),
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                Consumer<SalesProvider>(
+                  builder: (context, provider, _) {
+                    final selectedItem = provider.tempSale?.items.cast<dynamic>().firstWhere(
+                      (item) => item.id == provider.selectedSaleItemId,
+                      orElse: () => null,
+                    );
+                    final selectedItemName = (selectedItem as dynamic)?.item?.name as String?;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 4.0,
+                      children: [
+                        if (selectedItemName != null)
+                          Text(
+                            'Tanlangan: $selectedItemName',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        Text(
+                          'Miqdor',
+                          style: textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              provider.keyboardInput.toString(),
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (provider.maxQuantityForSelectedItem > 0)
+                              Text(
+                                'Maks: ${provider.maxQuantityForSelectedItem.toInt()}',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: provider.keyboardInput > provider.maxQuantityForSelectedItem ? Colors.red : Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ],

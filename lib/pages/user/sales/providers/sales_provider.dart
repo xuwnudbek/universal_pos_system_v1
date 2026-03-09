@@ -116,6 +116,26 @@ class SalesProvider extends ChangeNotifier {
   int _keyboardInput = 0;
   int get keyboardInput => _keyboardInput;
 
+  // Get max quantity for currently selected item
+  double get maxQuantityForSelectedItem {
+    if (_selectedSaleItemId == null || tempSale == null) return 0;
+
+    SaleItemFull? saleItem;
+    for (var item in tempSale!.items) {
+      if (item.id == _selectedSaleItemId) {
+        saleItem = item;
+        break;
+      }
+    }
+
+    if (saleItem == null) return 0;
+
+    final itemIndex = _items.indexWhere((i) => i.id == saleItem!.item.id);
+    if (itemIndex == -1) return 0;
+
+    return _items[itemIndex].shopQuantity;
+  }
+
   void toggleKeyboard() {
     _isKeyboardVisible = !_isKeyboardVisible;
     if (!_isKeyboardVisible) {
@@ -141,12 +161,73 @@ class SalesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void forceSelectSaleItem(int saleItemId) {
+    _selectedSaleItemId = saleItemId;
+    final saleItem = tempSale?.items.where((i) => i.id == saleItemId).firstOrNull;
+    if (saleItem != null) {
+      _keyboardInput = saleItem.quantity;
+    }
+    notifyListeners();
+  }
+
   void onKeyboardNumber(int number) {
+    // Get current sale item and check max quantity
+    if (_selectedSaleItemId != null && tempSale != null) {
+      SaleItemFull? saleItem;
+      for (var item in tempSale!.items) {
+        if (item.id == _selectedSaleItemId) {
+          saleItem = item;
+          break;
+        }
+      }
+
+      if (saleItem != null) {
+        // Get available shop quantity
+        final itemIndex = _items.indexWhere((i) => i.id == saleItem!.item.id);
+        if (itemIndex != -1) {
+          final maxQuantity = _items[itemIndex].shopQuantity;
+          final newValue = _keyboardInput * 10 + number;
+
+          // Don't allow input that exceeds max quantity
+          if (newValue > maxQuantity) {
+            log('Maksimal miqdor: ${maxQuantity.toInt()}');
+            return;
+          }
+        }
+      }
+    }
+
     _keyboardInput = _keyboardInput * 10 + number;
     notifyListeners();
   }
 
   void onKeyboardDoubleZero() {
+    // Get current sale item and check max quantity
+    if (_selectedSaleItemId != null && tempSale != null) {
+      SaleItemFull? saleItem;
+      for (var item in tempSale!.items) {
+        if (item.id == _selectedSaleItemId) {
+          saleItem = item;
+          break;
+        }
+      }
+
+      if (saleItem != null) {
+        // Get available shop quantity
+        final itemIndex = _items.indexWhere((i) => i.id == saleItem!.item.id);
+        if (itemIndex != -1) {
+          final maxQuantity = _items[itemIndex].shopQuantity;
+          final newValue = _keyboardInput * 100;
+
+          // Don't allow input that exceeds max quantity
+          if (newValue > maxQuantity) {
+            log('Maksimal miqdor: ${maxQuantity.toInt()}');
+            return;
+          }
+        }
+      }
+    }
+
     _keyboardInput = _keyboardInput * 100;
     notifyListeners();
   }
@@ -311,20 +392,42 @@ class SalesProvider extends ChangeNotifier {
       throw Exception('No temporary sale found.');
     }
 
+    // Find the item in items list to get available quantity
+    final itemIndex = _items.indexWhere((i) => i.id == itemId);
+    if (itemIndex == -1) {
+      throw Exception('Item not found');
+    }
+
+    final availableQuantity = _items[itemIndex].shopQuantity;
+
     // Check if item already exists in the sale
     final existingItemIndex = tempSale!.items.indexWhere(
       (saleItem) => saleItem.item.id == itemId,
     );
 
     if (existingItemIndex != -1) {
-      // Item exists - increase quantity by 1
+      // Item exists - check if can increase quantity by 1
       final existingSaleItem = tempSale!.items[existingItemIndex];
+      final newQuantity = existingSaleItem.quantity + 1;
+
+      // Don't allow quantity to exceed available stock
+      if (newQuantity > availableQuantity) {
+        log('Maxsulot cheksagi oshdi! Mavjud: ${availableQuantity.toInt()}');
+        return;
+      }
+
       await saleItemsRepo.updateQuantity(
         id: existingSaleItem.id,
-        quantity: existingSaleItem.quantity + 1,
+        quantity: newQuantity,
       );
     } else {
       // Item doesn't exist - create new sale item with quantity 1
+      // Check if available quantity is at least 1
+      if (availableQuantity < 1) {
+        log('Maxsulot mavjud emas');
+        return;
+      }
+
       await saleItemsRepo.create(
         saleId: tempSale!.id,
         itemId: itemId,
@@ -354,6 +457,7 @@ class SalesProvider extends ChangeNotifier {
     }
 
     final existingSaleItem = tempSale!.items[existingItemIndex];
+    final wasSelected = _selectedSaleItemId == existingSaleItem.id;
 
     if (existingSaleItem.quantity > 1) {
       // Decrease quantity by 1
@@ -368,6 +472,22 @@ class SalesProvider extends ChangeNotifier {
 
     // Reload the temp sale to reflect changes
     tempSale = await salesRepo.getBySaleId(tempSale!.id);
+
+    // If no items left, clear selection and hide keyboard
+    if (tempSale!.items.isEmpty) {
+      _selectedSaleItemId = null;
+      _keyboardInput = 0;
+      _isKeyboardVisible = false;
+    }
+    // If the deleted/modified item was selected, select the next available item
+    else if (wasSelected) {
+      // Select the first remaining item
+      if (tempSale!.items.isNotEmpty) {
+        _selectedSaleItemId = tempSale!.items.first.id;
+        _keyboardInput = 0;
+      }
+    }
+
     notifyListeners();
   }
 
